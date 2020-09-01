@@ -1,6 +1,6 @@
 <p align="center">
   <a>
-    <img src="Wsimple/static/media/logo.svg">
+    <img src="Wsimple/static/media/logo64.svg">
     <br>
     <img src="https://forthebadge.com/images/badges/contains-technical-debt.svg">
     <img src="https://forthebadge.com/images/badges/made-with-python.svg">
