@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel='shortcut icon' type='image/x-icon' href="{{ url_for('static', filename='media/favicon.svg') }}" />
+    <!-- Google material icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/errors.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <title>Wsimple: Desktop for Wealthsimple Trade</title>
+</head>
+
+<body>
+    <div id="navbar">
+        <nav>
+            <div class="custom-navbar nav-wrapper">
+                <a href="" class="custom-logo">Wsimple</a>
+                <a href="https://my.wealthsimple.com/app/public/trade-referral-signup?code=QWCFLA"
+                    class="waves-effect waves-light btn custom-navbar-button">Sign Up</a>
+            </div>
+        </nav>
+    </div>
+    <div class="main">
+        <div class="container" style="height: calc(100vh - 64px);">
+            <div class="row" style="height: 100%;display: flex;flex-direction: column;justify-content: center;">
+                <div class="col s4 offset-s4">
+                    <!-- <div style="border-style: solid; border-color: red;">
+                        Hello   
+                    </div> -->
+                    {% if form.errors %}
+                    {% for _, error in form.errors.items() %}
+                    <div class="materialert error" role="alert">
+                        <div class="material-icons">error_outline</div>
+                        {{ error[0] }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if pass_auth %}
+                    <div class="materialert error" role="alert">
+                        <div class="material-icons">error_outline</div>
+                        email or password is incorrect
+                    </div>
+                    {% endif %}
+
+                    <div class="custom-login login-padding">
+                        <form action="{{ url_for('index') }}" method="POST">
+                            {{ form.csrf_token }}
+                            <div class="input-field">
+                                {{ form.email(class_="validate") }}
+                                {{ form.email.label(class_="active") }}
+                                <!-- <input id="email" type="email" class="validate">
+                                <label for="email">Email</label> -->
+                            </div>
+                            <div class="input-field">
+                                {{ form.password(class_="validate") }}
+                                {{ form.password.label(class_="active") }}
+                                <!-- <input id="password" type="password" class="validate">
+                                <label for="password">Password</label> -->
+                            </div>
+                            <p>
+                                <label>
+                                    {{ form.tos() }}
+                                    {{ form.tos.label }}
+                                    <!-- <input type="checkbox" />
+                                <span>Accept Terms of Service of Wealthsimple Trade and Crypto</span> -->
+                                </label>
+                            </p>
+                            <input type="submit" value="Login" class="btn">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

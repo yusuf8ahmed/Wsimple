@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel='shortcut icon' type='image/x-icon' href="{{ url_for('static', filename='media/favicon.svg') }}" />
+    <meta name="Description"
+        content="Wsimple: Wealthsimple Trade for Desktop with better graphs and virtually real-time graphs">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google material icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"
+        integrity="sha512-v8ng/uGxkge3d1IJuEo6dJP8JViyvms0cly9pnbfRxT6/31c3dRWxIiwGnMSWwZjHKOuY3EVmijs7k1jz/9bLA=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script defer src="{{ url_for('static', filename='js/stock.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stock.css') }}">
+    <title>Stock page</title>
+</head>
+
+<body>
+    <!-- add https://www.wealthsimple.com/en-ca/quote/NASDAQ/AAPL#1d -->
+    <!-- https://subdomainfinder.c99.nl/scans/2019-12-30/wealthsimple.com -->
+
+</body>
+
+</html>

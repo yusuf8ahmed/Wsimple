@@ -1,0 +1,15 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 2">
+<g id="Vector 1">
+<path d="M10 13H12L11.6 11L11.2 9L10 13Z" fill="white"/>
+<path d="M4 3C4 3 2.78105 3 2 3C2.78105 6.90524 4 13 4 13L5.33333 9.66667L4 3Z" fill="white"/>
+<path d="M4 13H6L5.33333 9.66667L4 13Z" fill="white"/>
+<path d="M8 3L5.33333 9.66667L6 13L8.66667 6.33333L8 3Z" fill="white"/>
+<path d="M10 3H8L8.66667 6.33333L10 3Z" fill="white"/>
+<path d="M11.2 9L10 3L8.66667 6.33333L10 13L11.2 9Z" fill="white"/>
+<path d="M15 3H13L11.2 9L11.6 11L12 13L15 3Z" fill="white"/>
+</g>
+<path id="Vector 3" d="M10 3L6 13L8 3H10Z" fill="#FAB132"/>
+<path id="Vector 4" d="M15 3L12 13L13 3H15Z" fill="#FAB132"/>
+</g>
+</svg>
