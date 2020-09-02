@@ -8,7 +8,9 @@ from .errors import LoginError, InvalidAccessToken
 # third party
 import requests
 
+
 class Wsimple:
+    # class assumes frist id in account/list is for trading
     base_url = "https://trade-service.wealthsimple.com/"
     
     def __init__(self, email, password):
@@ -28,6 +30,7 @@ class Wsimple:
             self._access_token = r.headers['X-Access-Token']
             self._refresh_token = r.headers['X-Refresh-Token']
             self._header = {'Authorization': self._access_token}
+            del r
         else:
             print(r.status_code)
             raise LoginError()
@@ -115,6 +118,16 @@ class Wsimple:
                        json=order_dict)
         return r.json()
       
+    def delete_order(self, order_id: str):
+        """
+        Cancels a specific order by its id.
+        """
+        #1: Where ORDER is order_id from place order
+        r = requests.delete(
+            "{}/orders/{}".format(self.base_url, order_id)
+            )   
+        return r.json() 
+      
     def buymarketorder(self, security_id: str, limit_price: int = 1, quantity: int = 1):
         """
         Places an market buy order for a security. Works
@@ -145,15 +158,6 @@ class Wsimple:
                        quantity=1):
         return NotImplementedError()
 
-    def delete_order(self, order_id: str):
-        """
-        Cancels a specific order by its id.
-        """
-        #1: Where ORDER is order_id from place order
-        r = requests.delete(
-            "{}/orders/{}".format(self.base_url, order_id)
-            )  
-
     def find_securities(self, ticker: str):
         """
         Grabs information about the security resembled by the ticker
@@ -174,6 +178,11 @@ class Wsimple:
         return r.json()
     
     def find_securities_by_id_historical(self, sec_id: str, time: str):
+        """
+        Get historical data of securites by id 
+        #mic=XNAS
+        XNAS: "US", XNYS: "US", XTSE: "CA", XTSX: "CA", BATS: "US", NEOE: "CA"
+        """
         r = requests.get(
             url="{}securities/{}/historical_quotes/{}?mic=XNAS".format(self.base_url, sec_id, time),
             headers=self._header
@@ -277,9 +286,9 @@ class Wsimple:
             url="{}watchlist/{}".format(self.base_url, sec_id),
             headers=self._header
         )
-        return r.json()          
-    
-    # exchange functions   
+        return r.json()  
+            
+    # exchange functions 
     def get_exchange_rate(self):
         """
         Current WealthSimple Trade USD/CAD exchange rates
@@ -288,16 +297,18 @@ class Wsimple:
             url="{}forex".format(self.base_url),
             headers=self._header
         )
-        return r.json()   
-
+        return r.json() 
+    
+    #! functions after this point are not core to the API
     def test_endpoint(self):
         """
         test endpoints
         """
         r = requests.get(
-            url="{}activities?type=orders".format(self.base_url),
+            url="{}".format(self.base_url),
             headers=self._header
         )
+        print(r.status_code)
         return r.json()
 
     def usd_to_cad(self, amount):
@@ -369,7 +380,61 @@ class Wsimple:
                     'account_positions': { 'table': positions },
                     'account_watchlist': { 'table': watchlist }
                 }
+        
+    #? public function (can be used without login in)
+    @staticmethod
+    def public_find_securities_by_ticker(ticker):
+        #"https://trade-service.wealthsimple.com/public/securities/" + e
+        return NotImplementedError()
     
+    @staticmethod
+    def public_find_securities_by_ticker_historical(ticker, time):
+        #https://trade-service.wealthsimple.com/public/securities/{AAPL}/historical_quotes/{1d}
+        return NotImplementedError()
+    
+    @staticmethod
+    def public_top_traded(offset=0, limit=5):
+        #"https://trade-service.wealthsimple.com/public/securities/top_traded?offset="+e+"&limit="+t
+        r = requests.get(
+            url="""https://trade-service.wealthsimple.com/public/securities/top_traded?offset={}&limit={}""".format(offset, limit)
+        )
+        return r.json()
+    
+    @staticmethod
+    def public_find_securities_news(ticker):
+        r = requests.get(
+            url="https://trade-service.wealthsimple.com/public/securities/{}/news".format(ticker)
+        )
+        return r.json()
+    
+    #? wealthsimple operational status
+    @staticmethod    
+    def summary_status():
+        #https://status.wealthsimple.com/api/v2/summary.json
+        # summary contains data for
+        # [ Login and Account Access, Quotes iOS app Order execution
+        # Security Search, Order submission, Apps, Android App
+        # Order status, Trading, Market Data, Order Cancellation,
+        # Linking bank accounts, Deposits and Withdrawals,
+        # Account Values, Account Opening ]
+        #json in context
+        return NotImplementedError() 
+    
+    @staticmethod    
+    def current_status():
+        #https://status.wealthsimple.com/api/v2/status.json
+        #current status
+        #json in context
+        return NotImplementedError()  
+    
+    @staticmethod    
+    def previous_status():
+        #https://status.wealthsimple.com/api/v2/incidents.json
+        #previous status (very large json)
+        #json in context
+        return NotImplementedError()
+    
+    #? auth for testing
     @staticmethod
     def auth(email, password):
         """

@@ -61,6 +61,9 @@ socket.on('main_dashboard_info', function (data) {
                 yAxes: [{
                     gridLines: {
                         display: false
+                    },
+                    ticks: {
+                        callback: function(value) {if (value % 1 === 0) {return value;}}
                     }
                 }]
             }
