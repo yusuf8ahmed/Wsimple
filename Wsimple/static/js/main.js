@@ -54,17 +54,11 @@ socket.on('main_dashboard_info', function (data) {
             responsiveAnimationDuration: 0, // animation duration after a resize
             scales: {
                 xAxes: [{
-                    gridLines: {
-                        display: false
-                    }
+                    gridLines: { display: false }
                 }],
                 yAxes: [{
-                    gridLines: {
-                        display: false
-                    },
-                    ticks: {
-                        callback: function(value) {if (value % 1 === 0) {return value;}}
-                    }
+                    gridLines: { display: false },
+                    ticks: { callback: function(value) {if (value % 1 === 0) {return value;}} }
                 }]
             }
         }
@@ -80,8 +74,8 @@ socket.on('main_dashboard_info', function (data) {
         });
         chart.update();
     }
-
-    console.log("chart updated");
+    
+    console.log("chart updated " + data.account_value_graph.table.results.length);
 
     available_to_trade.innerHTML = `
     Available to trade: ${data.available_to_trade.amount} ${data.available_to_trade.currency}

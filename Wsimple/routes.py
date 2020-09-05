@@ -22,7 +22,6 @@ def index():
 @app.route('/home', methods=['POST', 'GET'])
 def home():
     try:
-        print(session["key"])
         account = str(session["key"]).split(",")
         login = Wsimple.auth(account[0], account[1])
         if "OK" in login:
@@ -33,7 +32,6 @@ def home():
 @app.route('/search', methods=['POST', 'GET'])
 def search():
     try:
-        print(session["key"])
         account = str(session["key"]).split(",")
         login = Wsimple.auth(account[0], account[1])
         if "OK" in login:
@@ -44,7 +42,6 @@ def search():
 @app.route('/search/<sec_id>', methods=['POST', 'GET']) 
 def search_stock(sec_id):
     try:
-        print(session["key"])
         account = str(session["key"]).split(",")
         login = Wsimple.auth(account[0], account[1])
         if "OK" in login:  
@@ -55,7 +52,6 @@ def search_stock(sec_id):
 @app.route('/activities', methods=['POST', 'GET'])
 def activities():
     try:
-        print(session["key"])
         account = str(session["key"]).split(",")
         login = Wsimple.auth(account[0], account[1])
         if "OK" in login:
@@ -66,7 +62,6 @@ def activities():
 @app.route('/settings', methods=['POST', 'GET'])
 def settings():
     try:
-        print(session["key"])
         account = str(session["key"]).split(",")
         login = Wsimple.auth(account[0], account[1])
         if "OK" in login:
@@ -95,19 +90,36 @@ def dash_main_info(key):
         ws = Wsimple(account[0], account[1])
         dashboard = ws.dashboard()
         socketio.emit('main_dashboard_info', dashboard)
-        socketio.sleep(10)    
+        socketio.sleep(10)   
+        
+def settings_info(key):
+    """Example of how to send server generated events to clients."""
+    while True:
+        account = str(key).split(",")
+        ws = Wsimple(account[0], account[1])
+        settings = ws.get_settings()
+        print(settings)
+        socketio.emit('return_settings', settings)
+        socketio.sleep(10)  
     
 @socketio.on('dashboard')
-def dashboard():
-    print("1-Starting dashboard")
+def soc_dashboard():
     global thread
     with thread_lock:
         if thread is None:
-            print("2-Starting dashboard")
+            print("Starting dashboard")
             thread = socketio.start_background_task(dash_main_info, (session["key"]))
             
+@socketio.on("get_settings")
+def soc_settings(data):
+    global thread
+    with thread_lock:
+        if thread is None:
+            print("Starting settings")
+            thread = socketio.start_background_task(settings_info, (session["key"]))
+            
 @socketio.on('find_security')
-def find_security(data):
+def soc_find_security(data):
     print('search for security {}'.format(data[0]))  
     account = str(session["key"]).split(",")
     ws = Wsimple(account[0], account[1]) 
@@ -115,7 +127,7 @@ def find_security(data):
     socketio.emit('return_security', [security])              
     
 @socketio.on('get_security_info')
-def find_security(data):
+def soc_find_security(data):
     #not the best solution
     account = str(session["key"]).split(",")
     ws = Wsimple(account[0], account[1]) 
@@ -126,7 +138,7 @@ def find_security(data):
     socketio.emit('return_stock_info', [sparkline, security_info])  
     
 @socketio.on("get_activities")
-def get_activities(data):
+def soc_get_activities(data):
     account = str(session["key"]).split(",")
     ws = Wsimple(account[0], account[1])
     socketio.sleep(5)

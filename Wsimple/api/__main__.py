@@ -2,15 +2,13 @@
 # standard library
 import json
 import pprint
-
 # custom error
 from .errors import LoginError, InvalidAccessToken
 # third party
 import requests
 
-
 class Wsimple:
-    # class assumes frist id in account/list is for trading
+    # class assumes first id in account/list is for trading
     base_url = "https://trade-service.wealthsimple.com/"
     
     def __init__(self, email, password):
@@ -32,7 +30,7 @@ class Wsimple:
             self._header = {'Authorization': self._access_token}
             del r
         else:
-            print(r.status_code)
+            print(r.status_code, r.content)
             raise LoginError()
             
     def refresh_token(self):
@@ -305,7 +303,7 @@ class Wsimple:
         test endpoints
         """
         r = requests.get(
-            url="{}".format(self.base_url),
+            url="{}top_traded".format(self.base_url),
             headers=self._header
         )
         print(r.status_code)
@@ -323,7 +321,7 @@ class Wsimple:
         sell_rate = float(forex['sell_rate'])
         price = round(float(amount * sell_rate), 2)
         return price
-
+ 
     def get_total_value(self):
         account = self.get_account()["results"][0]
         account_positions = self.get_positions()['results']
@@ -345,7 +343,21 @@ class Wsimple:
             "amount": round(sum(security_value.values()) + account['buying_power']['amount'], 2),
             "currency": "CAD"
         }
-
+        
+    def get_settings(self):
+        me = self.get_me()
+        person = self.get_person()
+        bank_account = self.get_deposits()
+        exchange_rate = self.get_exchange_rate()  
+        ws_current_operational_status = self.current_status()    
+        return {
+            'me': me,
+            'person': person,
+            'bank_account': bank_account,
+            'exchange_rate': exchange_rate,
+            'ws_current_operational_status': ws_current_operational_status  
+        }
+    
     def dashboard(self):
         account = self.get_account()["results"][0]
         total_value = self.get_total_value()
@@ -381,7 +393,7 @@ class Wsimple:
                     'account_watchlist': { 'table': watchlist }
                 }
         
-    #? public function (can be used without login in)
+    #? public functions (can be used without login in)
     @staticmethod
     def public_find_securities_by_ticker(ticker):
         #"https://trade-service.wealthsimple.com/public/securities/" + e
@@ -407,7 +419,7 @@ class Wsimple:
         )
         return r.json()
     
-    #? wealthsimple operational status
+    #? wealthsimple operational status also public
     @staticmethod    
     def summary_status():
         #https://status.wealthsimple.com/api/v2/summary.json
@@ -418,14 +430,20 @@ class Wsimple:
         # Linking bank accounts, Deposits and Withdrawals,
         # Account Values, Account Opening ]
         #json in context
-        return NotImplementedError() 
+        r = requests.get(
+            url="https://status.wealthsimple.com/api/v2/status.json"
+        )
+        return json.loads(r.content)
     
     @staticmethod    
     def current_status():
-        #https://status.wealthsimple.com/api/v2/status.json
-        #current status
-        #json in context
-        return NotImplementedError()  
+        # https://status.wealthsimple.com/api/v2/status.json
+        # current status
+        # json in context
+        r = requests.get(
+            url="https://status.wealthsimple.com/api/v2/status.json"
+        )
+        return json.loads(r.content)
     
     @staticmethod    
     def previous_status():

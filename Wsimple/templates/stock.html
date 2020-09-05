@@ -45,8 +45,93 @@
             </a>
         </div>
         <div class="row" style="margin: 0px;">
-            <!-- https://www.tradingview.com/markets/stocks-canada/market-movers-large-cap/ -->
+            <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px; background: #fff;">
+                <div id="top_bar" style="height: 10vh; width: calc(100vw - 10vw); display: flex; justify-content: space-between;align-items: center;">
+                    <div id="top_bar_left" style="display: flex;align-items: center;">
+                        <div id="ticker_info">
+                            <div id="ticker_symbol" style="font-size: 1.2rem;">
+                            </div>
+                            <div id="ticker_name" style="font-size: 1.2rem;">
+                            </div>
+                        </div>
+                        <div id="ticker_value" style="font-size:1.5rem; margin: 0px 5px;">
+                        </div>
+                    </div>
+                    <div id="top_bar_right" style="display: flex;">
+                        <div id="buy">
+                            <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Buy</a>
+
+                            <!-- Modal Structure -->
+                            <div id="modal1" class="modal">
+                              <div class="modal-content">
+                                <h4>Buy Header</h4>
+                                <p>A Buy of text</p>
+                              </div>
+                              <div class="modal-footer">
+                                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+                              </div>
+                            </div>
+                        </div>
+                        <div id="sell">
+                            <a class="waves-effect waves-light btn modal-trigger" href="#modal2">Sell</a>
+
+                            <!-- Modal Structure -->
+                            <div id="modal2" class="modal">
+                              <div class="modal-content">
+                                <h4>Sell Header</h4>
+                                <p>A Sell of text</p>
+                              </div>
+                              <div class="modal-footer">
+                                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+                              </div>
+                            </div>
+                        </div>
+                        <div id="add_watchlist">
+                            <a id="add_watchlist_button" href="">
+                                <img height="35" width="35" src="{{ url_for('static', filename='media/watchlist_button.svg') }}"
+                                    alt="user/home button">
+                            </a>
+                        </div>
+                    </div>                 
+                </div>
+            </div>
             <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px;">
+                <div style="height: 45vh; width: calc(100vw - 10vw);">
+                    <canvas id="chart" role="img">
+                        <p>account value chart</p>
+                    </canvas>
+                </div>
+            </div>
+            <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px; background: #fff;">
+                <div style="height: 40vh; width: calc(100vw - 10vw); overflow-y: scroll; padding: 5px;">
+                    <div id="info">
+                        <div id="stats">
+                            <table>
+                                <tr>
+                                    <td>Jill</td>
+                                    <td>Smith</td>
+                                    <td>50</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Eve</td>
+                                    <td>Jackson</td>
+                                    <td>94</td>
+                                  </tr>
+                                  <tr>
+                                    <td>John</td>
+                                    <td>Doe</td>
+                                    <td>80</td>
+                                  </tr>
+                            </table>      
+                        </div>
+                        <div id="more_info">
+                            <div id="activities">
+                            </div>
+                            <div id="about">
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
             </div>
         </div>
 </body>

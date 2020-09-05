@@ -3,12 +3,9 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
+    background-color: #F9F6F6;
     margin: 0;
     padding: 0;
-}
-
-body {
-    background-color: #F9F6F6;
 }
 
 .custom-navbar {
@@ -26,13 +23,4 @@ body {
 
 .custom-navbar>a {
     margin: 5px 0px;
-    background-color: transparent;
-}
-
-.row>div{
-    width:calc(100vw - 10vw) !important;
-}
-
-#top_bar_right>div {
-    margin: 0px 5px;
 }
