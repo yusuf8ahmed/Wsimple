@@ -11,7 +11,7 @@
 ## Getting Started
 
   #### Prerequisites
-  * python and is required to use wsimple
+  * python and pip is required to use/download wsimple
   * to download pip and python goto ["Download Python"](https://realpython.com/installing-python/)
   * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows)
   * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
