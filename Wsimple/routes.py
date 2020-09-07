@@ -133,9 +133,10 @@ def soc_find_security(data):
     ws = Wsimple(account[0], account[1]) 
     sparkline = ws.find_securities_by_id_historical(data[0], "1d")
     security_info = ws.find_securities_by_id(data[0])
+    position = ws.get_account()["results"][0]["position_quantities"]
     print(f'stock_info {security_info["stock"]["symbol"]}')
-    socketio.sleep(5)
-    socketio.emit('return_stock_info', [sparkline, security_info])  
+    socketio.sleep(20)
+    socketio.emit('return_stock_info', [sparkline, security_info, position])  
     
 @socketio.on("get_activities")
 def soc_get_activities(data):
@@ -146,6 +147,32 @@ def soc_get_activities(data):
         socketio.emit('display_activities', ws.get_activities())
     else:
         socketio.emit('display_activities', ws.get_activities_bookmark(data[0]))
+        
+@socketio.on("market_buy_order")
+def soc_market_buy_order(data):
+    socketio.emit('',)
+    
+@socketio.on("market_sell_order")
+def soc_market_sell_order(data):
+    socketio.emit('',)
+    
+@socketio.on("market_limit_buy_order")
+def soc_market_limit_buy_order(data):
+    socketio.emit('',)
+    
+@socketio.on("market_limit_sell_order")
+def soc_market_limit_sell_order(data):
+    socketio.emit('',)
+    
+@socketio.on("market_stop_limit_buy_order")
+def soc_market_stop_limit_buy_order(data):
+    socketio.emit('',)
+    
+@socketio.on("market_stop_limit_sell_order")
+def soc_market_stop_limit_sell_order(data):
+    socketio.emit('',)
+    
+
                
 if __name__ == '__main__':
     socketio.run(app)

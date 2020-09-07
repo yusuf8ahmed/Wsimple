@@ -116,16 +116,6 @@ class Wsimple:
                        json=order_dict)
         return r.json()
       
-    def delete_order(self, order_id: str):
-        """
-        Cancels a specific order by its id.
-        """
-        #1: Where ORDER is order_id from place order
-        r = requests.delete(
-            "{}/orders/{}".format(self.base_url, order_id)
-            )   
-        return r.json() 
-      
     def buymarketorder(self, security_id: str, limit_price: int = 1, quantity: int = 1):
         """
         Places an market buy order for a security. Works
@@ -155,7 +145,17 @@ class Wsimple:
                        account_id=None,
                        quantity=1):
         return NotImplementedError()
-
+    
+    def delete_order(self, order_id: str):
+        """
+        Cancels a specific order by its id.
+        """
+        #1: Where ORDER is order_id from place order
+        r = requests.delete(
+            "{}/orders/{}".format(self.base_url, order_id)
+            )   
+        return r.json() 
+    
     def find_securities(self, ticker: str):
         """
         Grabs information about the security resembled by the ticker
@@ -303,7 +303,7 @@ class Wsimple:
         test endpoints
         """
         r = requests.get(
-            url="{}top_traded".format(self.base_url),
+            url="{}time".format(self.base_url),
             headers=self._header
         )
         print(r.status_code)
@@ -431,7 +431,7 @@ class Wsimple:
         # Account Values, Account Opening ]
         #json in context
         r = requests.get(
-            url="https://status.wealthsimple.com/api/v2/status.json"
+            url="https://status.wealthsimple.com/api/v2/summary.json"
         )
         return json.loads(r.content)
     

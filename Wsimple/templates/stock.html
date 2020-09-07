@@ -47,7 +47,7 @@
         <div class="row" style="margin: 0px;">
             <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px; background: #fff;">
                 <div id="top_bar" style="height: 10vh; width: calc(100vw - 10vw); display: flex; justify-content: space-between;align-items: center;">
-                    <div id="top_bar_left" style="display: flex;align-items: center;">
+                    <div id="top_bar_left" style="display: flex;align-items: center;margin: 0px 5px;">
                         <div id="ticker_info">
                             <div id="ticker_symbol" style="font-size: 1.2rem;">
                             </div>
@@ -59,13 +59,17 @@
                     </div>
                     <div id="top_bar_right" style="display: flex;">
                         <div id="buy">
-                            <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Buy</a>
+                            <a id="buy_button" class="waves-effect waves-light btn modal-trigger" href="#modal1">Buy</a>
 
                             <!-- Modal Structure -->
                             <div id="modal1" class="modal">
                               <div class="modal-content">
-                                <h4>Buy Header</h4>
-                                <p>A Buy of text</p>
+                                <h4>Market Buy Header</h4>
+                                <p>Enter amount of shares (positive integer only)</p>
+                                <form id="buy_form" name="buy_form" onsubmit="return buy_market();">
+                                    <input type="number" name="number_shares" required>
+                                    <input type="submit" value="Continue">
+                                </form>
                               </div>
                               <div class="modal-footer">
                                 <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
@@ -73,13 +77,13 @@
                             </div>
                         </div>
                         <div id="sell">
-                            <a class="waves-effect waves-light btn modal-trigger" href="#modal2">Sell</a>
+                            <a id="sell_button" class="waves-effect waves-light btn modal-trigger" href="#modal2" style="display: none;" >Sell</a>
 
                             <!-- Modal Structure -->
                             <div id="modal2" class="modal">
                               <div class="modal-content">
-                                <h4>Sell Header</h4>
-                                <p>A Sell of text</p>
+                                <h4>Market Sell Header</h4>
+                                <p>Enter amount of shares (positive integer only)</p>
                               </div>
                               <div class="modal-footer">
                                 <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
@@ -87,7 +91,7 @@
                             </div>
                         </div>
                         <div id="add_watchlist">
-                            <a id="add_watchlist_button" href="">
+                            <a id="add_watchlist_button" style="cursor: pointer;">
                                 <img height="35" width="35" src="{{ url_for('static', filename='media/watchlist_button.svg') }}"
                                     alt="user/home button">
                             </a>
@@ -108,26 +112,39 @@
                         <div id="stats">
                             <table>
                                 <tr>
-                                    <td>Jill</td>
-                                    <td>Smith</td>
-                                    <td>50</td>
+                                    <td>Open</td>
+                                    <td>78.50</td>
+                                    <td>Market capitalization</td>
+                                    <td>24.3B</td>
+                                    <td>High</td>
+                                    <td>80.46</td>
+                                    <td>52W High</td>
+                                    <td>98.99</td>                                    
                                   </tr>
                                   <tr>
-                                    <td>Eve</td>
-                                    <td>Jackson</td>
-                                    <td>94</td>
+                                    <td>Low</td>
+                                    <td>75.55</td>
+                                    <td>52W Low</td>
+                                    <td>27.55</td>  
+                                    <td>Volume</td>
+                                    <td>4.66M</td>   
+                                    <td>Average volume</td>
+                                    <td>5.04M</td>                                                                                                         
                                   </tr>
                                   <tr>
-                                    <td>John</td>
-                                    <td>Doe</td>
-                                    <td>80</td>
+                                    <td>P/E</td>
+                                    <td>8,612.90</td>                                      
+                                    <td>Yield</td>
+                                    <td>-</td>
+                                    <td>Exchange</td>
+                                    <td>NASDAQ</td>
                                   </tr>
                             </table>      
                         </div>
                         <div id="more_info">
                             <div id="activities">
                             </div>
-                            <div id="about">
+                            <div id="about" style="margin:12px 0px;">
                             </div>
                         </div>
                     </div>                    
