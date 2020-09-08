@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel='shortcut icon' type='image/x-icon' href="{{ url_for('static', filename='media/favicon.svg') }}" />
+    <meta name="Description"
+        content="Wsimple: Wealthsimple Trade for Desktop with better graphs and virtually real-time graphs">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google material icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"
+        integrity="sha512-v8ng/uGxkge3d1IJuEo6dJP8JViyvms0cly9pnbfRxT6/31c3dRWxIiwGnMSWwZjHKOuY3EVmijs7k1jz/9bLA=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script defer src="{{ url_for('static', filename='js/stock.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stock.css') }}">
+    <title>Wsimple stock</title>
+</head>
+
+<body>
+    <!-- add https://www.wealthsimple.com/en-ca/quote/NASDAQ/AAPL#1d -->
+    <!-- https://subdomainfinder.c99.nl/scans/2019-12-30/wealthsimple.com -->
+    <div class="container" style="padding: 0; margin: 0;width: 100vw;">
+        <div class="custom-navbar">
+            <a href="/home">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/user_button.svg') }}"
+                    alt="user/home button">
+            </a>
+            <a href="/search">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/search_button.svg') }}"
+                    alt="search button">
+            </a>
+            <a href="/activities">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/activities_button.svg') }}"
+                    alt="activities button">
+            </a>
+            <a href="/settings" style="margin-top: auto;">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/settings_button.svg') }}"
+                    alt="settings button">
+            </a>
+        </div>
+        <div class="row" style="margin: 0px;">
+            <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px; background: #fff;">
+                <div id="top_bar" style="height: 10vh; width: calc(100vw - 10vw); display: flex; justify-content: space-between;align-items: center;">
+                    <div id="top_bar_left" style="display: flex;align-items: center;margin: 0px 5px;">
+                        <div id="ticker_info">
+                            <div id="ticker_symbol" style="font-size: 1.2rem;">
+                            </div>
+                            <div id="ticker_name" style="font-size: 1.2rem;">
+                            </div>
+                        </div>
+                        <div id="ticker_value" style="font-size:1.5rem; margin: 0px 5px;">
+                        </div>
+                    </div>
+                    <div id="top_bar_right" style="display: flex;">
+                        <div id="buy">
+                            <a id="buy_button" class="waves-effect waves-light btn modal-trigger" href="#modal1">Buy</a>
+
+                            <!-- Modal Structure -->
+                            <div id="modal1" class="modal">
+                              <div class="modal-content">
+                                <h4>Market Buy Header</h4>
+                                <p>Enter amount of shares (positive integer only)</p>
+                                <form id="buy_form" name="buy_form" onsubmit="return buy_market();">
+                                    <input type="number" name="number_shares" required>
+                                    <input type="submit" value="Continue">
+                                </form>
+                              </div>
+                              <div class="modal-footer">
+                                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+                              </div>
+                            </div>
+                        </div>
+                        <div id="sell">
+                            <a id="sell_button" class="waves-effect waves-light btn modal-trigger" href="#modal2" style="display: none;" >Sell</a>
+
+                            <!-- Modal Structure -->
+                            <div id="modal2" class="modal">
+                              <div class="modal-content">
+                                <h4>Market Sell Header</h4>
+                                <p>Enter amount of shares (positive integer only)</p>
+                              </div>
+                              <div class="modal-footer">
+                                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+                              </div>
+                            </div>
+                        </div>
+                        <div id="add_watchlist">
+                            <a id="add_watchlist_button" style="cursor: pointer;">
+                                <img height="35" width="35" src="{{ url_for('static', filename='media/watchlist_button.svg') }}"
+                                    alt="user/home button">
+                            </a>
+                        </div>
+                    </div>                 
+                </div>
+            </div>
+            <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px;">
+                <div style="height: 45vh; width: calc(100vw - 10vw);">
+                    <canvas id="chart" role="img">
+                        <p>account value chart</p>
+                    </canvas>
+                </div>
+            </div>
+            <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px; background: #fff;">
+                <div style="height: 40vh; width: calc(100vw - 10vw); overflow-y: scroll; padding: 5px;">
+                    <div id="info">
+                        <div id="stats">
+                            <table>
+                                <tr>
+                                    <td>High</td>
+                                    <td><div id="high"></div></td>
+                                    <td>Low</td>
+                                    <td><div id="low"></div></td>
+                                    <td>52W High</td>
+                                    <td><div id="whigh"></div></td> 
+                                    <td>52W Low</td>
+                                    <td><div id="wlow"></div></td>                                       
+                                  </tr>
+                                  <tr>
+                                    <td>Open</td>
+                                    <td><div id="open"></div></td>
+                                    <td>Market capitalization</td>
+                                    <td><div id="mktcap"></div></td>
+                                    <td>Volume</td>
+                                    <td><div id="vol"></div></td>   
+                                    <td>Average volume</td>
+                                    <td><div id="avgvol"></div></td>                                                                                                         
+                                  </tr>
+                                  <tr>
+                                    <td>P/E</td>
+                                    <td><div id="pe"></div></td>                                      
+                                    <td>Yield</td>
+                                    <td><div id="yield"></div></td>
+                                    <td>Exchange</td>
+                                    <td><div id="exg"></div></td>
+                                    <td>Beta</td>
+                                    <td><div id="beta"></div></td> 
+                                  </tr>
+                                  <tr>
+                                    <td>Debt</td>
+                                    <td><div id="debt"></div></td>                                      
+                                    <td>Revenue</td>
+                                    <td><div id="revenue"></div></td>
+                                    <td>Total assets</td>
+                                    <td><div id="tassets"></div></td>
+                                    <td>Gross profit margin</td>
+                                    <td><div id="gpm"></div></td> 
+                                  </tr>
+                                  <tr>
+                                    <td>Company cash</td>
+                                    <td><div id="cash"></div></td>                                      
+                                    <td>Earning growth</td>
+                                    <td><div id="growth"></div></td>
+                                    <td>Company ceo</td>
+                                    <td><div id="ceo"></div></td>                                    
+                                    <td>Website</td>
+                                    <td><div id="website"></div></td> 
+                                  </tr>                                  
+                            </table>      
+                        </div>
+                        <div id="more_info">
+                            <div id="activities">
+                            </div>
+                            <div id="about" style="margin:12px 0px;">
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+</body>
+</html>

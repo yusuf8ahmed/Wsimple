@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel='shortcut icon' type='image/x-icon' href="{{ url_for('static', filename='media/favicon.svg') }}" />
+    <meta name="Description"
+        content="Wsimple: Wealthsimple Trade for Desktop with better graphs and virtually real-time graphs">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google material icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"
+        integrity="sha512-v8ng/uGxkge3d1IJuEo6dJP8JViyvms0cly9pnbfRxT6/31c3dRWxIiwGnMSWwZjHKOuY3EVmijs7k1jz/9bLA=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script defer src="{{ url_for('static', filename='js/activities.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/activities.css') }}">
+    <title>Wsimple activities</title>
+</head>
+
+<body class="body">
+    <div class="container" style="padding: 0; margin: 0;width: 100vw;">
+        <div class="custom-navbar">
+            <a href="/home">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/user_button.svg') }}"
+                    alt="user/home button">
+            </a>
+            <a href="/search">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/search_button.svg') }}"
+                    alt="search button">
+            </a>
+            <a href="/activities">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/activities_button.svg') }}"
+                    alt="activities button">
+            </a>
+            <a href="/settings" style="margin-top: auto;">
+                <img height="35" width="35" src="{{ url_for('static', filename='media/settings_button.svg') }}"
+                    alt="settings button">
+            </a>
+        </div>
+        <div class="row" style="margin: 0px;">
+            <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:10px;">
+                <div id="activities_box"
+                    style="background-color: #fff;width: calc(100vw - 10vw);border-radius: 25px;height: calc(100vh - 20px); padding:20px 0px; overflow-y: scroll;">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
