@@ -5,6 +5,7 @@
     <img src="https://forthebadge.com/images/badges/contains-technical-debt.svg">
     <img src="https://forthebadge.com/images/badges/made-with-python.svg">
     <img src="https://forthebadge.com/images/badges/uses-badges.svg">
+    <img src="https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg">
   </a>
 </p>
 
