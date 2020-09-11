@@ -5,6 +5,8 @@ import pprint
 import datetime
 import logging
 from typing import Union
+
+from pandas.core.indexes import accessors
 # custom error
 from .errors import LoginError, InvalidAccessToken
 # third party
@@ -251,7 +253,7 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)   
    
-    # activities        
+    # activities functions      
     def get_activities(self):
         try: 
             self.logger.debug("get activities")
@@ -276,10 +278,41 @@ class Wsimple:
  
     # withdrawals 
  
-    # deposits  
-    def get_deposits(self):
+    # deposits 
+    def make_deposit(self, amount: int, currency: str = "CAD", bank_account_id: str = None, account_id: str = None):
+        if bank_account_id == None:
+            bank_account_id = self.get_bank_accounts()["results"][0]["id"] 
+        if account_id == None:
+            account_id = self.get_account()["results"][0]["id"]
+        person = self.get_person()
+        payload = {
+            "client_id": str(person["id"]),
+            "bank_account_id": str(bank_account_id),
+            "account_id": str(account_id),
+            "amount": float(amount),
+            "currency": str(currency)
+        }
+        r = requests.post(
+            url='{}deposits'.format(self.base_url),
+            headers=self._header,
+            data=payload
+        )
+        return r.json()
+     
+    def get_deposit(self, funds_transfer_id: str):
         try: 
             self.logger.debug("get deposits")
+            r = requests.get(
+                url="{}deposits/{}".format(self.base_url, funds_transfer_id),
+                headers=self._header
+            )
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e) 
+             
+    def list_deposits(self):
+        try: 
+            self.logger.debug("list_deposits")
             r = requests.get(
                 url="{}deposits".format(self.base_url),
                 headers=self._header
@@ -287,6 +320,17 @@ class Wsimple:
             return r.json()                                  
         except BaseException as e:
             self.logger.error(e)  
+    
+    def delete_deposit(self, funds_transfer_id: str):
+        try: 
+            self.logger.debug("get deposits")
+            r = requests.delete(
+                url="{}deposits/{}".format(self.base_url, funds_transfer_id),
+                headers=self._header
+            )
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e)     
     
     # market related functions
     def get_all_markets(self):
@@ -313,7 +357,7 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e) 
         
-    # get, add, delete securities on watchlist functions
+    # watchlist functions
     def get_watchlist(self):
         try: 
             self.logger.debug("get watchlist")
@@ -362,12 +406,21 @@ class Wsimple:
     #! functions after this point are not core to the API
     def test_endpoint(self):
         self.logger.debug("test endpoint")
-        r = requests.get(
-            url='{}securities/top_traded'.format(self.base_url),
-            headers=self._header
+        payload = {
+            "client_id": "person-r0gfq1z7argj4q",
+            "bank_account_id": "bank_account-193aSy0jfyiXkwqWwrVlfvyHA",
+            "account_id": "non-registered-acawrfq",
+            "amount": 420.69,
+            "currency": "USD"
+        }
+        r = requests.post(
+            url='{}deposits'.format(self.base_url),
+            headers=self._header,
+            data=payload
         )
         print(r.status_code)
         print(r.content)
+        print(r.json())
         return r.json()
 
     def usd_to_cad(self, amount: Union[float, int]) -> float:

@@ -12,7 +12,7 @@
 Welcome! This project is a . 
 . 
 . Also Wsimple allows the access API wrapper without the use of the web interface
-([API-methods](#API-methods)).
+(See => [API-methods](#API-methods)).
 
 ## Getting Started
 
@@ -51,39 +51,52 @@ Welcome! This project is a .
   # return a list of securities that include GOOG and GOOGL
   ```
 #### API methods
-### table of content (39)
+### table of content (42)
 
 * [Wsimple.__init__()](#init)
 * [Wsimple.refresh_token()](#refreshtoken)
+
 * [Wsimple.get_account()](#getaccount)
+* [Wsimple.get_historical_account_data()](#gethistoricalaccountdata)
 * [Wsimple.get_me()](#getme)
 * [Wsimple.get_person()](#getperson)
-* [Wsimple.get_historical_account_data()](#gethistoricalaccountdata)
-* [Wsimple.get_positions()](#getpositions)
 * [Wsimple.get_bank_accounts()](#getbankaccounts)
-* [Wsimple.get_deposits()](#getdeposits)
-* [Wsimple.get_activities()](#getactivities)
-* [Wsimple.get_activities_bookmark()](#getactivitiesbookmark)
+* [Wsimple.get_positions()](#getpositions)
+
 * [Wsimple.get_orders()](#getorders)
 * [Wsimple.buymarketorder()](#buymarketorder)
 * [Wsimple.sellmarketorder()](#sellmarketorder)
 * [Wsimple.buylimitorder()](#buylimitorder)
 * [Wsimple.selllimitorder()](#selllimitorder)
 * [Wsimple.delete_order()](#deleteorder)
+
 * [Wsimple.find_securities()](#findsecurities)
 * [Wsimple.find_securities_by_id()](#findsecuritiesbyid)
 * [Wsimple.find_securities_by_id_historical()](#findsecuritiesbyidhistorical)
+
+* [Wsimple.get_activities()](#getactivities)
+* [Wsimple.get_activities_bookmark()](#getactivitiesbookmark)
+
+* [Wsimple.make_deposit()](#makedeposit)
+* [Wsimple.get_deposit()](#getdeposit)
+* [Wsimple.list_deposits()](#listdeposits)
+* [Wsimple.delete_deposit()](#deletedeposit)
+
 * [Wsimple.get_all_markets()](#getallmarkets)
 * [Wsimple.get_market_hours()](#getmarkethours)
+
 * [Wsimple.get_watchlist()](#getwatchlist)
 * [Wsimple.delete_watchlist()](#deletewatchlist)
 * [Wsimple.add_watchlist()](#addwatchlist)
+
 * [Wsimple.get_exchange_rate()](#getexchangerate)
+
 * [Wsimple.usd_to_cad()](#usdtocad)
 * [Wsimple.cad_to_usd()](#cadtousd)
 * [Wsimple.get_total_value()](#gettotalvalue)
 * [Wsimple.settings()](#settings)
 * [Wsimple.dashboard()](#dashboard)
+
 * [Wsimple.public_find_securities_by_ticker()](#publicfindsecuritiesbyticker)
 * [Wsimple.public_find_securities_by_ticker_historical()](#publicfindsecuritiesbytickerhistorical)
 * [Wsimple.public_top_traded()](#publictoptraded)
@@ -247,11 +260,41 @@ Get all linked bank accounts under the WealthSimple Trade account.
 
 [Back to top—>](#index)
 
-<a id="getdeposits"></a>  
+<a id="makedeposit"></a>  
 
-### function get_deposits():
-Get all deposits under the WealthSimple Trade account.   
+### function make_deposit():
+make a deposit under this WealthSimple Trade account.  
+1.Where amount is the amount to deposit.  
+2.Where currency is the currency need to be transferred(Only CAD): autoset to "CAD"  
+3.Where bank_account_id is id of bank account where the money is going to be deposited to  
+(can be found in [get_bank_accounts function](#getbankaccounts)).  
+if bank_account_id is not passed then it will pick the first result.  
+4.Where account_id is id of the account that is depositing the money (can be found in [get_account function](#getaccount)).  
+if account_id is not passed then it will pick the first result.  
+ 
+[Back to top—>](#index)
 
+<a id="getdeposit"></a>  
+
+### function get_deposit():
+Get specific deposit under this WealthSimple Trade account.  
+1.Where funds_transfer_id is the id of the transfer and is in the result of [make_deposit function](#makedeposit)  
+but can be also found in [list_deposits function](#listdeposits)  
+ 
+[Back to top—>](#index)
+
+<a id="listdeposits"></a>  
+
+### function list_deposits():
+Get all deposits under this WealthSimple Trade account.
+ 
+[Back to top—>](#index)
+
+<a id="deletedeposit"></a>  
+
+### function delete_deposit():
+Delete a specific deposit under this WealthSimple Trade account.
+ 
 [Back to top—>](#index)
 
 <a id="getallmarkets"></a>
