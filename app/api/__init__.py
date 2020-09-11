@@ -86,6 +86,12 @@ class Wsimple:
     
     function get_deposits():
         #*  Get All deposits under the WealthSimple Trade account
+        
+    function get_all_markets():
+        #* Get all market data-hours including the hours
+
+    function get_market_hours(exchange):
+        #* Get all market data-hours about a specific exchange ("TSX", "NYSE")
     
     #? get, add, delete securities on watchlist functions
     def get_watchlist(self):

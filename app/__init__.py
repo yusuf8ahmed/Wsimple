@@ -20,9 +20,8 @@ if not __name__ == "__main__":
 
     app = Flask(__name__)
     socketio = SocketIO(app, manage_session=False)
+    app.debug = True
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-    app.config["DEBUG"] = True
-    app.config["DEVELOPMENT"] = True
     app.config['SESSION_TYPE'] = 'filesystem'
     Session(app)
     thread = None
@@ -46,4 +45,4 @@ if not __name__ == "__main__":
     from app import views
 
     if __name__ == '__main__':
-        socketio.run(app)
+        socketio.run(app, debug=True)

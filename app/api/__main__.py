@@ -2,6 +2,7 @@
 # standard library
 import json
 import pprint
+import datetime
 import logging
 from typing import Union
 # custom error
@@ -12,8 +13,20 @@ import requests
 class Wsimple:
     # class assumes first id in account/list is for trading
     base_url = "https://trade-service.wealthsimple.com/"
+    exh_to_mic = {
+        "TSX": "XTSE",
+        "CSE": "XCNQ",        
+        "NYSE": "XNYS",
+        "BATS": "BATS",
+        "FINRA": "FINR",        
+        "OTCBB": "XOTC",                
+        "TSX-V": "XTSX",        
+        "NASDAQ": "XNAS",
+        "OTC MARKETS": "OTCM",
+        "AEQUITAS NEO EXCHANGE": "NEOE"
+    }
     
-    def __init__(self, email, password, logging=True):
+    def __init__(self, email, password, verbose=False):
         """
         The LOGIN endpoint intializes a new session for the given email and
         password set. If the login is successful, access and refresh tokens
@@ -30,10 +43,9 @@ class Wsimple:
         if logging:
             self.logger.setLevel(logging.DEBUG)
         if r.status_code == 200:
-            
             self._access_token = r.headers['X-Access-Token']
             self._refresh_token = r.headers['X-Refresh-Token']
-            print(self._access_token)
+            print(f"access token: {self._access_token}")
             self._header = {'Authorization': self._access_token}
             del r
         else:
@@ -346,6 +358,31 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)  
     
+    # market related functions
+    def get_all_markets(self):
+        try: 
+            self.logger.debug("get all market")
+            r = requests.get(
+                url='{}markets'.format(self.base_url),
+                headers=self._header
+            )            
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e)  
+            
+    def get_market_hours(self, exchange: str):
+        try: 
+            exchanges = list(self.exh_to_mic.keys())
+            if exchange in exchanges:
+                all_markets = self.get_all_markets()['results'] 
+                for market in all_markets:
+                    if market["exchange_name"] == exchange:
+                        return market 
+            else:
+                return {}              
+        except BaseException as e:
+            self.logger.error(e) 
+        
     # get, add, delete securities on watchlist functions
     def get_watchlist(self):
         """
@@ -405,10 +442,11 @@ class Wsimple:
         """
         self.logger.debug("test endpoint")
         r = requests.get(
-            url="{}time".format(self.base_url),
+            url='{}'.format(self.base_url),
             headers=self._header
         )
         print(r.status_code)
+        print(r.content)
         return r.json()
 
     def usd_to_cad(self, amount: Union[float, int]) -> float:
@@ -447,8 +485,9 @@ class Wsimple:
             "currency": "CAD"
         }
         
-    def get_settings(self):
-        self.logger.debug("get settings")
+    def settings(self):
+        # /settings route
+        self.logger.debug("settings")
         me = self.get_me()
         person = self.get_person()
         bank_account = self.get_deposits()
@@ -463,6 +502,7 @@ class Wsimple:
         }
     
     def dashboard(self):
+        # /home route
         self.logger.debug("dashboard")
         account = self.get_account()["results"][0]
         total_value = self.get_total_value()

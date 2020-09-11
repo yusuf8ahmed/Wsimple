@@ -99,7 +99,7 @@ def settings_info(key):
     while True:
         account = str(key).split(",")
         ws = Wsimple(account[0], account[1])
-        settings = ws.get_settings()
+        settings = ws.settings()
         print(settings)
         socketio.emit('return_settings', settings)
         socketio.sleep(10)  

@@ -10,13 +10,19 @@
 
 ## Getting Started
 
-  #### Prerequisites
+  ### Project Status
+  <p style="color:red;font-size:35px;margin:0px;">
+  Pre-alpha v1.0
+  </p>
+  This project is in the pre-alpha stage. if you find any bugs please submit an issue.
+
+  ### Prerequisites
   * python and pip is required to use/download wsimple
   * to download pip and python goto ["Download Python"](https://realpython.com/installing-python/)
   * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows)
   * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
 
-  #### Installing (Not Ready)
+  ### Installing (Not Ready)
   ```bash
   pip install wsimple
   ```
@@ -112,10 +118,16 @@ Get Basic info of this WealthSimple Trade account.
 Get more Advanced/Personal info of this WealthSimple Trade account.  
     
 ### function get_bank_accounts():
-Get All linked bank accounts under the WealthSimple Trade account.
+Get all linked bank accounts under the WealthSimple Trade account.
     
 ### function get_deposits():
-Get All deposits under the WealthSimple Trade account. 
+Get all deposits under the WealthSimple Trade account. 
+
+### function get_all_markets():
+Get all market data-hours including the hours
+
+### function get_market_hours(exchange):
+Get all market data-hours about a specific exchange ("TSX", "NYSE")
 
 ### function get_watchlist():
 Get watchlist under this WealthSimple Trade account.    
