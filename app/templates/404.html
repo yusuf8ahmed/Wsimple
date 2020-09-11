@@ -3,11 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='shortcut icon' type='image/x-icon' href="{{ url_for('static', filename='media/favicon.svg') }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <title>Wsimple error page</title>
+    <style>
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            margin:0px;padding:0px;
+        }
+        .image_box {
+            display:flex;
+            width:100vw;
+            height:100vh;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .image_link {
+            max-width: 50vw;
+        }
+
+        .div_parent {
+            max-width: 50vw;
+            display: flex;
+            justify-content: center;
+            margin: 5px 0px;
+        }
+
+        .div_parent > a {
+            text-decoration: none;
+            color: #000;
+            font-size: 25px;
+        }
+        </style>
 </head>
-<body style="margin:0px;padding:0px;">
-    <div class="center" style="display:flex;width:99vw;height:99vh;justify-content: center; align-items: center;">
-        <img src="{{ link }}" alt="" style="max-width: 50vw;">
+<body>
+    <div class="image_box">
+        <img class="image_link" src="{{ link }}" alt="insert spiderman meme here ^">
+        <div class="div_parent">
+            <a class="index_href" href="/">Home</a>
+        </div>
     </div>
 </body>
 </html>
