@@ -1,15 +1,15 @@
 <svg width="128" height="116" viewBox="0 0 128 116" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="logo64">
 <g id="Vector 1">
-<path d="M78.6923 102H95.0714L92.2308 82.6L88.8461 63.2L78.6923 102Z" fill="black"/>
-<path d="M27.9231 5C27.9231 5 17.6089 5 11 5C17.6089 42.8809 27.9231 102 27.9231 102L39.2051 69.6667L27.9231 5Z" fill="black"/>
-<path d="M27.9231 102H44.8462L39.2051 69.6667L27.9231 102Z" fill="black"/>
-<path d="M62.0714 5L39.2051 69.6667L44.8462 102L67.4103 37.3333L62.0714 5Z" fill="black"/>
-<path d="M78.6923 5H62.0714L67.4103 37.3333L78.6923 5Z" fill="black"/>
-<path d="M88.8461 63.2L78.6923 5L67.4103 37.3333L78.6923 102L88.8461 63.2Z" fill="black"/>
-<path d="M121 5H104.5L88.8461 63.2L92.2308 82.6L95.0714 102L121 5Z" fill="black"/>
+<path d="M79 102H95L92.2308 82.6L88.8461 63.2L79 102Z" fill="black"/>
+<path d="M28 5C28 5 17.6089 5 11 5C17.6089 42.8809 28 102 28 102L39.2051 69.6667L28 5Z" fill="black"/>
+<path d="M28 102H45L39.2051 69.6667L28 102Z" fill="black"/>
+<path d="M62 5L39.2051 69.6667L45 102L67.4103 37.3333L62 5Z" fill="black"/>
+<path d="M79 5H62L67.4103 37.3333L79 5Z" fill="black"/>
+<path d="M88.8461 63.2L79 5L67.4103 37.3333L79 102L88.8461 63.2Z" fill="black"/>
+<path d="M121 5H104.5L88.8461 63.2L92.2308 82.6L95 102L121 5Z" fill="black"/>
 </g>
-<path id="Vector 3" d="M76 5L44 98L60.3721 5H76Z" fill="#00FE91"/>
-<path id="Vector 4" d="M117 5L93 98L101.727 5H117Z" fill="#00FE91"/>
+<path id="Vector 3" d="M79 5L45 102L62 5H79Z" fill="#00FE91"/>
+<path id="Vector 4" d="M121 5L95 102L104.5 5H121Z" fill="#00FE91"/>
 </g>
 </svg>
