@@ -14,16 +14,18 @@ function display_buys(pposition_div, activities) {
     pposition_symbol.style.margin = "0px";
     var pposition_symbol_link = document.createElement("a");
     pposition_symbol_link.style.fontSize = "1.2rem";
-    var position_symbol_text = document.createTextNode(activities.object);
+    var position_symbol_text = document.createTextNode(`${activities.object} ${activities.order_type} ${activities.order_sub_type}`);
     pposition_symbol_link.appendChild(position_symbol_text);
     // securities value
     var pposition_value = document.createElement("p");
     pposition_value.style.margin = "0px";
     var position_value;
     if (activities.status == "cancelled") {
-        position_value = document.createTextNode("cancelled"); 
+        position_value = document.createTextNode("Cancelled"); 
     } else if (activities.status == "posted") {
-        position_value = document.createTextNode(`${activities.market_value.amount} ${activities.market_value.currency}`); 
+        position_value = document.createTextNode(`${activities.symbol} ${activities.quantity} ${activities.market_value.amount.toFixed(2)} ${activities.market_value.currency}`); 
+    } else if (activities.status == "expired") {
+        position_value = document.createTextNode("Expired"); 
     } else {
         position_value = document.createTextNode("None"); 
     }
@@ -40,16 +42,18 @@ function display_sells(pposition_div, activities) {
     pposition_symbol.style.margin = "0px";
     var pposition_symbol_link = document.createElement("a");
     pposition_symbol_link.style.fontSize = "1.2rem";
-    var position_symbol_text = document.createTextNode(activities.object);
+    var position_symbol_text = document.createTextNode(`${activities.object} ${activities.order_type} ${activities.order_sub_type}`);
     pposition_symbol_link.appendChild(position_symbol_text);
     // securities value
     var pposition_value = document.createElement("p");
     pposition_value.style.margin = "0px";
     var position_value;
     if (activities.status == "cancelled") {
-        position_value = document.createTextNode("cancelled"); 
+        position_value = document.createTextNode("Cancelled"); 
     } else if (activities.status == "posted") {
-        position_value = document.createTextNode(`${activities.market_value.amount} ${activities.market_value.currency}`); 
+        position_value = document.createTextNode(`${activities.market_value.amount.toFixed(2)} ${activities.market_value.currency}`); 
+    } else if (activities.status == "expired") {
+        position_value = document.createTextNode("Expired"); 
     } else {
         position_value = document.createTextNode("None"); 
     }
@@ -74,9 +78,9 @@ function display_deposits(pposition_div, activities) {
     pposition_value.style.margin = "0px";
     var position_value;
     if (activities.status == "cancelled") {
-        position_value = document.createTextNode("cancelled"); 
+        position_value = document.createTextNode("Cancelled"); 
     } else if (activities.status == "accepted") {
-        position_value = document.createTextNode(`${activities.value.amount} ${activities.value.currency}`); 
+        position_value = document.createTextNode(`${activities.value.amount.toFixed(2)} ${activities.value.currency}`); 
     } else {
         position_value = document.createTextNode("None"); 
     }
@@ -101,9 +105,9 @@ function display_withdrawals(pposition_div, activities) {
     pposition_value.style.margin = "0px";
     var position_value;
     if (activities.status == "cancelled") {
-        position_value = document.createTextNode("cancelled"); 
+        position_value = document.createTextNode("Cancelled"); 
     } else if (activities.status == "accepted") {
-        position_value = document.createTextNode(`${activities.value.amount} ${activities.value.currency}`); 
+        position_value = document.createTextNode(`${activities.value.amount.toFixed(2)} ${activities.value.currency}`); 
     } else {
         position_value = document.createTextNode("None"); 
     }
@@ -116,7 +120,23 @@ function display_withdrawals(pposition_div, activities) {
 }
 
 function display_dividends(pposition_div, activities) {
-    
+    // securities symbol
+    var pposition_symbol = document.createElement("p");
+    pposition_symbol.style.margin = "0px";
+    var pposition_symbol_link = document.createElement("a");
+    pposition_symbol_link.style.fontSize = "1.2rem";
+    var position_symbol_text = document.createTextNode(activities.object);
+    pposition_symbol_link.appendChild(position_symbol_text);
+    // securities value
+    var pposition_value = document.createElement("p");
+    pposition_value.style.margin = "0px";
+    var position_value = document.createTextNode(`${activities.process_date} ${activities.symbol} ${activities.market_value.amount.toFixed(2)} ${activities.market_value.currency}`); 
+    // attaching elements
+    pposition_symbol.appendChild(pposition_symbol_link);
+    pposition_div.appendChild(pposition_symbol);
+    pposition_value.appendChild(position_value);
+    pposition_div.appendChild(pposition_value);
+    activities_box.appendChild(pposition_div);
 }
 
 // activity type unknown below

@@ -1,3 +1,5 @@
+import random
+
 from app import app, session, render_template, redirect
 from app import socketio, thread, thread_lock
 from app.forms import LoginForm

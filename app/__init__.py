@@ -4,6 +4,7 @@ from .api import Wsimple
 # wsimple webserver part
 if not __name__ == "__main__":
     #flask/flask-addon libraries
+    import random
     from flask import Flask, render_template, redirect, session, g
     from flask_socketio import SocketIO
     from flask_session import Session
@@ -26,9 +27,29 @@ if not __name__ == "__main__":
     Session(app)
     thread = None
     thread_lock = Lock()
-    featured = ["SPY", "DDOG", "EBAY", "GOOGL"]
 
     DATABASE = pathlib.Path(__file__).cwd() / "wsimple.db"
+    
+    @app.errorhandler(404)
+    def page_not_found(e):
+        # 1. og two pointing 
+        # 3. error in matrix
+        # 4. listen here you little shit        
+        # 5. you cant ground spider-man 
+        # 6. class not found
+        # 7. f are you doing
+        # 8. searching for f's 
+        
+        image = [
+            "https://static2.cbrimages.com/wordpress/wp-content/uploads/2019/03/Spider-Man-Pointing-Meme.jpg",    
+            "https://i.imgflip.com/44kbg9.jpg",
+            "https://i.imgflip.com/3mkw5n.jpg",       
+            "https://i.kym-cdn.com/entries/icons/original/000/005/482/50sspider-man-meme.jpg",  
+            "https://memegenerator.net/img/instances/63226656/error-404-class-not-found.jpg",
+            "https://memegenerator.net/img/instances/24858103/i-dont-know-what-the-fuck-youre-doing-404-error.jpg",
+            "https://memegenerator.net/img/instances/60418014/searching-for-fucks-error-404-fucks-not-found.jpg"
+        ]
+        return render_template('404.html', link=random.choice(image)), 404
 
     def get_db():
         db = getattr(g, '_database', None)

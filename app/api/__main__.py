@@ -5,6 +5,8 @@ import pprint
 import datetime
 import logging
 from typing import Union
+
+from pandas.core.indexes import accessors
 # custom error
 from .errors import LoginError, InvalidAccessToken
 # third party
@@ -27,12 +29,6 @@ class Wsimple:
     }
     
     def __init__(self, email, password, verbose=False):
-        """
-        The LOGIN endpoint intializes a new session for the given email and
-        password set. If the login is successful, access and refresh tokens
-        are returned in the headers. The access token is the key for invoking
-        all other end points.
-        """
         self.logger = logging.getLogger('wsimple_logging')
         payload = dict(email=email, password=password)
         r = requests.post(
@@ -53,9 +49,6 @@ class Wsimple:
             raise LoginError()
             
     def refresh_token(self):
-        """
-        Generates a new set of access and refresh tokens.
-        """
         try:
             payload = dict(refresh_token=str(self._refresh_token))
             r = requests.post(
@@ -68,11 +61,9 @@ class Wsimple:
             return r.text
         except BaseException as e:
             self.logger.error(e)
-         
+     
+    # account related functions     
     def get_account(self):
-        """
-        Get account info of this WealthSimple Trade account.
-        """
         try:
             self.logger.debug("get account info")
             r = requests.get(
@@ -84,12 +75,6 @@ class Wsimple:
             self.logger.error(e)
 
     def get_historical_account_data(self, time: str = "1d"):
-        """
-        The HISTORY_ACCOUNT endpoint provides historical snapshots of the
-        WealthSimple account for a specified timeframe.
-        """
-        #1: Where TIME is one of [1d, 1w, 1m, 3m, 1y, all]
-        #2: Where ACCOUNT is the account id received from /account/list Ex. rrsp-123_abc
         try:
             self.logger.debug("get historical account data")
             account = self.get_account()
@@ -102,10 +87,52 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
    
+    def get_me(self):
+        try: 
+            self.logger.debug("get me info")
+            r = requests.get(
+                url="{}me".format(self.base_url),
+                headers=self._header
+            )
+            return r.json()                                    
+        except BaseException as e:
+            self.logger.error(e)   
+    
+    def get_person(self):
+        try: 
+            self.logger.debug("get person info")
+            r = requests.get(
+                url="{}person".format(self.base_url),
+                headers=self._header
+            )
+            return r.json()                                   
+        except BaseException as e:
+            self.logger.error(e) 
+    
+    def get_bank_accounts(self):
+        try: 
+            self.logger.debug("get bank accounts")
+            r = requests.get(
+                url="{}bank-accounts".format(self.base_url),
+                headers=self._header
+            )
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e) 
+       
+    def get_positions(self):
+        try: 
+            self.logger.debug("get positions")
+            r = requests.get(
+                url="{}account/positions".format(self.base_url),
+                headers=self._header
+            )
+            return r.json()                       
+        except BaseException as e:
+            self.logger.error(e)
+  
+    # order functions   
     def get_orders(self):
-        """
-        Get all current and past orders.
-        """
         try:
             self.logger.debug("get orders")
             r = requests.get(
@@ -122,9 +149,6 @@ class Wsimple:
                     sub_type: str = 'market',
                     limit_price: float = 1,
                     quantity: int = 1):
-        """
-        Places an order for a security.
-        """
         try:
             account_id = self.get_account()["results"][0]["id"]
             if order_type == "sell_quantity" and sub_type == "market":
@@ -154,9 +178,6 @@ class Wsimple:
             self.logger.error(e)
 
     def buymarketorder(self, security_id: str, limit_price: int = 1, quantity: int = 1):
-        """
-        Places an market buy order for a security. Works
-        """
         try: 
             self.logger.debug("buy market order")
             res = self._place_order(security_id, 'buy_quantity',
@@ -166,9 +187,6 @@ class Wsimple:
             self.logger.error(e)
 
     def sellmarketorder(self, security_id: str, quantity: int =1):
-        """
-        Places an market sell order for a security. Works
-        """
         try: 
             self.logger.debug("sell market order")
             res = self._place_order(security_id, 'sell_quantity',
@@ -177,48 +195,32 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
 
-    def buylimitorder(self,
-                      security_id,
-                      limit_price,
-                      account_id=None,
-                      quantity=1):
+    def buylimitorder(self, security_id, limit_price, account_id=None, quantity=1):
         try: 
             self.logger.debug("buy limit order")
             return NotImplementedError()            
         except BaseException as e:
             self.logger.error(e)
 
-    def selllimitorder(self,
-                       limit_price,
-                       security_id,
-                       account_id=None,
-                       quantity=1):
+    def selllimitorder(self, limit_price, security_id, account_id=None, quantity=1):
         try: 
             self.logger.debug("sell limit order")
             return NotImplementedError()            
         except BaseException as e:
             self.logger.error(e)
     
-    def delete_order(self, order_id: str):
-        """
-        Cancels a specific order by its id.
-        """
-        #1: Where ORDER is order_id from place order
+    def delete_order(self, order: str):
         try: 
             self.logger.debug("delete order")
             r = requests.delete(
-                "{}/orders/{}".format(self.base_url, order_id)
+                "{}/orders/{}".format(self.base_url, order)
                 )   
             return r.json()                        
         except BaseException as e:
             self.logger.error(e)
 
+    # find securitites functions
     def find_securities(self, ticker: str):
-        """
-        Grabs information about the security resembled by the ticker
-        """
-        #1: Where TICKER is the ticker of the company, wealthsimple will fuzzy match this argument 
-        # and therefore multiple results can appear.
         try: 
             self.logger.debug("find securities")
             r = requests.get(
@@ -229,7 +231,7 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
     
-    def find_securities_by_id(self, sec_id: str) -> dict:
+    def find_securities_by_id(self, sec_id: str = "1d") -> dict:
         try: 
             self.logger.debug("find securities by id")
             r = requests.get(
@@ -241,11 +243,6 @@ class Wsimple:
             self.logger.error(e)
     
     def find_securities_by_id_historical(self, sec_id: str, time: str):
-        """
-        Get historical data of securites by id 
-        #mic=XNAS
-        XNAS: "US", XNYS: "US", XTSE: "CA", XTSX: "CA", BATS: "US", NEOE: "CA"
-        """
         try: 
             self.logger.debug("find securities by id historical")
             r = requests.get(
@@ -254,29 +251,10 @@ class Wsimple:
             )
             return r.json()                      
         except BaseException as e:
-            self.logger.error(e)
-
-    def get_positions(self):
-        """
-        Get all current securities held by this WealthSimple Trade account. 
-        """
-        try: 
-            self.logger.debug("get positions")
-            r = requests.get(
-                url="{}account/positions".format(self.base_url),
-                headers=self._header
-            )
-            return r.json()                       
-        except BaseException as e:
-            self.logger.error(e)
-        
+            self.logger.error(e)   
+   
+    # activities functions      
     def get_activities(self):
-        """
-        Provides the most recent 20 activities (deposits, dividends, orders, etc)
-        on the WealthSimple Trade account.
-        #?type=deposit
-        #?type=dividend
-        """
         try: 
             self.logger.debug("get activities")
             r = requests.get(
@@ -288,10 +266,6 @@ class Wsimple:
             self.logger.error(e)
     
     def get_activities_bookmark(self, bookmark):
-        """
-        Provides the most recent 20 activities (deposits, dividends, orders, etc)
-        on the WealthSimple Trade account.
-        """
         try: 
             self.logger.debug("get activities bookmark")
             r = requests.get(
@@ -301,55 +275,44 @@ class Wsimple:
             return r.json()                                   
         except BaseException as e:
             self.logger.error(e)
-
-    def get_me(self):
-        """
-        Get Basic info of this WealthSimple Trade account.
-        """
+ 
+    # withdrawals 
+ 
+    # deposits 
+    def make_deposit(self, amount: int, currency: str = "CAD", bank_account_id: str = None, account_id: str = None):
+        if bank_account_id == None:
+            bank_account_id = self.get_bank_accounts()["results"][0]["id"] 
+        if account_id == None:
+            account_id = self.get_account()["results"][0]["id"]
+        person = self.get_person()
+        payload = {
+            "client_id": str(person["id"]),
+            "bank_account_id": str(bank_account_id),
+            "account_id": str(account_id),
+            "amount": float(amount),
+            "currency": str(currency)
+        }
+        r = requests.post(
+            url='{}deposits'.format(self.base_url),
+            headers=self._header,
+            data=payload
+        )
+        return r.json()
+     
+    def get_deposit(self, funds_transfer_id: str):
         try: 
-            self.logger.debug("get me info")
+            self.logger.debug("get deposits")
             r = requests.get(
-                url="{}me".format(self.base_url),
-                headers=self._header
-            )
-            return r.json()                                    
-        except BaseException as e:
-            self.logger.error(e)   
-    
-    def get_person(self):
-        """
-        Get more Advanced/Personal info of this WealthSimple Trade account.
-        """
-        try: 
-            self.logger.debug("get person info")
-            r = requests.get(
-                url="{}person".format(self.base_url),
-                headers=self._header
-            )
-            return r.json()                                   
-        except BaseException as e:
-            self.logger.error(e) 
-    
-    def get_bank_accounts(self):
-        """
-        All linked bank accounts under the WealthSimple Trade account
-        """
-        try: 
-            self.logger.debug("get bank accounts")
-            r = requests.get(
-                url="{}bank-accounts".format(self.base_url),
+                url="{}deposits/{}".format(self.base_url, funds_transfer_id),
                 headers=self._header
             )
             return r.json()                                  
         except BaseException as e:
             self.logger.error(e) 
-    
-    def get_deposits(self):
-        """
-        All deposits under the WealthSimple Trade account
-        """
+             
+    def list_deposits(self):
         try: 
-            self.logger.debug("get deposits")
+            self.logger.debug("list_deposits")
             r = requests.get(
                 url="{}deposits".format(self.base_url),
                 headers=self._header
@@ -357,6 +320,17 @@ class Wsimple:
             return r.json()                                  
         except BaseException as e:
             self.logger.error(e)  
+    
+    def delete_deposit(self, funds_transfer_id: str):
+        try: 
+            self.logger.debug("get deposits")
+            r = requests.delete(
+                url="{}deposits/{}".format(self.base_url, funds_transfer_id),
+                headers=self._header
+            )
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e)     
     
     # market related functions
     def get_all_markets(self):
@@ -383,11 +357,8 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e) 
         
-    # get, add, delete securities on watchlist functions
+    # watchlist functions
     def get_watchlist(self):
-        """
-        Get watchlist under this WealthSimple Trade account
-        """
         try: 
             self.logger.debug("get watchlist")
             r = requests.get(
@@ -422,9 +393,6 @@ class Wsimple:
                        
     # exchange functions 
     def get_exchange_rate(self):
-        """
-        Current WealthSimple Trade USD/CAD exchange rates
-        """
         try: 
             self.logger.debug("get exchange rate")
             r = requests.get(
@@ -437,16 +405,22 @@ class Wsimple:
     
     #! functions after this point are not core to the API
     def test_endpoint(self):
-        """
-        test endpoints
-        """
         self.logger.debug("test endpoint")
-        r = requests.get(
-            url='{}'.format(self.base_url),
-            headers=self._header
+        payload = {
+            "client_id": "person-r0gfq1z7argj4q",
+            "bank_account_id": "bank_account-193aSy0jfyiXkwqWwrVlfvyHA",
+            "account_id": "non-registered-acawrfq",
+            "amount": 420.69,
+            "currency": "USD"
+        }
+        r = requests.post(
+            url='{}deposits'.format(self.base_url),
+            headers=self._header,
+            data=payload
         )
         print(r.status_code)
         print(r.content)
+        print(r.json())
         return r.json()
 
     def usd_to_cad(self, amount: Union[float, int]) -> float:
@@ -456,7 +430,6 @@ class Wsimple:
         return round(amount * buy_rate, 3)
     
     def cad_to_usd(self, amount: Union[float, int]) -> float:
-        #not working correctly
         self.logger.debug("cad to usd")
         forex = self.get_exchange_rate()['USD']
         sell_rate = forex['sell_rate']
@@ -474,7 +447,6 @@ class Wsimple:
             if currency == "CAD":
                 amount = round(float(security["quote"]["amount"]) * security["quantity"], 3) 
             elif currency == "USD":
-                # change usd to cad
                 amount = round(self.usd_to_cad(float(security["quote"]["amount"])) * security["quantity"], 3)
             else:
                 amount = 0
@@ -486,7 +458,6 @@ class Wsimple:
         }
         
     def settings(self):
-        # /settings route
         self.logger.debug("settings")
         me = self.get_me()
         person = self.get_person()
@@ -502,7 +473,6 @@ class Wsimple:
         }
     
     def dashboard(self):
-        # /home route
         self.logger.debug("dashboard")
         account = self.get_account()["results"][0]
         total_value = self.get_total_value()
@@ -538,26 +508,31 @@ class Wsimple:
                     'account_watchlist': { 'table': watchlist }
                 }
         
-    #? public functions (can be used without login in)
+    #? public functions (can be used without logging in)
     @staticmethod
     def public_find_securities_by_ticker(ticker):
-        #"https://trade-service.wealthsimple.com/public/securities/" + e
-        try: 
-            return NotImplementedError()                      
+        try:
+            r = requests.get(
+                url="https://trade-service.wealthsimple.com/public/securities/{}".format(ticker)
+            )
+            # json.loads(r.content) 
+            return r.json()                 
         except BaseException as e:
             print(e) 
         
     @staticmethod
     def public_find_securities_by_ticker_historical(ticker, time):
-        #https://trade-service.wealthsimple.com/public/securities/{AAPL}/historical_quotes/{1d}
         try: 
-            return NotImplementedError()                      
+            r = requests.get(
+                url="https://trade-service.wealthsimple.com/public/securities/{}/historical_quotes/{}".format(ticker, time)
+            )
+            # json.loads(r.content) 
+            return r.json()                       
         except BaseException as e:
             print(e) 
     
     @staticmethod
     def public_top_traded(offset=0, limit=5):
-        #"https://trade-service.wealthsimple.com/public/securities/top_traded?offset="+e+"&limit="+t
         try: 
             r = requests.get(
                 url="""https://trade-service.wealthsimple.com/public/securities/top_traded?offset={}&limit={}""".format(offset, limit)
@@ -579,14 +554,6 @@ class Wsimple:
     #? wealthsimple operational status also public
     @staticmethod    
     def summary_status():
-        #https://status.wealthsimple.com/api/v2/summary.json
-        # summary contains data for
-        # [ Login and Account Access, Quotes iOS app Order execution
-        # Security Search, Order submission, Apps, Android App
-        # Order status, Trading, Market Data, Order Cancellation,
-        # Linking bank accounts, Deposits and Withdrawals,
-        # Account Values, Account Opening ]
-        #json in context
         try: 
             r = requests.get(
                 url="https://status.wealthsimple.com/api/v2/summary.json"
@@ -597,9 +564,6 @@ class Wsimple:
     
     @staticmethod    
     def current_status():
-        # https://status.wealthsimple.com/api/v2/status.json
-        # current status
-        # json in context
         try: 
             r = requests.get(
                 url="https://status.wealthsimple.com/api/v2/status.json"
@@ -610,9 +574,6 @@ class Wsimple:
     
     @staticmethod    
     def previous_status():
-        #https://status.wealthsimple.com/api/v2/incidents.json
-        #previous status (very large json)
-        #json in context
         try: 
             r = requests.get(
                 url="https://status.wealthsimple.com/api/v2/incidents.json"
