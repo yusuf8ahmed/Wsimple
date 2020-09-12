@@ -23,7 +23,7 @@ Welcome! This project is a web interface for w.
   </p>
 
   This project is in the pre-alpha stage. if you find any bugs please submit an
-  ["issue"](https://github.com/yusuf8ahmed/Wsimple/issues/new)
+  [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new)
 
   ### Prerequisites
   * python and pip is required to use/download wsimple
