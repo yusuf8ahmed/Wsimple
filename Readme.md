@@ -21,7 +21,9 @@ Welcome! This project is a web interface for w.
   <p style="color:red;font-size:35px;margin:0px;">
   Pre-alpha v1.0
   </p>
-  This project is in the pre-alpha stage. if you find any bugs please submit an [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new).
+
+  This project is in the pre-alpha stage. if you find any bugs please submit an
+  ["issue"](https://github.com/yusuf8ahmed/Wsimple/issues/new)
 
   ### Prerequisites
   * python and pip is required to use/download wsimple
