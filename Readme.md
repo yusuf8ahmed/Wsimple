@@ -10,7 +10,7 @@
 </p>
 
 ### What is the Wsimple project
-Welcome! This project is a . 
+Welcome! This project is a web interface for w. 
 . 
 . Also Wsimple allows the access API wrapper without the use of the web interface
 (See => [API-methods](#API-methods)).
@@ -21,7 +21,7 @@ Welcome! This project is a .
   <p style="color:red;font-size:35px;margin:0px;">
   Pre-alpha v1.0
   </p>
-  This project is in the pre-alpha stage. if you find any bugs please submit an issue.
+  This project is in the pre-alpha stage. if you find any bugs please submit an [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new).
 
   ### Prerequisites
   * python and pip is required to use/download wsimple
