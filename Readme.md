@@ -223,7 +223,7 @@ Get all current position held by this WealthSimple Trade account.
 ### function get_activities():
 Provides the most recent 20 activities (deposits, dividends, orders, etc).   
 on this WealthSimple Trade account.  
-?type ->> ?type=deposit, ?type=dividend.    
+?type ->> deposit, dividend, sell, buy, withdrawal  
 ?limit ->> less than 100.    
 ?bookmark ->> where bookmark is return by each GET that can be used for the subsequent.    
 ^> pages in following calls.    

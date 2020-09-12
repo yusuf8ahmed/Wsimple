@@ -1,7 +1,10 @@
 var activities_box = document.getElementById("activities_box");
+var color_int = 0;
 var bookmark;
 
-var socket = io();
+var socket = io("/activities",{
+    transports: ['websocket']
+  });
 
 socket.on('connect', function () {
     console.log("socket.io connected");
@@ -64,7 +67,6 @@ function display_sells(pposition_div, activities) {
     pposition_div.appendChild(pposition_value);
     activities_box.appendChild(pposition_div);
 }
-
 function display_deposits(pposition_div, activities) {
     // securities symbol
     var pposition_symbol = document.createElement("p");
@@ -91,7 +93,6 @@ function display_deposits(pposition_div, activities) {
     pposition_div.appendChild(pposition_value);
     activities_box.appendChild(pposition_div);
 }
-
 function display_withdrawals(pposition_div, activities) {
     // securities symbol
     var pposition_symbol = document.createElement("p");
@@ -118,7 +119,6 @@ function display_withdrawals(pposition_div, activities) {
     pposition_div.appendChild(pposition_value);
     activities_box.appendChild(pposition_div);
 }
-
 function display_dividends(pposition_div, activities) {
     // securities symbol
     var pposition_symbol = document.createElement("p");
@@ -155,10 +155,17 @@ socket.on('display_activities', function (data) {
     console.dir(data);
     for (const activities of data.results) {
         var pposition_div = document.createElement("div");
-        pposition_div.style.margin = "9px 9px";
+        pposition_div.style.padding = "9px 9px";
         pposition_div.style.display = "flex";
-        pposition_div.style.backgroundColor = "transparent";
         pposition_div.style.justifyContent = "space-between";
+        if ((color_int % 2) == 0) {
+            // pposition_div.style.backgroundColor = "#DCDCDC";
+            pposition_div.style.borderTop = "3px solid #FAB132";
+            pposition_div.style.borderBottom = "3px solid #FAB132";
+        } else {
+            pposition_div.style.backgroundColor = "transparent";
+        }
+
         if (activities.object == "order" && activities.order_type == "buy_quantity") {
             display_buys(pposition_div, activities);
         } else if (activities.object == "order" && activities.order_type == "sell_quantity") {
@@ -173,12 +180,15 @@ socket.on('display_activities', function (data) {
             alert("open javascript console");
             console.error(`unknown wealthsimple activity type ${activities.object}`);
         }
+        color_int++;
     }
+    color_int = 0;
 });
 
 activities_box.onscroll = function (elem) {
-    console.log(`scrollng update ${activities_box.scrollTop} ${activities_box.scrollHeight} ${activities_box.offsetHeight}`);
-    if (activities_box.scrollHeight == (activities_box.scrollTop + activities_box.offsetHeight)) {
+    // console.log(`scrollng update ${activities_box.scrollTop} ${activities_box.scrollHeight} ${activities_box.offsetHeight}`);
+    if ( (activities_box.scrollHeight == (activities_box.scrollTop + activities_box.offsetHeight))) {
+        // prevent duplicate bookmarks being sent
         console.log("scrollng update true");
         socket.emit('get_activities', [bookmark]);
         elem.scrollTop = elem.scrollHeight;

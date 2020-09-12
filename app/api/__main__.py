@@ -403,20 +403,25 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e) 
     
+    #! fact-sheet functions
+    
+    def get_fact_sheets(self):
+        try: 
+            self.logger.debug("get_fact_sheets")
+            r = requests.get(
+                url='{}fact-sheets'.format(self.base_url),
+                headers=self._header
+            )
+            return r.json()                               
+        except BaseException as e:
+            self.logger.error(e) 
+    
     #! functions after this point are not core to the API
     def test_endpoint(self):
         self.logger.debug("test endpoint")
-        payload = {
-            "client_id": "person-r0gfq1z7argj4q",
-            "bank_account_id": "bank_account-193aSy0jfyiXkwqWwrVlfvyHA",
-            "account_id": "non-registered-acawrfq",
-            "amount": 420.69,
-            "currency": "USD"
-        }
-        r = requests.post(
-            url='{}deposits'.format(self.base_url),
-            headers=self._header,
-            data=payload
+        r = requests.get(
+            url='{}email'.format(self.base_url),
+            headers=self._header
         )
         print(r.status_code)
         print(r.content)

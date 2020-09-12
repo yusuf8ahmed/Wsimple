@@ -119,7 +119,7 @@ socket.on('main_dashboard_info', function (data) {
             timeStyle: 'short'
         }));
         chart.data.datasets.forEach((dataset) => {
-            dataset.data.push(account_value.value.amount);
+            dataset.data.push(account_value.value.amount.toFixed(2));
         });
         chart.update();
     }

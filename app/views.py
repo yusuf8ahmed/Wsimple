@@ -142,15 +142,15 @@ def soc_find_security(data):
     socketio.sleep(20)
     socketio.emit('return_stock_info', [sparkline, security_info, position])  
     
-@socketio.on("get_activities")
+@socketio.on("get_activities", namespace='/activities')
 def soc_get_activities(data):
     account = str(session["key"]).split(",")
     ws = Wsimple(account[0], account[1])
     socketio.sleep(5)
     if data == []:
-        socketio.emit('display_activities', ws.get_activities())
+        socketio.emit('display_activities', ws.get_activities(), namespace='/activities')
     else:
-        socketio.emit('display_activities', ws.get_activities_bookmark(data[0]))
+        socketio.emit('display_activities', ws.get_activities_bookmark(data[0]), namespace='/activities')
         
 @socketio.on("market_buy_order")
 def soc_market_buy_order(data):
