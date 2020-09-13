@@ -211,7 +211,7 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
 
-    def buymarketorder(self, security_id: str, limit_price: int = 1, quantity: int = 1):
+    def buy_market_order(self, security_id: str, limit_price: int = 1, quantity: int = 1):
         """
         Places a market buy order for a security. Works.  
         """
@@ -223,7 +223,7 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
 
-    def sellmarketorder(self, security_id: str, quantity: int =1):
+    def sell_market_order(self, security_id: str, quantity: int =1):
         """
         Places a market sell order for a security. Works.
         """
@@ -235,7 +235,7 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
 
-    def buylimitorder(self, security_id, limit_price, account_id=None, quantity=1):
+    def buy_limit_order(self, security_id, limit_price, account_id=None, quantity=1):
         """
         Places a limit buy order for a security.    
         NotImplementedError
@@ -246,7 +246,7 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
 
-    def selllimitorder(self, limit_price, security_id, account_id=None, quantity=1):
+    def sell_limit_order(self, limit_price, security_id, account_id=None, quantity=1):
         """
         Places a limit sell order for a security.  
         NotImplementedError  
@@ -355,9 +355,84 @@ class Wsimple:
         except BaseException as e:
             self.logger.error(e)
  
-    #! withdrawals 
+    #! withdrawal functions (Not ADDED)
+    def make_withdrawal(self, amount: int, currency: str = "CAD", bank_account_id: str = None, account_id: str = None):
+        """
+        make a withdrawal under this WealthSimple Trade account.
+        1.Where amount is the amount to withdraw
+        2.Where currency is the currency need to be withdrawn(only CAD): autoset to "CAD"
+        3.Where bank_account_id is id of bank account where the money is going to be withdrawn from (can be found in get_bank_accounts function)
+        if bank_account_id is not passed then it will pick the first result.
+        4.Where account_id is id of the account that is withdrawing the money (can be found in get_account function).
+        if account_id is not passed then it will pick the first result.
+        """
+        if bank_account_id == None:
+            bank_account_id = self.get_bank_accounts()["results"][0]["id"] 
+        if account_id == None:
+            account_id = self.get_account()["results"][0]["id"]
+        person = self.get_person()
+        payload = {
+            "bank_account_id": str(bank_account_id),
+            "account_id": str(account_id),
+            "client_id": str(person["id"]),
+            "withdrawal_type": "full",
+            "withdrawal_reason": "other",
+            "withdrawal_reason_details": "other",
+            "amount": float(amount),
+            "currency": str(currency)
+        }
+        r = requests.post(
+            url='{}withdrawals'.format(self.base_url),
+            headers=self._header,
+            data=payload
+        )
+        return r.json()
+     
+    def get_withdrawal(self, funds_transfer_id: str):
+        """
+        Get specific withdrawal under this WealthSimple Trade account.
+        1.Where funds_transfer_id is the id of the transfer and is in the result of make_withdrawal function
+        but can be also found in list_withdrawals function
+        """
+        try: 
+            self.logger.debug("get withdrawal")
+            r = requests.get(
+                url="{}withdrawals/{}".format(self.base_url, funds_transfer_id),
+                headers=self._header
+            )
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e) 
+             
+    def list_withdrawals(self):
+        """
+        Get all withdrawals under this WealthSimple Trade account.
+        """
+        try: 
+            self.logger.debug("list withdrawals")
+            r = requests.get(
+                url="{}withdrawals".format(self.base_url),
+                headers=self._header
+            )
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e)  
+    
+    def delete_withdrawal(self, funds_transfer_id: str):
+        """
+        Delete a specific withdrawals under this WealthSimple Trade account.
+        """
+        try: 
+            self.logger.debug("delete withdrawal")
+            r = requests.delete(
+                url="{}withdrawals/{}".format(self.base_url, funds_transfer_id),
+                headers=self._header
+            )
+            return r.json()                                  
+        except BaseException as e:
+            self.logger.error(e)     
  
-    #! deposits 
+    #! deposits functions
     def make_deposit(self, amount: int, currency: str = "CAD", bank_account_id: str = None, account_id: str = None):
         """
         make a deposit under this WealthSimple Trade account.
@@ -368,7 +443,7 @@ class Wsimple:
         4.Where account_id is id of the account that is depositing the money (can be found in get_account function).
         if account_id is not passed then it will pick the first result.
         """
-        
+        self.logger.debug("make deposits")
         if bank_account_id == None:
             bank_account_id = self.get_bank_accounts()["results"][0]["id"] 
         if account_id == None:
@@ -409,7 +484,7 @@ class Wsimple:
         Get all deposits under this WealthSimple Trade account.
         """
         try: 
-            self.logger.debug("list_deposits")
+            self.logger.debug("list deposits")
             r = requests.get(
                 url="{}deposits".format(self.base_url),
                 headers=self._header
@@ -423,7 +498,7 @@ class Wsimple:
         Delete a specific deposit under this WealthSimple Trade account.
         """
         try: 
-            self.logger.debug("get deposits")
+            self.logger.debug("delete deposits")
             r = requests.delete(
                 url="{}deposits/{}".format(self.base_url, funds_transfer_id),
                 headers=self._header
@@ -548,7 +623,7 @@ class Wsimple:
     def test_endpoint(self):
         self.logger.debug("test endpoint")
         r = requests.get(
-            url='{}email'.format(self.base_url),
+            url='{}withdrawals'.format(self.base_url),
             headers=self._header
         )
         print(r.status_code)

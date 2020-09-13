@@ -67,10 +67,10 @@ Welcome! This project is a web interface for w.
 * [Wsimple.get_positions()](#getpositions)
 
 * [Wsimple.get_orders()](#getorders)
-* [Wsimple.buymarketorder()](#buymarketorder)
-* [Wsimple.sellmarketorder()](#sellmarketorder)
-* [Wsimple.buylimitorder()](#buylimitorder)
-* [Wsimple.selllimitorder()](#selllimitorder)
+* [Wsimple.buy_market_order()](#buymarketorder)
+* [Wsimple.sell_market_order()](#sellmarketorder)
+* [Wsimple.buy_limit_order()](#buylimitorder)
+* [Wsimple.sell_limit_order()](#selllimitorder)
 * [Wsimple.delete_order()](#deleteorder)
 
 * [Wsimple.find_securities()](#findsecurities)
@@ -127,331 +127,402 @@ Generates and applies a new set of access and refresh tokens.
 
 [Back to top—>](#index)
 
-<a id="getaccount"></a>
+<div id="account_functions">
 
-### function get_account():
-Grabs account info of this WealthSimple Trade account.   
+  <a id="getaccount"></a>
 
-[Back to top—>](#index)
+  ### function get_account():
+  Grabs account info of this WealthSimple Trade account.   
 
-<a id="gethistoricalaccountdata"></a>   
+  [Back to top—>](#index)
 
-### function get_historical_account_data(time: str):
-The HISTORY_ACCOUNT endpoint provides historical snapshots of the.   
-WealthSimple account for a specified timeframe.  
-1.Where TIME is one of [1d, 1w, 1m, 3m, 1y, all] autoset 1d.    
-2.Where ACCOUNT is the account id received from /account/list: autoset to first accounts_id.     
+  <a id="gethistoricalaccountdata"></a>   
 
-[Back to top—>](#index)
+  ### function get_historical_account_data(time: str):
+  The HISTORY_ACCOUNT endpoint provides historical snapshots of the.   
+  WealthSimple account for a specified timeframe.  
+  1.Where TIME is one of [1d, 1w, 1m, 3m, 1y, all] autoset 1d.    
+  2.Where ACCOUNT is the account id received from /account/list: autoset to first accounts_id.     
 
-<a id="getorders"></a>
+  [Back to top—>](#index)
 
-### function get_orders():
-Get all current and past orders.    
+  <a id="getpositions"></a>
 
-[Back to top—>](#index)
+  ### function get_positions():
+  Get all current position held by this WealthSimple Trade account.    
 
-<a id="buymarketorder"></a>
+  [Back to top—>](#index)
 
-### function buymarketorder(security_id: str, limit_price: int = 1, quantity: int = 1):
-Places a market buy order for a security. Works.    
+  <a id="getme"></a>
 
-[Back to top—>](#index)
+  ### function get_me():
+  Get Basic info of this WealthSimple Trade account.    
 
-<a id="sellmarketorder"></a>  
+  [Back to top—>](#index)
 
-### function sellmarketorder(security_id: str, quantity: int = 1):
-Places a market sell order for a security. Works.   
+  <a id="getperson"></a> 
 
-[Back to top—>](#index)
+  ### function get_person():
+  Get more Advanced-Personal info of this WealthSimple Trade account.    
 
-<a id="buylimitorder"></a>
+  [Back to top—>](#index)
 
-### function buylimitorder(security_id, limit_price, account_id=None, quantity=1):
-Places a limit buy order for a security.    
-NotImplementedError  
+  <a id="getbankaccounts"></a>  
 
-[Back to top—>](#index)
+  ### function get_bank_accounts():
+  Get all linked bank accounts under the WealthSimple Trade account.  
 
-<a id="selllimitorder"></a>
+  [Back to top—>](#index)
 
-### function selllimitorder(security_id, limit_price, account_id=None, quantity=1):
-Places a limit sell order for a security.  
-NotImplementedError  
+</div>
 
-[Back to top—>](#index)
+<div id="order_functions">
 
-<a id="deleteorder"></a>
+  <a id="getorders"></a>
 
-### function delete_order(order: str):
-Cancels a specific order by its id.    
-Where ORDER is order_id from place order.    
+  ### function get_orders():
+  Get all current and past orders.    
 
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="findsecurities"></a>  
+  <a id="buymarketorder"></a>
 
-### function find_securities(ticker: str):
-Grabs information about the security resembled by the ticker.    
-1.Where TICKER is the ticker of the company, API will fuzzy.     
-match this argument and therefore multiple results can appear.   
+  ### function buymarketorder(security_id: str, limit_price: int = 1, quantity: int = 1):
+  Places a market buy order for a security. Works.    
 
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="findsecuritiesbyid"></a>
+  <a id="sellmarketorder"></a>  
 
-### function find_securities_by_id(sec_id: str) -> dict:
-Grabs information about the security resembled by the security id.      
+  ### function sellmarketorder(security_id: str, quantity: int = 1):
+  Places a market sell order for a security. Works.   
 
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="findsecuritiesbyidhistorical"></a>
+  <a id="buylimitorder"></a>
 
-### function find_securities_by_id_historical(sec_id: str, time: str):
-Grabs information about the security resembled by the security id in a a specified timeframe.   
-1.Where TIME is one of [1d, 1w, 1m, 3m, 1y, all] autoset 1d.   
+  ### function buylimitorder(security_id, limit_price, account_id=None, quantity=1):
+  Places a limit buy order for a security.    
+  NotImplementedError  
 
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="getpositions"></a>
+  <a id="selllimitorder"></a>
 
-### function get_positions():
-Get all current position held by this WealthSimple Trade account.    
+  ### function selllimitorder(security_id, limit_price, account_id=None, quantity=1):
+  Places a limit sell order for a security.  
+  NotImplementedError  
 
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="getactivities"></a>    
+  <a id="deleteorder"></a>
 
-### function get_activities():
-Provides the most recent 20 activities (deposits, dividends, orders, etc).   
-on this WealthSimple Trade account.  
-?type ->> deposit, dividend, sell, buy, withdrawal  
-?limit ->> less than 100.    
-?bookmark ->> where bookmark is return by each GET that can be used for the subsequent.    
-^> pages in following calls.    
-?account-id ->> ??????.    
+  ### function delete_order(order: str):
+  Cancels a specific order by its id.    
+  Where ORDER is order_id from place order.    
 
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="getactivitiesbookmark"></a>   
+</div>
 
-### function get_activities_bookmark(bookmark):
-Provides the last 20 activities (deposits, dividends, orders, etc) on the WealthSimple Trade.   
-account based on the url query bookmark.   
-?bookmark ->> [long string of alphanumeric characters from the response of [Wsimple.get_activities()](#getactivities) ].   
+<div id="securities_functions">
 
-[Back to top—>](#index)
+  <a id="findsecurities"></a>
 
-<a id="getme"></a>
+  ### function find_securities(ticker: str):
+  Grabs information about the security resembled by the ticker.    
+  1.Where TICKER is the ticker of the company, API will fuzzy.     
+  match this argument and therefore multiple results can appear.   
 
-### function get_me():
-Get Basic info of this WealthSimple Trade account.    
+  [Back to top—>](#index)
 
-[Back to top—>](#index)
+  <a id="findsecuritiesbyid"></a>
 
-<a id="getperson"></a> 
+  ### function find_securities_by_id(sec_id: str) -> dict:
+  Grabs information about the security resembled by the security id.      
 
-### function get_person():
-Get more Advanced-Personal info of this WealthSimple Trade account.    
+  [Back to top—>](#index)
 
-[Back to top—>](#index)
+  <a id="findsecuritiesbyidhistorical"></a>
 
-<a id="getbankaccounts"></a>  
+  ### function find_securities_by_id_historical(sec_id: str, time: str):
+  Grabs information about the security resembled by the security id in a a specified timeframe.   
+  1.Where TIME is one of [1d, 1w, 1m, 3m, 1y, all] autoset 1d.   
 
-### function get_bank_accounts():
-Get all linked bank accounts under the WealthSimple Trade account.  
+  [Back to top—>](#index)
 
-[Back to top—>](#index)
+</div>
 
-<a id="makedeposit"></a>  
+<div id="activities_functions">
 
-### function make_deposit():
-make a deposit under this WealthSimple Trade account.  
-1.Where amount is the amount to deposit.  
-2.Where currency is the currency need to be transferred(Only CAD): autoset to "CAD"  
-3.Where bank_account_id is id of bank account where the money is going to be deposited to  
-(can be found in [get_bank_accounts function](#getbankaccounts)).  
-if bank_account_id is not passed then it will pick the first result.  
-4.Where account_id is id of the account that is depositing the money (can be found in [get_account function](#getaccount)).  
-if account_id is not passed then it will pick the first result.  
- 
-[Back to top—>](#index)
+  <a id="getactivities"></a>    
 
-<a id="getdeposit"></a>  
+  ### function get_activities():
+  Provides the most recent 20 activities (deposits, dividends, orders, etc).   
+  on this WealthSimple Trade account.  
+  ?type ->> deposit, dividend, sell, buy, withdrawal  
+  ?limit ->> less than 100.    
+  ?bookmark ->> where bookmark is return by each GET that can be used for the subsequent.    
+  ^> pages in following calls.    
+  ?account-id ->> ??????.    
 
-### function get_deposit():
-Get specific deposit under this WealthSimple Trade account.  
-1.Where funds_transfer_id is the id of the transfer and is in the result of [make_deposit function](#makedeposit)  
-but can be also found in [list_deposits function](#listdeposits)  
- 
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="listdeposits"></a>  
+  <a id="getactivitiesbookmark"></a>   
 
-### function list_deposits():
-Get all deposits under this WealthSimple Trade account.
- 
-[Back to top—>](#index)
+  ### function get_activities_bookmark(bookmark):
+  Provides the last 20 activities (deposits, dividends, orders, etc) on the WealthSimple Trade.   
+  account based on the url query bookmark.   
+  ?bookmark ->> [long string of alphanumeric characters from the response of [Wsimple.get_activities()](#getactivities) ].   
 
-<a id="deletedeposit"></a>  
+  [Back to top—>](#index)
 
-### function delete_deposit():
-Delete a specific deposit under this WealthSimple Trade account.
- 
-[Back to top—>](#index)
+</div>
 
-<a id="getallmarkets"></a>
+<div id="withdrawals_functions">
 
-### function get_all_markets():
-Get all market data-hours including the hours. includes every exchange on Wealthsimple Trade.   
-and has the opening and closing time amongst other data.  
+  <a id="makewithdrawal"></a>  
 
-[Back to top—>](#index)
+  ### function make_withdrawal():
 
-<a id="getmarkethours"></a>
-
-### function get_market_hours(exchange):
-Get all data about a specific exchange.  
-1.Where EXCHANGE is the ticker of the company, can be only.     
-("TSX","CSE","NYSE","BATS","FINRA","OTCBB","TSX-V","NASDAQ","OTC MARKETS","AEQUITAS NEO EXCHANGE")
-
-[Back to top—>](#index)
-
-<a id="getwatchlist"></a>
-
-### function get_watchlist():
-Get all securities under the watchlist in this WealthSimple Trade account.      
-
-[Back to top—>](#index)
-
-<a id="deletewatchlist"></a>
-
-### function delete_watchlist(sec_id):
-Delete a security from watchlist under this WealthSimple Trade account.  
-1.Where SEC_ID is the security id for the security you want to delete.  
-
-[Back to top—>](#index)
-
-<a id="addwatchlist"></a> 
-
-### function add_watchlist(sec_id):
-Add security under this WealthSimple Trade account.    
-1.Where SEC_ID is the security id for the security you want to add.  
-
-[Back to top—>](#index)
-
-<a id="getexchangerate"></a>  
-
-### function get_exchange_rate(self):
-Current WealthSimple Trade USD/CAD exchange rates.  
-
-[Back to top—>](#index)
-
-<a id="usdtocad"></a>
-
-### def usd_to_cad(self, amount):
-use [Wsimple.get_exchange_rate()](#getexchangerate) to exchange to change usd to cad.   
-**not working correctly**
-
-[Back to top—>](#index) 
-
-<a id="cadtousd"></a>
-
-### def get_sell_usd(self, amount: float):
-use [Wsimple.get_exchange_rate()](#getexchangerate) to exchange to change cad to usd.     
-
-[Back to top—>](#index)
-
-<a id="gettotalvalue"></a>
-
-### def get_total_value(self):
-Get the total account value of this wealthsimple account in cad.   
-
-[Back to top—>](#index)
-
-<a id="settings"></a>
-
-### def settings(self):
-Get settings needed for /settings route.   
-
-[Back to top—>](#index)
-
-<a id="dashboard"></a>
-
-### def dashboard(self):
-Get dashboard needed for /home route.   
-
-[Back to top—>](#index)
-
-<a id="publicfindsecuritiesbyticker"></a>
-
-### def public_find_securities_by_ticker(ticker):  
-staticmethod: get a company historical data by the ticker.    
-1.Where TICKER is the ticker of the company you want to search for.    
-Ex. AMZN, APPL, GOOGL, SPY. May not work on smaller companies, ETF.    
-?May not work on smaller companies or ETF.    
-
-[Back to top—>](#index)
-
-<a id="publicfindsecuritiesbytickerhistorical"></a>
-
-### def public_find_securities_by_ticker_historical(ticker, time):  
-staticmethod: get a company historical data based on time and by the actual ticker.    
-1.Where TICKER is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.  
-2.Where TIME is ("1d", "1w", "1m", "3m", "1y"): DOES NOT INCLUDE ("all").   
-?May not work on smaller companies or ETF.    
-
-
-[Back to top—>](#index)
-
-<a id="publictoptraded"></a>
-
-### def public_top_traded(offset=0, limit=5):  
-staticmethod: get top traded companies on wealthsimple trade.  
-1.Where OFFSET is the displacement between the selected offset and the beginning.   
-2.Where LIMIT is the amount of response you want from the request.  
-
-[Back to top—>](#index)
-
-<a id="publicfindsecuritiesnews"></a>
-
-### def public_find_securities_news(ticker):  
-staticmethod: get public news based on ticker name.    
-1.Where TICKER is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.   
-?May not work on smaller companies or ETF.   
-
-[Back to top—>](#index)
-
-<a id="publicsummarystatus"></a>
   
-### def summary_status():  
-staticmethod: get current summary status/incidents of wealthsimple trade.   
-the summary contains data for the following systems [    
-Login and Account Access, Quotes iOS app Order execution,  
-Security Search, Order submission, Apps, Android App   
-Order status, Trading, Market Data, Order Cancellation,   
-Linking bank accounts, Deposits and Withdrawals,   
-Account Values, Account Opening  
-] 
-the data is in JSON format in body/content, JSON is large.  
+  [Back to top—>](#index)
+
+  <a id="getwithdrawal"></a>  
+
+  ### function get_withdrawal():
+  Get specific withdrawal under this Wealthsimple Trade account.
+  1.Where funds_transfer_id is the id of the transfer and is in the result of (make_withdrawal)[] function
+  but can be also found in (list_withdrawals)[] function  
   
-[Back to top—>](#index)
+  [Back to top—>](#index)
 
-<a id="publiccurrentstatus"></a>
+  <a id="listwithdrawals"></a>  
 
-### def current_status():
-staticmethod: get current status/incidents of wealthsimple trade.    
-?the data is in json format in body/content, json could be large.  
+  ### function list_withdrawals():
+  Get all withdrawals under this Wealthsimple Trade account.
+  
+  [Back to top—>](#index)
 
-[Back to top—>](#index)
+  <a id="deletewithdrawal"></a>  
 
-<a id="publicpreviousstatus"></a> 
+  ### function delete_withdrawal():
+  Delete a specific withdrawal under this Wealthsimple Trade account.
+  
+  [Back to top—>](#index)
 
-### def previous_status():
-staticmethod: get all previous history status/incidents of wealthsimple trade.   
-?the data is in json format in body/content, json is large.  
+</div>
 
-[Back to top—>](#index)
+<div id="deposit_functions">
+
+  <a id="makedeposit"></a>  
+
+  ### function make_deposit():
+  make a deposit under this WealthSimple Trade account.  
+  1.Where amount is the amount to deposit.  
+  2.Where currency is the currency need to be transferred(Only CAD): autoset to "CAD"  
+  3.Where bank_account_id is id of bank account where the money is going to be deposited to  
+  (can be found in [get_bank_accounts function](#getbankaccounts)).  
+  if bank_account_id is not passed then it will pick the first result.  
+  4.Where account_id is id of the account that is depositing the money (can be found in [get_account function](#getaccount)).  
+  if account_id is not passed then it will pick the first result.  
+  
+  [Back to top—>](#index)
+
+  <a id="getdeposit"></a>  
+
+  ### function get_deposit():
+  Get specific deposit under this WealthSimple Trade account.  
+  1.Where funds_transfer_id is the id of the transfer and is in the result of [make_deposit function](#makedeposit)  
+  but can be also found in [list_deposits function](#listdeposits)  
+  
+  [Back to top—>](#index)
+
+  <a id="listdeposits"></a>  
+
+  ### function list_deposits():
+  Get all deposits under this WealthSimple Trade account.
+  
+  [Back to top—>](#index)
+
+  <a id="deletedeposit"></a>  
+
+  ### function delete_deposit():
+  Delete a specific deposit under this WealthSimple Trade account.
+  
+  [Back to top—>](#index)
+
+</div>
+
+<div id="market_functions">
+
+  <a id="getallmarkets"></a>
+
+  ### function get_all_markets():
+  Get all market data-hours including the hours. includes every exchange on Wealthsimple Trade.   
+  and has the opening and closing time amongst other data.  
+
+  [Back to top—>](#index)
+
+  <a id="getmarkethours"></a>
+
+  ### function get_market_hours(exchange):
+  Get all data about a specific exchange.  
+  1.Where EXCHANGE is the ticker of the company, can be only.     
+  ("TSX","CSE","NYSE","BATS","FINRA","OTCBB","TSX-V","NASDAQ","OTC MARKETS","AEQUITAS NEO EXCHANGE")
+
+  [Back to top—>](#index)
+
+</div>
+
+<div id="watchlist_functions">
+
+  <a id="getwatchlist"></a>
+
+  ### function get_watchlist():
+  Get all securities under the watchlist in this WealthSimple Trade account.      
+
+  [Back to top—>](#index)
+
+  <a id="deletewatchlist"></a>
+
+  ### function delete_watchlist(sec_id):
+  Delete a security from watchlist under this WealthSimple Trade account.  
+  1.Where SEC_ID is the security id for the security you want to delete.  
+
+  [Back to top—>](#index)
+
+  <a id="addwatchlist"></a> 
+
+  ### function add_watchlist(sec_id):
+  Add security under this WealthSimple Trade account.    
+  1.Where SEC_ID is the security id for the security you want to add.  
+
+  [Back to top—>](#index)
+
+</div>
+
+<div id="exchange_rate_functions">
+
+  <a id="getexchangerate"></a>  
+
+  ### function get_exchange_rate(self):
+  Current WealthSimple Trade USD/CAD exchange rates.  
+
+  [Back to top—>](#index)
+
+</div>
+
+<div id="not_core_functions"></div>
+
+<div id="public_functions">
+
+  <a id="usdtocad"></a>
+
+  ### def usd_to_cad(self, amount):
+  use [Wsimple.get_exchange_rate()](#getexchangerate) to exchange to change usd to cad.   
+  **not working correctly**
+
+  [Back to top—>](#index) 
+
+  <a id="cadtousd"></a>
+
+  ### def get_sell_usd(self, amount: float):
+  use [Wsimple.get_exchange_rate()](#getexchangerate) to exchange to change cad to usd.     
+
+  [Back to top—>](#index)
+
+  <a id="gettotalvalue"></a>
+
+  ### def get_total_value(self):
+  Get the total account value of this wealthsimple account in cad.   
+
+  [Back to top—>](#index)
+
+  <a id="settings"></a>
+
+  ### def settings(self):
+  Get settings needed for /settings route.   
+
+  [Back to top—>](#index)
+
+  <a id="dashboard"></a>
+
+  ### def dashboard(self):
+  Get dashboard needed for /home route.   
+
+  [Back to top—>](#index)
+
+  <a id="publicfindsecuritiesbyticker"></a>
+
+  ### def public_find_securities_by_ticker(ticker):  
+  staticmethod: get a company historical data by the ticker.    
+  1.Where TICKER is the ticker of the company you want to search for.    
+  Ex. AMZN, APPL, GOOGL, SPY. May not work on smaller companies, ETF.    
+  ?May not work on smaller companies or ETF.    
+
+  [Back to top—>](#index)
+
+  <a id="publicfindsecuritiesbytickerhistorical"></a>
+
+  ### def public_find_securities_by_ticker_historical(ticker, time):  
+  staticmethod: get a company historical data based on time and by the actual ticker.    
+  1.Where TICKER is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.  
+  2.Where TIME is ("1d", "1w", "1m", "3m", "1y"): DOES NOT INCLUDE ("all").   
+  ?May not work on smaller companies or ETF.    
+
+  [Back to top—>](#index)
+
+  <a id="publictoptraded"></a>
+
+  ### def public_top_traded(offset=0, limit=5):  
+  staticmethod: get top traded companies on wealthsimple trade.  
+  1.Where OFFSET is the displacement between the selected offset and the beginning.   
+  2.Where LIMIT is the amount of response you want from the request.  
+
+  [Back to top—>](#index)
+
+  <a id="publicfindsecuritiesnews"></a>
+
+  ### def public_find_securities_news(ticker):  
+  staticmethod: get public news based on ticker name.    
+  1.Where TICKER is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.   
+  ?May not work on smaller companies or ETF.   
+
+  [Back to top—>](#index)
+
+  <a id="publicsummarystatus"></a>
+    
+  ### def summary_status():  
+  staticmethod: get current summary status/incidents of wealthsimple trade.   
+  the summary contains data for the following systems [    
+  Login and Account Access, Quotes iOS app Order execution,  
+  Security Search, Order submission, Apps, Android App   
+  Order status, Trading, Market Data, Order Cancellation,   
+  Linking bank accounts, Deposits and Withdrawals,   
+  Account Values, Account Opening  
+  ] 
+  the data is in JSON format in body/content, JSON is large.  
+    
+  [Back to top—>](#index)
+
+  <a id="publiccurrentstatus"></a>
+
+  ### def current_status():
+  staticmethod: get current status/incidents of wealthsimple trade.    
+  ?the data is in json format in body/content, json could be large.  
+
+  [Back to top—>](#index)
+
+  <a id="publicpreviousstatus"></a> 
+
+  ### def previous_status():
+  staticmethod: get all previous history status/incidents of wealthsimple trade.   
+  ?the data is in json format in body/content, json is large.  
+
+  [Back to top—>](#index)
+
+</div>
 
 <a id="auth"></a> 
 
