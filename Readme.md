@@ -289,14 +289,15 @@ Generates and applies a new set of access and refresh tokens.
   <a id="makewithdrawal"></a>  
 
   ### function make_withdrawal():
-  make a withdrawal under this WealthSimple Trade account.
-  1.Where amount is the amount to withdraw
-  2.Where currency is the currency need to be withdrawn(only CAD): autoset to "CAD"
-  3.Where bank_account_id is id of bank account where the money is going to be withdrawn from (can be found in get_bank_accounts function)
-  if bank_account_id is not passed then it will pick the first result.
-  4.Where account_id is id of the account that is withdrawing the money (can be found in get_account function).
-  if account_id is not passed then it will pick the first result.
-
+  make a withdrawal under this WealthSimple Trade account.  
+  1.Where amount is the amount to withdraw.    
+  2.Where currency is the currency need to be withdrawn(only CAD): autoset to "CAD"  
+  3.Where bank_account_id is id of bank account where the money is going to be withdrawn  
+  from (can be found in get_bank_accounts function)  
+  if bank_account_id is not passed then it will pick the first result.  
+  4.Where account_id is id of the account that is withdrawing the money 
+  (can be found in get_account function). If account_id is not passed then it will  
+  pick the first result.  
   
   [Back to top—>](#index)
 
