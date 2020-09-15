@@ -56,8 +56,10 @@
             <div class="col s10 offset-s2" style="padding: 0;margin: 0; margin-top: 10px;">
                 <div class="info-boxes">
                     <div id="account_positions" style="padding: 12px; overflow-y: scroll; border-radius: 25px;">
-                        <div class="account_positions_header" style="margin: 2px 0px; display: flex; justify-content: space-between;">
-                            <p style="margin: 3px 0px; font-weight:bold;">Current securities</p>
+                        <div class="account_positions_header" style="margin: 3px 0px; display: flex; justify-content: space-between;">
+                            <div>
+                                <p style="margin: 3px 0px; font-weight:bold;">Current securities</p>    
+                            </div>
                             <div class="switch">
                                 <label>
                                   <input type="checkbox" id="checkbox_price_shares" onclick="price_to_shares()">
@@ -70,21 +72,22 @@
                     </div>
                     <div id="account_info" style="padding: 12px; overflow-y: scroll; border-radius: 25px;">
                         <p style="margin: 3px 0px; font-weight:bold;">Account information</p>
-                        <div id="account_value">
-                        </div>
-                        <div id="account_change">
-                        </div>                        
-                        <div id="net_deposits">
-                        </div> 
-                        <div id="available_to_trade">
-                        </div>
-                        <div id="available_to_withdraw">
+                        <div id="account_info_child">
+                            <div id="account_value" style="margin: 3px 0px;">
+                            </div>
+                            <div id="account_change" style="margin: 3px 0px;">
+                            </div>                        
+                            <div id="net_deposits" style="margin: 3px 0px;">
+                            </div> 
+                            <div id="available_to_trade" style="margin: 3px 0px;">
+                            </div>
+                            <div id="available_to_withdraw" style="margin: 3px 0px;">
+                            </div>                            
                         </div>
                     </div>
                     <div id="account_watchlist" style="padding: 12px; overflow-y: scroll; border-radius: 25px;">
                         <p style="margin: 3px 0px; font-weight:bold;">Account watchlist</p>
                         <div id="account_watchlist_box">
-
                         </div>
                     </div>
                 </div>
@@ -92,5 +95,4 @@
         </div>
     </div>
 </body>
-
 </html>

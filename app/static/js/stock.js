@@ -41,9 +41,10 @@ gradient.addColorStop(0, 'rgba(138, 192, 189, 1)');
 gradient.addColorStop(1, 'rgba(138, 192, 189, 0)');
 var socket = io();
 
-Array.prototype.contains = function ( str ) {
+Array.prototype.contains = function (str) {
     return this.indexOf(str) > -1;
 };
+
 Object.prototype.keys = function () {
     return Object.keys(this);
 };
@@ -52,10 +53,7 @@ add_watchlist.addEventListener("click", function(e) {
     e.preventDefault();
     console.log("add to watchlist");
 });
-document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.modal');
-    var instances = M.Modal.init(elems, {});
-});
+
 
 function buy_market() {
     shares = document.getElementsByName("number_shares")[0].value;
@@ -63,34 +61,13 @@ function buy_market() {
     return false;
 }
 
-socket.on('connect', function () {
-    console.log("connected");
-    var sec_id = window.location.pathname;
-    socket.emit("get_security_info", [sec_id.split("/")[2]]);
-});
+function display_stock() {
 
-socket.on('return_stock_info', function (data) {
-    console.log("return stock search");
-    console.dir(data);    
-    var graph = data[0];
-    var info = data[1];
-    var position = data[2];
-    ticker_symbol.innerHTML = '';
-    ticker_name.innerHTML = '';
-    ticker_value.innerHTML = '';
-    activities.innerHTML = '';
-    about.innerHTML = '';
-
-    high.innerHTML = ''; whigh.innerHTML = '';
-    low.innerHTML = ''; wlow.innerHTML = '';
-    open.innerHTML = ''; mktcap.innerHTML = '';
-    vol.innerHTML = ''; avgvol.innerHTML = '';
-    pe.innerHTML = ''; yield_.innerHTML = '';
-    exg.innerHTML = ''; beta.innerHTML = '';
-    debt.innerHTML = ''; revenue.innerHTML = '';
-    tassets.innerHTML = ''; gpm.innerHTML = '';
-    cash.innerHTML = ''; growth.innerHTML = '';
-    ceo.innerHTML = ''; website.innerHTML = '';
+        high.innerHTML = ''; whigh.innerHTML = ''; low.innerHTML = ''; wlow.innerHTML = '';
+    open.innerHTML = ''; mktcap.innerHTML = ''; vol.innerHTML = ''; avgvol.innerHTML = '';
+    pe.innerHTML = ''; yield_.innerHTML = ''; exg.innerHTML = ''; beta.innerHTML = '';
+    debt.innerHTML = ''; revenue.innerHTML = ''; tassets.innerHTML = ''; gpm.innerHTML = '';
+    cash.innerHTML = ''; growth.innerHTML = ''; ceo.innerHTML = ''; website.innerHTML = '';
 
     var chart = new Chart(ctx, {
         type: 'line',
@@ -142,7 +119,7 @@ socket.on('return_stock_info', function (data) {
         console.log("you dont own this security");
         sell_button.style.display = 'inline-block';
     } else {
-        console.log("you dont own this security")
+        console.log("you dont own this security");
     }
 
     high.innerHTML = parseFloat(info.quote.high).toFixed(2);    
@@ -170,15 +147,15 @@ socket.on('return_stock_info', function (data) {
     stats_website_link.setAttribute("href", `${info.fundamentals.website}`);
     var stats_website_text = document.createTextNode("Website");
     stats_website_link.appendChild(stats_website_text);
-    website.appendChild(stats_website_link)
+    website.appendChild(stats_website_link);
 
     var ticker_symbol_text = document.createTextNode(info.stock.symbol);
-    ticker_symbol.appendChild(ticker_symbol_text);
     var ticker_name_text = document.createTextNode(info.stock.name);
-    ticker_name.appendChild(ticker_name_text);
     var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
-    ticker_value.appendChild(ticker_value_text);
     var about_text = document.createTextNode(info.fundamentals.description);
+    ticker_symbol.appendChild(ticker_symbol_text);
+    ticker_name.appendChild(ticker_name_text);
+    ticker_value.appendChild(ticker_value_text);
     about.appendChild(about_text);
     
     for (const stock_chart of graph.results.slice(1)) {
@@ -192,5 +169,41 @@ socket.on('return_stock_info', function (data) {
         chart.update();
     }
 
-    socket.emit("get_security_info", [info.id]);
+}
+
+function display_etf() {
+
+
+
+}
+
+
+socket.on('connect', function () {
+    console.log("connected");
+    var sec_id = window.location.pathname;
+    socket.emit("get_security_info", sec_id.split("/")[2]);
+});
+
+socket.on('return_stock_info', function (data) {
+    console.log("return stock search");
+    console.dir(data);    
+    var graph = data[0];
+    var info = data[1];
+    var position = data[2];
+
+    ticker_symbol.innerHTML = '';
+    ticker_name.innerHTML = '';
+    ticker_value.innerHTML = '';
+    activities.innerHTML = '';
+    about.innerHTML = '';    
+
+    if (info.security_type == "us_stocks" || "canadian_stocks") {
+        console.log("stock");
+    } else if (info.security_type == "exchange_traded_fund") {
+        console.log("etf");
+    }
+
+
+
+    // socket.emit("get_security_info", [info.id]);
 });

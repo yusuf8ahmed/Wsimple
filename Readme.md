@@ -66,12 +66,19 @@ Welcome! This project is a web interface for w.
 * [Wsimple.get_bank_accounts()](#getbankaccounts)
 * [Wsimple.get_positions()](#getpositions)
 
+<details>
+<summary>Account order functions</summary>
+<br>
+
 * [Wsimple.get_orders()](#getorders)
 * [Wsimple.buy_market_order()](#buymarketorder)
 * [Wsimple.sell_market_order()](#sellmarketorder)
 * [Wsimple.buy_limit_order()](#buylimitorder)
 * [Wsimple.sell_limit_order()](#selllimitorder)
 * [Wsimple.delete_order()](#deleteorder)
+</details>
+
+
 
 * [Wsimple.find_securities()](#findsecurities)
 * [Wsimple.find_securities_by_id()](#findsecuritiesbyid)

@@ -1,5 +1,5 @@
 var search_box = document.getElementById("search");
-var socket = io();
+var socket = io("/search");
 
 socket.on('return_security', function (data) {
     // width: 40vw; height: auto; border: none; background: #ffffff; border-radius: 23px;

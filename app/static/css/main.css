@@ -30,6 +30,12 @@ body {
     margin: 5px 0px;
 }
 
+.account_positions_header>div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 /* chart */
 .custom-chart-size {
     width: calc(100vw - 10vw);

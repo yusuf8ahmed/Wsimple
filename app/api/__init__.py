@@ -1,2 +1,2 @@
 from .__main__ import Wsimple
-from .errors import LoginError, InvalidAccessToken
+from .errors import LoginError, InvalidAccessTokenError

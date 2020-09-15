@@ -1,5 +1,5 @@
 var toggle_price_to_shares = false; // show current price auto
-var data_cache;
+var data_cache = {};
 var checkbox_price_shares = document.getElementById("checkbox_price_shares");
 var available_to_trade = document.getElementById("available_to_trade");
 var account_value = document.getElementById("account_value");
@@ -14,7 +14,7 @@ var gradient = ctx.createLinearGradient(0, 0, 0, 350);
 gradient.addColorStop(0, 'rgba(250, 177, 50,1)');
 gradient.addColorStop(1, 'rgba(250, 174, 50,0)');
 
-var socket = io();
+var socket = io("/dashboard");
 
 function price_to_shares() {
     console.log(checkbox_price_shares.checked);
@@ -61,12 +61,13 @@ socket.on('connect', function () {
     socket.emit('dashboard');
 });
 
-window.onbeforeunload = function () {
-    socket.close();
-    return true;
-}
+socket.on('invalid_token', function (data) {
+    alert("Access Token is Invalid or Broken must return to login page");
+    window.location.href = "/";
+});
 
 socket.on('main_dashboard_info', function (data) {
+    console.log(`updated ${ data.account_value_graph.table.results.length } ${ new Date().toLocaleTimeString() }`);
     data_cache = null;  data_cache = data;
     account_positions_box.innerHTML = '';
     account_watchlist_box.innerHTML = '';
@@ -123,8 +124,7 @@ socket.on('main_dashboard_info', function (data) {
         });
         chart.update();
     }
-    
-    console.log("chart updated " + data.account_value_graph.table.results.length);
+
     console.log(data);
 
     for (const positions of data.account_positions.table.results) {

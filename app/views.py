@@ -1,10 +1,10 @@
-import random
+import sys
 
 from app import app, session, render_template, redirect
-from app import socketio, thread, thread_lock
+from app import socketio, thread, thread_lock, TIME
 from app.forms import LoginForm
 from app.api import Wsimple
-from app.api import LoginError
+from app.api import LoginError, InvalidAccessTokenError
 
 @app.route('/index', methods=['POST', 'GET'])
 @app.route('/', methods=['POST', 'GET'])
@@ -13,11 +13,12 @@ def index():
     if form.validate_on_submit():
         email = str(form.email.data)
         password = str(form.password.data)
+        print(email,password)
         tos = form.tos.data
         if tos:
             try:
-                login = Wsimple(email, password)
-                session["key"] = ",".join([email, password])
+                ws = Wsimple(email, password)
+                session["key"] = ws.tokens
                 return redirect('/home') 
             except LoginError:
                 return render_template('index.html', form=form, pass_auth=True) 
@@ -26,29 +27,29 @@ def index():
 @app.route('/home', methods=['POST', 'GET'])
 def home():
     try:
-        account = str(session["key"]).split(",")
-        login = Wsimple.auth(account[0], account[1])
-        if "OK" in login:
-            return render_template("main.html")
+        # account = str(session["key"]).split(",")
+        # login = Wsimple.auth(account[0], account[1])
+        # if "OK" in login:
+        return render_template("main.html")
     except KeyError:
         return redirect('/') 
     
 @app.route('/search', methods=['POST', 'GET'])
 def search():
     try:
-        account = str(session["key"]).split(",")
-        login = Wsimple.auth(account[0], account[1])
-        if "OK" in login:
-            return render_template("search.html")
+        # account = str(session["key"]).split(",")
+        # login = Wsimple.auth(account[0], account[1])
+        # if "OK" in login:
+        return render_template("search.html")
     except KeyError:
         return redirect('/')     
     
 @app.route('/search/<sec_id>', methods=['POST', 'GET']) 
 def search_stock(sec_id):
     try:
-        account = str(session["key"]).split(",")
-        login = Wsimple.auth(account[0], account[1])
-        if "OK" in login:  
+        # account = str(session["key"]).split(",")
+        # login = Wsimple.auth(account[0], account[1])
+        # if "OK" in login:  
             return render_template("stock.html")
     except KeyError:
         return redirect('/')    
@@ -56,20 +57,20 @@ def search_stock(sec_id):
 @app.route('/activities', methods=['POST', 'GET'])
 def activities():
     try:
-        account = str(session["key"]).split(",")
-        login = Wsimple.auth(account[0], account[1])
-        if "OK" in login:
-            return render_template("activities.html")
+        # account = str(session["key"]).split(",")
+        # login = Wsimple.auth(account[0], account[1])
+        # if "OK" in login:
+        return render_template("activities.html")
     except KeyError:
         return redirect('/')     
     
 @app.route('/settings', methods=['POST', 'GET'])
 def settings():
     try:
-        account = str(session["key"]).split(",")
-        login = Wsimple.auth(account[0], account[1])
-        if "OK" in login:
-            return render_template("settings.html")
+        # account = str(session["key"]).split(",")
+        # login = Wsimple.auth(account[0], account[1])
+        # if "OK" in login:
+        return render_template("settings.html")
     except KeyError:
         return redirect('/') 
     
@@ -87,70 +88,101 @@ def connect():
 def disconnect():
     print('Client disconnected')  
     
-def dash_main_info(key):
+def dash_main_info(tokens):
     """Example of how to send server generated events to clients."""
+    ws = Wsimple.access(verbose=True)
     while True:
-        account = str(key).split(",")
-        ws = Wsimple(account[0], account[1])
-        dashboard = ws.dashboard()
-        socketio.emit('main_dashboard_info', dashboard)
-        socketio.sleep(10)   
+        try:
+            socketio.sleep(TIME) 
+            dashboard = ws.dashboard(tokens)
+            socketio.emit('main_dashboard_info', dashboard, namespace='/dashboard')
+        except InvalidAccessTokenError as e:
+            print("dash_main_info invalid token")
+            ws = Wsimple.access()
+            new_tokens = ws.refresh_token(tokens)   
+            print(f"dash_main_info re-valid token {new_tokens}")
+            tokens = new_tokens                 
         
-def settings_info(key):
-    """Example of how to send server generated events to clients."""
-    while True:
-        account = str(key).split(",")
-        ws = Wsimple(account[0], account[1])
-        settings = ws.settings()
-        print(settings)
-        socketio.emit('return_settings', settings)
-        socketio.sleep(10)  
-    
-@socketio.on('dashboard')
+@socketio.on('dashboard', namespace='/dashboard')
 def soc_dashboard():
     global thread
     with thread_lock:
         if thread is None:
-            print("Starting dashboard")
-            thread = socketio.start_background_task(dash_main_info, (session["key"]))
-            
+            print("Starting dashboard")        
+            if session.get('key') is not None:
+                print("Starting dashboard true key") 
+                thread = socketio.start_background_task(dash_main_info, session['key'])   
+            else:
+                print("Starting dashboard false key") 
+                socketio.emit('invalid_token', namespace='/dashboard')
+ 
+def settings_info(key):
+    """Example of how to send server generated events to clients."""
+    while True:
+        ws = Wsimple.access()
+        tokens = key
+        settings = ws.settings(tokens)
+        socketio.sleep(TIME) 
+        socketio.emit('return_settings', settings)
+        
 @socketio.on("get_settings")
 def soc_settings(data):
     global thread
     with thread_lock:
         if thread is None:
             print("Starting settings")
-            thread = socketio.start_background_task(settings_info, (session["key"]))
-            
-@socketio.on('find_security')
-def soc_find_security(data):
-    print('search for security {}'.format(data[0]))  
-    account = str(session["key"]).split(",")
-    ws = Wsimple(account[0], account[1]) 
-    security = ws.find_securities(data[0])
-    socketio.emit('return_security', [security])              
+            thread = socketio.start_background_task(settings_info, (session["key"]))        
+        
+def stock_info(data):
+    """Example of how to send server generated events to clients."""
+    while True:
+        try:
+            ws = Wsimple.access()
+            tokens = data[0]
+            sparkline = ws.find_securities_by_id_historical(tokens, data[1], "1d")
+            security_info = ws.find_securities_by_id(tokens, data[1])
+            position = ws.get_account(tokens)
+            socketio.sleep(TIME)
+            socketio.emit('return_stock_info', [sparkline, security_info, position])
+        except BaseException:
+            print("stock_info InvalidAccessTokenError")
     
 @socketio.on('get_security_info')
 def soc_find_security(data):
-    #not the best solution
-    account = str(session["key"]).split(",")
-    ws = Wsimple(account[0], account[1]) 
-    sparkline = ws.find_securities_by_id_historical(data[0], "1d")
-    security_info = ws.find_securities_by_id(data[0])
-    position = ws.get_account()["results"][0]["position_quantities"]
+    """
+    not the best solution
+    ws = Wsimple.access()
+    tokens = session["key"]
+    sparkline = ws.find_securities_by_id_historical(tokens, data[0], "1d")
+    security_info = ws.find_securities_by_id(tokens, data[0])
+    position = ws.get_account(tokens)["results"][0]["position_quantities"]
     print(f'stock_info {security_info["stock"]["symbol"]}')
     socketio.sleep(20)
-    socketio.emit('return_stock_info', [sparkline, security_info, position])  
+    socketio.emit('return_stock_info', [sparkline, security_info, position])      
+    """
+    global thread
+    with thread_lock:
+        if thread is None:
+            print("Starting settings")
+            thread = socketio.start_background_task(stock_info, (session["key"], data))  
+                
+@socketio.on('find_security', namespace="/search")
+def soc_find_security(data):
+    print('search for security {}'.format(data[0]))  
+    ws = Wsimple.access()
+    tokens = session["key"]
+    security = ws.find_securities(tokens, data[0])
+    socketio.emit('return_security', [security], namespace="/search")              
     
 @socketio.on("get_activities", namespace='/activities')
 def soc_get_activities(data):
-    account = str(session["key"]).split(",")
-    ws = Wsimple(account[0], account[1])
+    ws = Wsimple.access()
+    tokens = session["key"]
     socketio.sleep(5)
     if data == []:
-        socketio.emit('display_activities', ws.get_activities(), namespace='/activities')
+        socketio.emit('display_activities', ws.get_activities(tokens), namespace='/activities')
     else:
-        socketio.emit('display_activities', ws.get_activities_bookmark(data[0]), namespace='/activities')
+        socketio.emit('display_activities', ws.get_activities_bookmark(tokens, data[0]), namespace='/activities')
         
 @socketio.on("market_buy_order")
 def soc_market_buy_order(data):

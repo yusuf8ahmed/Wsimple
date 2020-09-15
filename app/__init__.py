@@ -5,7 +5,8 @@ from .api import Wsimple
 if not __name__ == "__main__":
     #flask/flask-addon libraries
     import random
-    from flask import Flask, render_template, redirect, session, g
+    from flask import Flask, render_template, redirect
+    from flask import session, g, current_app
     from flask_socketio import SocketIO
     from flask_session import Session
     from dotenv import load_dotenv, find_dotenv
@@ -13,11 +14,13 @@ if not __name__ == "__main__":
     #standard library
     from threading import Lock
     import sqlite3
+    import logging
     import pathlib
     import os
 
     # export FLASK_APP=Wsimple/app.py
     # export FLASK_ENV=development
+    # kill $(lsof -ti:3000)
 
     app = Flask(__name__)
     socketio = SocketIO(app, manage_session=False)
@@ -27,18 +30,15 @@ if not __name__ == "__main__":
     Session(app)
     thread = None
     thread_lock = Lock()
-
+    TIME:int = 15
     DATABASE = pathlib.Path(__file__).cwd() / "wsimple.db"
     
     @app.errorhandler(404)
     def page_not_found(e):
-        # 1. og two pointing 
-        # 3. error in matrix
+        # 1. og two pointing # 3. error in matrix
         # 4. listen here you little shit        
-        # 5. you cant ground spider-man 
-        # 6. class not found
-        # 7. f are you doing
-        # 8. searching for f's 
+        # 5. you cant ground spider-man # 6. class not found
+        # 7. f are you doing # 8. searching for f's 
         
         image = [
             "https://static2.cbrimages.com/wordpress/wp-content/uploads/2019/03/Spider-Man-Pointing-Meme.jpg",    
