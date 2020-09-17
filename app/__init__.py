@@ -30,7 +30,10 @@ if not __name__ == "__main__":
     Session(app)
     thread = None
     thread_lock = Lock()
-    TIME:int = 15
+    TIME = 5
+    ALLOW_DASH = True
+    ALLOW_STOCK_INFO = True
+    ALLOW_SETTINGS = True
     DATABASE = pathlib.Path(__file__).cwd() / "wsimple.db"
     
     @app.errorhandler(404)

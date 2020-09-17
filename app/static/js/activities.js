@@ -150,6 +150,11 @@ function display_referral_rewards(pposition_div, activities) {
     console.log("referral rewards activity type");
 }
 
+socket.on('invalid_token', function (data) {
+    alert("Access Token is Invalid or Broken must return to login page");
+    window.location.href = "/";
+});
+
 socket.on('display_activities', function (data) {
     bookmark = data.bookmark;
     console.dir(data);

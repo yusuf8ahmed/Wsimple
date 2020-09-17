@@ -7,7 +7,8 @@ import datetime
 from loguru import logger
 from typing import Union, Optional
 # custom error
-from .errors import LoginError, InvalidAccessTokenError
+from .errors import LoginError, MethodInputError
+from .errors import InvalidAccessTokenError, InvalidRefreshTokenError
 # third party
 import requests
 
@@ -35,7 +36,7 @@ class Wsimple:
         the headers. The access token is the key for invoking all other endpoints.
         """
         self.logger = logger
-        self.logger.add("logfiles/file_{time}.log",  rotation="24:00")
+        # self.logger.add("logfiles/file_{time}.log",  rotation="1 day")
         self.logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="DEBUG")
         self.access_mode = access_mode
         self.verbose = verbose   
@@ -54,7 +55,7 @@ class Wsimple:
                 self.tokens = [{'Authorization': self._access_token}, {"refresh_token": self._refresh_token}]
                 del r
             else:
-                raise LoginError()
+                raise LoginError
     
     @classmethod
     def access(cls, verbose=False):
@@ -68,17 +69,19 @@ class Wsimple:
         """
         Generates and applies a new set of access and refresh tokens.  
         """
-        try:
-            r = requests.post(
-                url="{}auth/refresh".format(self.base_url),
-                data=tokens[1],
-            )
+        r = requests.post(
+            url="{}auth/refresh".format(self.base_url),
+            data=tokens[1],
+        )            
+        if r.status_code == 401:
+            self.logger.error("dead refresh token")
+            raise InvalidRefreshTokenError
+        else:
+            self.logger.debug(f"refresh token {r.status_code} code")
             self._access_token = r.headers['X-Access-Token']
             self._refresh_token = r.headers['X-Refresh-Token']
             return [{'Authorization': self._access_token}, {"refresh_token": self._refresh_token}]
-        except BaseException as e:
-            self.logger.error(e)
-     
+
     #! account related functions     
     def get_account(self, tokens):
         """
@@ -89,7 +92,7 @@ class Wsimple:
             headers=tokens[0]
         )         
         if r.status_code == 401:
-            print("get account info InvalidAccessTokenError")
+            logger.debug("get account info InvalidAccessTokenError")
             raise InvalidAccessTokenError
         else:
             return r.json()
@@ -108,10 +111,11 @@ class Wsimple:
                 url="{}account/history/{}?account_id={}".format(self.base_url, time, account),
                 headers=tokens[0]
             )
-            logger.debug(f"get historical account data status code {r.status_code}")
             if r.status_code == 401:
+                logger.error(f"get historical account data error")
                 raise InvalidAccessTokenError
             else:
+                logger.debug(f"get historical account data {r.status_code}")
                 return r.json()    
         except BaseException as e:
             logger.error(e)
@@ -127,6 +131,7 @@ class Wsimple:
                 headers=tokens[0]
             )
             if r.status_code == 401:
+                logger.debug("get me info error")
                 raise InvalidAccessTokenError
             else:
                 return r.json()                                    
@@ -725,11 +730,46 @@ class Wsimple:
         except BaseException as e:
             logger.error(e) 
     
+    #! get_all_securities_groups
+    def get_all_securities_groups(self, tokens, offset=0, limit=25, sort_order="asc"):
+        """
+        Grabs about all security groups
+        WHERE offset is >= 0 and defaults to 0
+        WHERE limit is >= 1 and <=250 and defaults to 25
+        WHERE sort_order is order of the results and can be "asc" or "desc" 
+        but defaults to "desc"
+        """
+        if not (1 <= limit <= 250):
+            raise MethodInputError
+        elif not offset >= 0:
+            raise MethodInputError
+        elif not sort_order == ("asc" or "desc"):
+            raise MethodInputError
+        r = requests.get(
+            url="{}security-groups?offset={}&limit={}&sort_order={}".format(self.base_url, offset, limit, sort_order),
+            headers=tokens[0]
+        )         
+        if r.status_code == 401:
+            logger.debug("get account info InvalidAccessTokenError")
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+    
+    #! /institutional_transfers
+    # i dont understand wot it does
+    
+    #! /transfer_institutions
+    
+    #! /relinquishing_accounts
+    
+    #! /documents
+    #General endpoint for uploading/retrieving Documents
+    
     #! functions after this point are not core to the API
     def test_endpoint(self, tokens):
         logger.debug("test endpoint")
         r = requests.get(
-            url='{}'.format(self.base_url),
+            url='{}batch_orders'.format(self.base_url),
             headers=tokens[0]
         )
         print(r.status_code)
@@ -738,8 +778,7 @@ class Wsimple:
         return r.json()
 
     def usd_to_cad(self, tokens, amount: Union[float, int]) -> float:
-        """
-        use Wsimple.get_exchange_rate() to exchange to change usd to cad.   
+        """  
         **not working correctly**
         """
         logger.debug("usd to cad")
@@ -749,37 +788,12 @@ class Wsimple:
     
     def cad_to_usd(self, tokens, amount: Union[float, int]) -> float:
         """
-        use Wsimple.get_exchange_rate() to exchange to change cad to usd. 
+        **not working correctly**
         """
         logger.debug("cad to usd")
         forex = self.get_exchange_rate(tokens)['USD']
         sell_rate = forex['sell_rate']
         return round(amount * sell_rate, 2)
- 
-    def get_total_value(self, tokens):
-        """
-        Get the total account value of this wealthsimple account in cad. 
-        """
-        logger.debug("get total value")
-        account = self.get_account(tokens)["results"][0]
-        account_positions = self.get_positions(tokens)['results']
-        security_value = {}
-
-        for security in account_positions:
-            ticker = security["stock"]["symbol"]
-            currency = security["quote"]["currency"]
-            if currency == "CAD":
-                amount = round(float(security["quote"]["amount"]) * security["quantity"], 3) 
-            elif currency == "USD":
-                amount = round(self.usd_to_cad(tokens, float(security["quote"]["amount"])) * security["quantity"], 3)
-            else:
-                amount = 0
-            security_value[ticker] = amount
-            
-        return {
-            "amount": round(sum(security_value.values()) + account['buying_power']['amount'], 2),
-            "currency": "CAD"
-        }
         
     def settings(self, tokens):
         """
@@ -799,20 +813,39 @@ class Wsimple:
             'ws_current_operational_status': ws_current_operational_status  
         }
     
+    def stock(self, tokens, sec_id, time="1d"):
+        """
+        Get dashboard needed for /stock/<sec_id> route.
+        """
+        logger.debug("start emiting stock")
+        try:
+            sparkline = self.find_securities_by_id_historical(tokens, sec_id, time)
+            security_info = self.find_securities_by_id(tokens, sec_id)
+            position = self.get_account(tokens)
+            return [sparkline, security_info, position]
+        except InvalidAccessTokenError:
+            print("stock InvalidAccessTokenError")
+            raise InvalidAccessTokenError
+    
     def dashboard(self, tokens):
         """
         Get dashboard needed for /home route.
+        dry test:
+        #v1: 12+ seconds - 11 calls
+        #v2: 11-12 seconds - 5 calls
+        #-v3: 10-12 seconds - 4 calls
         """
+        logger.debug("start emiting dashboard")
         try:
-            account = self.get_account(tokens)
-            account = account["results"][0]
-            total_value = self.get_total_value(tokens)
+            account = self.get_account(tokens)["results"][0]
+            account_data = self.get_historical_account_data(tokens)
             watchlist = self.get_watchlist(tokens)
-            positions = self.get_positions(tokens)
-            account_value_graph = self.get_historical_account_data(tokens)
-            previous_amount = account_value_graph["previous_close_net_liquidation_value"]['amount']
-            account_change = format(total_value['amount'] - previous_amount, '.2f')
-            account_change_percentage = format(((total_value['amount'] - previous_amount) / previous_amount)*100, '.2f')
+            positions = self.get_positions(tokens)            
+            total_value = account_data["results"][-1]["value"]
+            account_value_graph = account_data["results"]
+            previous_amount = account_data["previous_close_net_liquidation_value"]['amount']
+            account_change = round(total_value['amount'] - previous_amount, 2)
+            account_change_percentage = round((account_change / previous_amount)*100, 2)
             return  {
                         'available_to_trade':{
                             'amount': account['buying_power']['amount'],

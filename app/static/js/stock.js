@@ -39,7 +39,7 @@ var ceo = document.getElementById("ceo");
 var website = document.getElementById("website");
 gradient.addColorStop(0, 'rgba(138, 192, 189, 1)');
 gradient.addColorStop(1, 'rgba(138, 192, 189, 0)');
-var socket = io();
+var socket = io("/stock");
 
 Array.prototype.contains = function (str) {
     return this.indexOf(str) > -1;
@@ -54,7 +54,6 @@ add_watchlist.addEventListener("click", function(e) {
     console.log("add to watchlist");
 });
 
-
 function buy_market() {
     shares = document.getElementsByName("number_shares")[0].value;
     console.log(`shares ${shares}`);
@@ -62,8 +61,7 @@ function buy_market() {
 }
 
 function display_stock() {
-
-        high.innerHTML = ''; whigh.innerHTML = ''; low.innerHTML = ''; wlow.innerHTML = '';
+    high.innerHTML = ''; whigh.innerHTML = ''; low.innerHTML = ''; wlow.innerHTML = '';
     open.innerHTML = ''; mktcap.innerHTML = ''; vol.innerHTML = ''; avgvol.innerHTML = '';
     pe.innerHTML = ''; yield_.innerHTML = ''; exg.innerHTML = ''; beta.innerHTML = '';
     debt.innerHTML = ''; revenue.innerHTML = ''; tassets.innerHTML = ''; gpm.innerHTML = '';
@@ -116,7 +114,7 @@ function display_stock() {
 
     if ( position.keys().contains(info.id) ) {
         // this security is owned by you
-        console.log("you dont own this security");
+        console.log("you own this security");
         sell_button.style.display = 'inline-block';
     } else {
         console.log("you dont own this security");
@@ -173,10 +171,12 @@ function display_stock() {
 
 function display_etf() {
 
-
-
 }
 
+socket.on('invalid_token', function (data) {
+    alert("Access Token is Invalid or Broken must return to login page");
+    window.location.href = "/";
+});
 
 socket.on('connect', function () {
     console.log("connected");
@@ -198,12 +198,11 @@ socket.on('return_stock_info', function (data) {
     about.innerHTML = '';    
 
     if (info.security_type == "us_stocks" || "canadian_stocks") {
+        display_stock();
         console.log("stock");
     } else if (info.security_type == "exchange_traded_fund") {
+        display_etf();
         console.log("etf");
     }
-
-
-
     // socket.emit("get_security_info", [info.id]);
 });

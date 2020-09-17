@@ -4,7 +4,8 @@ from app import app, session, render_template, redirect
 from app import socketio, thread, thread_lock, TIME
 from app.forms import LoginForm
 from app.api import Wsimple
-from app.api import LoginError, InvalidAccessTokenError
+from app.api import LoginError 
+from app.api import InvalidAccessTokenError, InvalidRefreshTokenError
 
 @app.route('/index', methods=['POST', 'GET'])
 @app.route('/', methods=['POST', 'GET'])
@@ -88,34 +89,74 @@ def connect():
 def disconnect():
     print('Client disconnected')  
     
+#? display the "/home" dashboard  
 def dash_main_info(tokens):
     """Example of how to send server generated events to clients."""
     ws = Wsimple.access(verbose=True)
     while True:
         try:
-            socketio.sleep(TIME) 
             dashboard = ws.dashboard(tokens)
-            socketio.emit('main_dashboard_info', dashboard, namespace='/dashboard')
+            socketio.sleep(TIME) 
+            socketio.emit('main_dashboard_info', dashboard, namespace='/dashboard')  
         except InvalidAccessTokenError as e:
-            print("dash_main_info invalid token")
-            ws = Wsimple.access()
-            new_tokens = ws.refresh_token(tokens)   
-            print(f"dash_main_info re-valid token {new_tokens}")
-            tokens = new_tokens                 
-        
+            try:
+                print(f"dash_main_info invalid token {tokens}")
+                ws = Wsimple.access()
+                tokens = ws.refresh_token(tokens)   
+                print(f"dash_main_info re-valid token {tokens}")  
+            except InvalidRefreshTokenError as e:
+                print(f"dash_main_info dead refresh token {tokens}")
+                socketio.emit('invalid_token', namespace='/dashboard') 
+                break 
+            
 @socketio.on('dashboard', namespace='/dashboard')
 def soc_dashboard():
     global thread
     with thread_lock:
         if thread is None:
             print("Starting dashboard")        
-            if session.get('key') is not None:
-                print("Starting dashboard true key") 
+            if isinstance(session.get('key'), list):
+                print(f"Starting dashboard key {session.get('key')}") 
                 thread = socketio.start_background_task(dash_main_info, session['key'])   
             else:
                 print("Starting dashboard false key") 
                 socketio.emit('invalid_token', namespace='/dashboard')
  
+#? display the stock info you searched
+def stock_info(data):
+    """Example of how to send server generated events to clients."""
+    ws = Wsimple.access()
+    tokens = data[0]
+    while True:
+        try:
+            re_stock_info = ws.stock(tokens, data[1], time="1d")
+            socketio.sleep(TIME)
+            socketio.emit('return_stock_info', re_stock_info, namespace='/stock')
+        except InvalidAccessTokenError as e:
+            try:
+                print(f"stock_info invalid token {tokens}")
+                ws = Wsimple.access()
+                tokens = ws.refresh_token(tokens)   
+                print(f"stock_info re-valid token {tokens}")  
+            except InvalidRefreshTokenError as e:
+                print(f"stock_info dead token {tokens}")  
+                socketio.emit('invalid_token', namespace='/stock') 
+                break 
+    
+@socketio.on('get_security_info', namespace='/stock')
+def soc_stock_info(data): 
+    global thread
+    with thread_lock:
+        if thread is None:
+            print("Starting stock_info")        
+            if isinstance(session.get('key'), list):
+                print(f"Starting stock_info key {session.get('key')}") 
+                thread = socketio.start_background_task(stock_info, (session['key'], data))   
+            else:
+                print("Starting stock_info false key") 
+                socketio.emit('invalid_token', namespace='/stock')
+ 
+#? display your settings  
 def settings_info(key):
     """Example of how to send server generated events to clients."""
     while True:
@@ -123,49 +164,17 @@ def settings_info(key):
         tokens = key
         settings = ws.settings(tokens)
         socketio.sleep(TIME) 
-        socketio.emit('return_settings', settings)
+        socketio.emit('return_settings', settings, namespace="/settings")
         
-@socketio.on("get_settings")
+@socketio.on("get_settings", namespace="/settings")
 def soc_settings(data):
     global thread
     with thread_lock:
         if thread is None:
             print("Starting settings")
             thread = socketio.start_background_task(settings_info, (session["key"]))        
-        
-def stock_info(data):
-    """Example of how to send server generated events to clients."""
-    while True:
-        try:
-            ws = Wsimple.access()
-            tokens = data[0]
-            sparkline = ws.find_securities_by_id_historical(tokens, data[1], "1d")
-            security_info = ws.find_securities_by_id(tokens, data[1])
-            position = ws.get_account(tokens)
-            socketio.sleep(TIME)
-            socketio.emit('return_stock_info', [sparkline, security_info, position])
-        except BaseException:
-            print("stock_info InvalidAccessTokenError")
-    
-@socketio.on('get_security_info')
-def soc_find_security(data):
-    """
-    not the best solution
-    ws = Wsimple.access()
-    tokens = session["key"]
-    sparkline = ws.find_securities_by_id_historical(tokens, data[0], "1d")
-    security_info = ws.find_securities_by_id(tokens, data[0])
-    position = ws.get_account(tokens)["results"][0]["position_quantities"]
-    print(f'stock_info {security_info["stock"]["symbol"]}')
-    socketio.sleep(20)
-    socketio.emit('return_stock_info', [sparkline, security_info, position])      
-    """
-    global thread
-    with thread_lock:
-        if thread is None:
-            print("Starting settings")
-            thread = socketio.start_background_task(stock_info, (session["key"], data))  
-                
+  
+#? display search securities          
 @socketio.on('find_security', namespace="/search")
 def soc_find_security(data):
     print('search for security {}'.format(data[0]))  
@@ -173,7 +182,8 @@ def soc_find_security(data):
     tokens = session["key"]
     security = ws.find_securities(tokens, data[0])
     socketio.emit('return_security', [security], namespace="/search")              
-    
+
+#? display your activities
 @socketio.on("get_activities", namespace='/activities')
 def soc_get_activities(data):
     ws = Wsimple.access()

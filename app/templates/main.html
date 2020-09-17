@@ -27,7 +27,7 @@
         <div class="custom-navbar">
             <a href="/home">
                 <img height="35" width="35" src="{{ url_for('static', filename='media/user_button.svg') }}"
-                    alt="user/home button">
+                    alt="user/home button" style="max-width: 100%;max-height: 100vh;">
             </a>
             <a href="/search">
                 <img height="35" width="35" src="{{ url_for('static', filename='media/search_button.svg') }}"
@@ -35,7 +35,7 @@
             </a>
             <a href="/activities">
                 <img height="35" width="35" src="{{ url_for('static', filename='media/activities_button.svg') }}"
-                    alt="activities button">
+                    alt="activities button" style="max-width: 100%;max-height: 100vh;">
             </a>
             <a href="/settings" style="margin-top: auto;">
                 <img height="35" width="35" src="{{ url_for('static', filename='media/settings_button.svg') }}"
@@ -43,10 +43,16 @@
             </a>
         </div>
         <div class="row" style="margin: 0px;">
-            <div class="col s10 offset-s2" style="padding: 0; margin: 0; margin-top:7px; margin-bottom: 5px;">
-                <p style="margin:0px;margin-left: 5px;font-weight: bold">
-                    Porfolio value
-                </p> 
+            <div class="col s10 offset-s2" style="padding: 0;margin: 0;width: calc(100vw - 10vw);">
+                <div class="top_bar" style="display:flex;justify-content:space-between;align-content:center;">
+                    <p style="margin:0px;margin-left: 5px;font-weight: bold">
+                        Portfolio value
+                    </p>   
+                    <p id="updated_on" style="margin:0px;">
+                    </p>          
+                </div>                
+            </div>
+            <div class="col s10 offset-s2" style="padding: 0;margin: 0; margin-top:7px; margin-bottom: 5px;">
                 <div class="custom-chart-size">
                     <canvas id="chart" role="img">
                         <p>Profolio value</p>

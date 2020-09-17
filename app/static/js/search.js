@@ -1,6 +1,11 @@
 var search_box = document.getElementById("search");
 var socket = io("/search");
 
+socket.on('invalid_token', function (data) {
+    alert("Access Token is Invalid or Broken must return to login page");
+    window.location.href = "/";
+});
+
 socket.on('return_security', function (data) {
     // width: 40vw; height: auto; border: none; background: #ffffff; border-radius: 23px;
     search_box.innerHTML = '';

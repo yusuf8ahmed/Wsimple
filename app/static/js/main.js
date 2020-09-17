@@ -1,5 +1,6 @@
 var toggle_price_to_shares = false; // show current price auto
 var data_cache = {};
+const updated_on = document.getElementById("updated_on");
 var checkbox_price_shares = document.getElementById("checkbox_price_shares");
 var available_to_trade = document.getElementById("available_to_trade");
 var account_value = document.getElementById("account_value");
@@ -14,7 +15,7 @@ var gradient = ctx.createLinearGradient(0, 0, 0, 350);
 gradient.addColorStop(0, 'rgba(250, 177, 50,1)');
 gradient.addColorStop(1, 'rgba(250, 174, 50,0)');
 
-var socket = io("/dashboard");
+var socket = io("/dashboard", {transports: ['websocket'], upgrade: false});
 
 function price_to_shares() {
     console.log(checkbox_price_shares.checked);
@@ -56,9 +57,12 @@ function price_to_shares() {
     }
 }
 
+updated_on.appendChild(document.createTextNode(`S/${new Date().toLocaleTimeString()}`));
+
 socket.on('connect', function () {
     console.log("socket.io connected");
     socket.emit('dashboard');
+    console.log("emitted to dashboard");
 });
 
 socket.on('invalid_token', function (data) {
@@ -67,7 +71,9 @@ socket.on('invalid_token', function (data) {
 });
 
 socket.on('main_dashboard_info', function (data) {
-    console.log(`updated ${ data.account_value_graph.table.results.length } ${ new Date().toLocaleTimeString() }`);
+    updated_on.innerHTML = "";
+    updated_on.appendChild(document.createTextNode(`U/${new Date().toLocaleTimeString()}`));
+    console.log(`updated ${ data.account_value_graph.table.length } ${ new Date().toLocaleTimeString() }`);
     data_cache = null;  data_cache = data;
     account_positions_box.innerHTML = '';
     account_watchlist_box.innerHTML = '';
@@ -114,7 +120,7 @@ socket.on('main_dashboard_info', function (data) {
         }
     });
 
-    for (const account_value of data.account_value_graph.table.results) {
+    for (const account_value of data.account_value_graph.table) {
         var date = new Date(account_value.date);
         chart.data.labels.push(date.toLocaleTimeString([], {
             timeStyle: 'short'
@@ -157,21 +163,22 @@ socket.on('main_dashboard_info', function (data) {
         account_positions_box.appendChild(pposition_div);
     }
 
-    available_to_trade.innerHTML = `
-    Available to trade: ${data.available_to_trade.amount} ${data.available_to_trade.currency}
-    `;
     account_value.innerHTML = `
-    Account value: ${data.account_value.amount} ${data.account_value.currency}
-    `;
+    Account value: ${data.account_value.amount.toFixed(2)} ${data.account_value.currency}
+    `;    
+    account_change.innerHTML = `
+    Account change: $${data.account_change.amount}(${data.account_change.percentage}%)
+    `;    
     net_deposits.innerHTML = `
     Net deposit: ${data.net_deposits.amount} ${data.net_deposits.currency}
+    `;    
+    available_to_trade.innerHTML = `
+    Available to trade: ${data.available_to_trade.amount} ${data.available_to_trade.currency}
     `;
     available_to_withdraw.innerHTML = `
     Available to withdraw: ${data.available_to_withdraw.amount} ${data.available_to_withdraw.currency}
     `;
-    account_change.innerHTML = `
-    Account change: $${data.account_change.amount}(${data.account_change.percentage}%)
-    `;
+
 
     for (const watchlist of data.account_watchlist.table.securities) {
         var pwatchlist_div = document.createElement("div");
