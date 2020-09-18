@@ -1,3 +1,9 @@
+"""
+Project Name: Wsimple
+ Copyright (c) 2020 Chromazmoves
+ Released under the Tos of Wealthsimple Trade and Wsimple
+"""
+
 #!/usr/bin/env python3
 # standard library
 import sys
@@ -130,7 +136,7 @@ class Wsimple:
             url="{}me".format(self.base_url),
             headers=tokens[0]
         )
-        logger.error(f"get_me {r.status_code}")
+        logger.debug(f"get_me {r.status_code}")
         if r.status_code == 401:
             raise InvalidAccessTokenError
         else:

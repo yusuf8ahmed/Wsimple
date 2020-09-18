@@ -12,9 +12,9 @@
 </p>
 
 ### What is the Wsimple project
-Welcome! This project is a web interface for wealthsimple trade. 
+Welcome! This project is suppose to be a web interface and API for Wealthsimple Trade. The main goal this project is to give a simple yet robust interface for Wealthsimple Trade users and also give the ability to allow developer to create any project while hooking straight into their wealthsimple trade account  
 . 
-. Also Wsimple allows the access API wrapper without the use of the web interface
+. API wrapper starts documentation starts here.
 (See => [API-methods](#API-methods)).
 
 ## Getting Started
@@ -57,8 +57,13 @@ Welcome! This project is a web interface for wealthsimple trade.
   # return a list of securities that include GOOG and GOOGL
 
   ws.make_deposit(tokens, amount=2000)
-  # deposit 2000 into your account
+  # create deposit order for 2000 CAD into your account
 
+  ws.get_market_hours(tokens, exchange="NYSE")
+  # return opening and closing of the exchange NYSE 
+
+  ws.current_status()
+  # get current operation status of Wealthsimple Trade Systems
   ```
 #### API methods
 ### table of content

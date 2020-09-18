@@ -1,3 +1,8 @@
+"""
+ Project Name: Wsimple
+ Copyright (c) 2020 Chromazmoves
+ Released under the Tos of Wealthsimple Trade and Wsimple
+"""
 from gevent import monkey
 monkey.patch_all()
 # wsimple api part

@@ -1,5 +1,8 @@
-import sys
-
+"""
+ Project Name: Wsimple
+ Copyright (c) 2020 Chromazmoves
+ Released under the Tos of Wealthsimple Trade and Wsimple
+"""
 from app import app, session, render_template, redirect
 from app import socketio, thread, thread_lock, TIME
 from app import ALLOW_DASH, ALLOW_SETTINGS, ALLOW_STOCK_INFO
