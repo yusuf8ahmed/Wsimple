@@ -6,11 +6,13 @@
     <img src="https://forthebadge.com/images/badges/made-with-python.svg">
     <img src="https://forthebadge.com/images/badges/uses-badges.svg">
     <img src="https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg">
+    <img src="https://forthebadge.com/images/badges/ages-18.svg">
+    <img src="https://forthebadge.com/images/badges/thats-how-they-get-you.svg">
   </a>
 </p>
 
 ### What is the Wsimple project
-Welcome! This project is a web interface for w. 
+Welcome! This project is a web interface for wealthsimple trade. 
 . 
 . Also Wsimple allows the access API wrapper without the use of the web interface
 (See => [API-methods](#API-methods)).
@@ -45,81 +47,155 @@ Welcome! This project is a web interface for w.
 #### Usage
   ```python
   from Wsimple import Wsimple
-  from getpass import getpass
 
   ws = Wsimple("john.doe@gmail.com", "johndoepass")
   # Wsimple("gmail", "password")
+  tokens = ws.tokens
+  # holds authentication information
 
-  print(ws.find_securities("GOOG")) 
+  print(ws.find_securities(tokens, "GOOG")) 
   # return a list of securities that include GOOG and GOOGL
+
+  ws.make_deposit(tokens, amount=2000)
+  # deposit 2000 into your account
+
   ```
 #### API methods
-### table of content (42)
+### table of content
 
-* [Wsimple.__init__()](#init)
-* [Wsimple.refresh_token()](#refreshtoken)
-
-* [Wsimple.get_account()](#getaccount)
-* [Wsimple.get_historical_account_data()](#gethistoricalaccountdata)
-* [Wsimple.get_me()](#getme)
-* [Wsimple.get_person()](#getperson)
-* [Wsimple.get_bank_accounts()](#getbankaccounts)
-* [Wsimple.get_positions()](#getpositions)
+* [__init__()](#init)
+* [refresh_token()](#refreshtoken)
 
 <details>
-<summary>Account order functions</summary>
+<summary>Account info functions functions</summary>
 <br>
 
-* [Wsimple.get_orders()](#getorders)
-* [Wsimple.buy_market_order()](#buymarketorder)
-* [Wsimple.sell_market_order()](#sellmarketorder)
-* [Wsimple.buy_limit_order()](#buylimitorder)
-* [Wsimple.sell_limit_order()](#selllimitorder)
-* [Wsimple.delete_order()](#deleteorder)
+* [get_account()](#getaccount)
+* [get_historical_account_data()](#gethistoricalaccountdata)
+* [get_me()](#getme)
+* [get_person()](#getperson)
+* [get_bank_accounts()](#getbankaccounts)
+* [get_positions()](#getpositions)
+</details>
+
+<details>
+<summary>Order functions </summary>
+<br>
+
+  * [get_orders()](#getorders)
+  * [buy_market_order()](#buymarketorder)
+  * [sell_market_order()](#sellmarketorder)
+  * [buy_limit_order()](#buylimitorder)
+  * [sell_limit_order()](#selllimitorder)
+  * [delete_order()](#deleteorder)
+</details>
+
+<details>
+<summary>Find securitites functions</summary>
+<br>
+
+* [find_securities()](#findsecurities)
+* [find_securities_by_id()](#findsecuritiesbyid)
+* [find_securities_by_id_historical()](#findsecuritiesbyidhistorical)
+</details>
+
+<details>
+<summary>Activities functions </summary>
+<br>
+
+* [get_activities()](#getactivities)
+* [get_activities_bookmark()](#getactivitiesbookmark)
+</details>
+
+<details>
+<summary>Withdrawal functions</summary>
+<br>
+
+* [make_withdrawal()](#makewithdrawal)
+* [get_withdrawal()](#getwithdrawal)
+* [list_withdrawals()](#listwithdrawals)
+* [delete_withdrawal()](#deletewithdrawal)
+</details>
+
+<details>
+<summary>Deposits functions</summary>
+<br>
+
+* [make_deposit()](#makedeposit)
+* [get_deposit()](#getdeposit)
+* [list_deposits()](#listdeposits)
+* [delete_deposit()](#deletedeposit)
+</details>
+
+<details>
+<summary>Market related functions</summary>
+<br>
+
+* [get_all_markets()](#getallmarkets)
+* [get_market_hours()](#getmarkethours)
+</details>
+
+<details>
+<summary>Watchlist functions</summary>
+<br>
+
+* [getwatchlist()](#getwatchlist)
+* [addwatchlist()](#addwatchlist)
+* [deletewatchlist()](#deletewatchlist)
+</details>
+
+<details>
+<summary>Securities groups functions</summary>
+<br>
+
+* [getallsecuritiesgroups()](#getallsecuritiesgroups)
+</details>
+
+<details>
+<summary>Exchange function</summary>
+<br>
+
+* [get_exchange_rate()](#getexchangerate)
+</details>
+
+<details>
+<summary>Fact-sheet function</summary>
+<br>
+
+* [get_fact_sheets()](#getfactsheets)
+</details>
+
+<details>
+<summary>Functions for flask app</summary>
+<br>
+
+* [usd_to_cad()](#usdtocad)
+* [cad_to_usd()](#cadtousd)
+* [get_total_value()](#gettotalvalue)
+* [settings()](#settings)
+* [dashboard()](#dashboard)
+</details>
+
+<details>
+<summary>Public: assorted functions</summary>
+<br>
+
+* [public_find_securities_by_ticker()](#publicfindsecuritiesbyticker)
+* [public_find_securities_by_ticker_historical()](#publicfindsecuritiesbytickerhistorical)
+* [public_top_traded()](#publictoptraded)
+* [public_find_securities_news()](#publicfindsecuritiesnews)
+</details>
+
+<details>
+<summary>Public: Wealthsimple Trade operational status functions</summary>
+<br>
+
+* [summary_status()](#publicsummarystatus)
+* [current_status()](#publiccurrentstatus)
+* [previous_status()](#publicpreviousstatus)
 </details>
 
 
-
-* [Wsimple.find_securities()](#findsecurities)
-* [Wsimple.find_securities_by_id()](#findsecuritiesbyid)
-* [Wsimple.find_securities_by_id_historical()](#findsecuritiesbyidhistorical)
-
-* [Wsimple.get_activities()](#getactivities)
-* [Wsimple.get_activities_bookmark()](#getactivitiesbookmark)
-
-* [Wsimple.make_deposit()](#makedeposit)
-* [Wsimple.get_deposit()](#getdeposit)
-* [Wsimple.list_deposits()](#listdeposits)
-* [Wsimple.delete_deposit()](#deletedeposit)
-
-* [Wsimple.make_withdrawal()](#makewithdrawal)
-* [Wsimple.get_withdrawal()](#getwithdrawal)
-* [Wsimple.list_withdrawals()](#listwithdrawals)
-* [Wsimple.delete_withdrawal()](#deletewithdrawal)
-
-* [Wsimple.get_all_markets()](#getallmarkets)
-* [Wsimple.get_market_hours()](#getmarkethours)
-
-* [Wsimple.get_watchlist()](#getwatchlist)
-* [Wsimple.delete_watchlist()](#deletewatchlist)
-* [Wsimple.add_watchlist()](#addwatchlist)
-
-* [Wsimple.get_exchange_rate()](#getexchangerate)
-
-* [Wsimple.usd_to_cad()](#usdtocad)
-* [Wsimple.cad_to_usd()](#cadtousd)
-* [Wsimple.get_total_value()](#gettotalvalue)
-* [Wsimple.settings()](#settings)
-* [Wsimple.dashboard()](#dashboard)
-
-* [Wsimple.public_find_securities_by_ticker()](#publicfindsecuritiesbyticker)
-* [Wsimple.public_find_securities_by_ticker_historical()](#publicfindsecuritiesbytickerhistorical)
-* [Wsimple.public_top_traded()](#publictoptraded)
-* [Wsimple.public_find_securities_news()](#publicfindsecuritiesnews)
-* [Wsimple.summary_status()](#publicsummarystatus)
-* [Wsimple.current_status()](#publiccurrentstatus)
-* [Wsimple.previous_status()](#publicpreviousstatus)
-* [Wsimple.auth()](#auth)
 
 <a id="init"></a>
 

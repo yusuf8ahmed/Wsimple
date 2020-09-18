@@ -39,7 +39,11 @@ var ceo = document.getElementById("ceo");
 var website = document.getElementById("website");
 gradient.addColorStop(0, 'rgba(138, 192, 189, 1)');
 gradient.addColorStop(1, 'rgba(138, 192, 189, 0)');
-var socket = io("/stock");
+
+var socket = io("/stock", {
+    transports: ['websocket'],
+    upgrade: false
+});
 
 Array.prototype.contains = function (str) {
     return this.indexOf(str) > -1;
@@ -60,12 +64,21 @@ function buy_market() {
     return false;
 }
 
-function display_stock() {
+function display_stock(graph, info, position) {
     high.innerHTML = ''; whigh.innerHTML = ''; low.innerHTML = ''; wlow.innerHTML = '';
     open.innerHTML = ''; mktcap.innerHTML = ''; vol.innerHTML = ''; avgvol.innerHTML = '';
     pe.innerHTML = ''; yield_.innerHTML = ''; exg.innerHTML = ''; beta.innerHTML = '';
     debt.innerHTML = ''; revenue.innerHTML = ''; tassets.innerHTML = ''; gpm.innerHTML = '';
     cash.innerHTML = ''; growth.innerHTML = ''; ceo.innerHTML = ''; website.innerHTML = '';
+
+    var ticker_symbol_text = document.createTextNode(info.stock.symbol);
+    var ticker_name_text = document.createTextNode(info.stock.name);
+    var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
+    var about_text = document.createTextNode(info.fundamentals.description);
+    ticker_symbol.appendChild(ticker_symbol_text);
+    ticker_name.appendChild(ticker_name_text);
+    ticker_value.appendChild(ticker_value_text);
+    about.appendChild(about_text);
 
     var chart = new Chart(ctx, {
         type: 'line',
@@ -112,7 +125,9 @@ function display_stock() {
         }
     });
 
-    if ( position.keys().contains(info.id) ) {
+    position_dict = position.results[0].position_quantities;
+
+    if (position_dict.keys().contains(info.id)) {
         // this security is owned by you
         console.log("you own this security");
         sell_button.style.display = 'inline-block';
@@ -129,15 +144,15 @@ function display_stock() {
     vol.innerHTML = info.quote.volume;   
     avgvol.innerHTML = parseFloat(info.stock.avg_daily_volume_last_month).toFixed(2);
     pe.innerHTML = info.fundamentals.pe_ratio;   
-    yield_.innerHTML = `${info.fundamentals.yield * 100}%`;
+    yield_.innerHTML = `${parseFloat(info.fundamentals.yield * 100).toFixed(2)}%`;
     exg.innerHTML = info.stock.primary_exchange; 
     beta.innerHTML = info.fundamentals.beta;
     debt.innerHTML = info.fundamentals.company_debt;    
     revenue.innerHTML = info.fundamentals.company_revenue;
     tassets.innerHTML = info.fundamentals.total_assets; 
-    gpm.innerHTML = info.fundamentals.company_gross_profit_margin;
+    gpm.innerHTML = parseFloat(info.fundamentals.company_gross_profit_margin).toFixed(2);
     cash_.innerHTML = info.fundamentals.company_cash;    
-    growth.innerHTML = info.fundamentals.company_earnings_growth;
+    growth.innerHTML = parseFloat(info.fundamentals.company_earnings_growth).toFixed(2);
     ceo.innerHTML = info.fundamentals.company_ceo;  
     
     var stats_website_link = document.createElement("a");
@@ -146,15 +161,6 @@ function display_stock() {
     var stats_website_text = document.createTextNode("Website");
     stats_website_link.appendChild(stats_website_text);
     website.appendChild(stats_website_link);
-
-    var ticker_symbol_text = document.createTextNode(info.stock.symbol);
-    var ticker_name_text = document.createTextNode(info.stock.name);
-    var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
-    var about_text = document.createTextNode(info.fundamentals.description);
-    ticker_symbol.appendChild(ticker_symbol_text);
-    ticker_name.appendChild(ticker_name_text);
-    ticker_value.appendChild(ticker_value_text);
-    about.appendChild(about_text);
     
     for (const stock_chart of graph.results.slice(1)) {
         var date = new Date('1970-01-01T' +stock_chart.time  + 'Z');
@@ -169,8 +175,15 @@ function display_stock() {
 
 }
 
-function display_etf() {
-
+function display_etf(graph, info, position) {
+    var ticker_symbol_text = document.createTextNode(info.stock.symbol);
+    var ticker_name_text = document.createTextNode(info.stock.name);
+    var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
+    var about_text = document.createTextNode(info.fundamentals.description);
+    ticker_symbol.appendChild(ticker_symbol_text);
+    ticker_name.appendChild(ticker_name_text);
+    ticker_value.appendChild(ticker_value_text);
+    about.appendChild(about_text);
 }
 
 socket.on('invalid_token', function (data) {
@@ -180,13 +193,15 @@ socket.on('invalid_token', function (data) {
 
 socket.on('connect', function () {
     console.log("connected");
-    var sec_id = window.location.pathname;
-    socket.emit("get_security_info", sec_id.split("/")[2]);
+    var sec_id = window.location.pathname.split("/")[2];
+    console.log(sec_id);
+    socket.emit("get_security_info", sec_id);
 });
 
 socket.on('return_stock_info', function (data) {
-    console.log("return stock search");
-    console.dir(data);    
+    console.log("stock search");
+    console.dir(data);  
+      
     var graph = data[0];
     var info = data[1];
     var position = data[2];
@@ -197,12 +212,17 @@ socket.on('return_stock_info', function (data) {
     activities.innerHTML = '';
     about.innerHTML = '';    
 
-    if (info.security_type == "us_stocks" || "canadian_stocks") {
-        display_stock();
-        console.log("stock");
+    console.log(info.asset_class, info.security_type);
+
+    stock_asset_classes = ["us_stocks", "canadian_stocks", "individual_stocks"];
+    if ((stock_asset_classes.contains(info.asset_class)) && (info.security_type == "equity") ) {
+        display_stock(graph, info, position);
+        console.log("display stock");
     } else if (info.security_type == "exchange_traded_fund") {
-        display_etf();
-        console.log("etf");
+        display_etf(graph, info, position);
+        console.log("display etf");
+    } else {
+        console.log("display unknown equity type")
     }
     // socket.emit("get_security_info", [info.id]);
 });

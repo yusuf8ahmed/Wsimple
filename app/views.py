@@ -2,6 +2,7 @@ import sys
 
 from app import app, session, render_template, redirect
 from app import socketio, thread, thread_lock, TIME
+from app import ALLOW_DASH, ALLOW_SETTINGS, ALLOW_STOCK_INFO
 from app.forms import LoginForm
 from app.api import Wsimple
 from app.api import LoginError 
@@ -48,10 +49,8 @@ def search():
 @app.route('/search/<sec_id>', methods=['POST', 'GET']) 
 def search_stock(sec_id):
     try:
-        # account = str(session["key"]).split(",")
-        # login = Wsimple.auth(account[0], account[1])
-        # if "OK" in login:  
-            return render_template("stock.html")
+        print(f"route stock: {sec_id}")
+        return render_template("stock.html")
     except KeyError:
         return redirect('/')    
     
@@ -127,9 +126,11 @@ def stock_info(data):
     """Example of how to send server generated events to clients."""
     ws = Wsimple.access()
     tokens = data[0]
+    sec_id = data[1]
+    print(f"socket stock: {sec_id}")
     while True:
         try:
-            re_stock_info = ws.stock(tokens, data[1], time="1d")
+            re_stock_info = ws.stock(tokens, sec_id, time="1d")
             socketio.sleep(TIME)
             socketio.emit('return_stock_info', re_stock_info, namespace='/stock')
         except InvalidAccessTokenError as e:

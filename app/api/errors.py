@@ -10,6 +10,12 @@ class MethodInputError(Exception):
     #     super().__init__(self.message)
     pass
 
+class EmptyTokensError(Exception):
+    # def __init__(self):
+    #     self.message = "Invalid Access Token Error has"
+    #     super().__init__(self.message)
+    pass
+
 class InvalidAccessTokenError(Exception):
     # def __init__(self):
     #     self.message = "Invalid Access Token Error has"

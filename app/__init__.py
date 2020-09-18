@@ -1,3 +1,5 @@
+from gevent import monkey
+monkey.patch_all()
 # wsimple api part
 from .api import Wsimple
 
@@ -23,7 +25,8 @@ if not __name__ == "__main__":
     # kill $(lsof -ti:3000)
 
     app = Flask(__name__)
-    socketio = SocketIO(app, manage_session=False)
+    socketio = SocketIO(app, manage_session=False, logger=True)
+    build = "01/09/2020"
     app.debug = True
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
     app.config['SESSION_TYPE'] = 'filesystem'
