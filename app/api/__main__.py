@@ -12,7 +12,6 @@ from .errors import InvalidAccessTokenError, InvalidRefreshTokenError
 # third party
 import requests
 
-
 class Wsimple:
     # class assumes first id in account/list is for trading
     base_url = "https://trade-service.wealthsimple.com/"
@@ -410,21 +409,31 @@ class Wsimple:
             return r.json()
 
     #! activities functions
-    def get_activities(self, tokens):
+    def get_activities(self, tokens, account_id: Optional[str] = None, limit:int = 20, type:str = "all"):
         """
         Provides the most recent 20 activities (deposits, dividends, orders, etc).   
         on this WealthSimple Trade account.  
-        ?type ->> ?type=deposit, ?type=dividend.    
-        ?limit ->> less than 100.    
-        ?bookmark ->> where bookmark is return by each GET that can be used for the subsequent.    
+        WHERE type is the activites type you want can be deposit, withdrawal, dividend, buy, sell
+        WHERE limit is the limitation of the response has to be less than 100.       
         ^> pages in following calls.    
         ?account-id ->> ??????. 
         """
-        logger.debug("get_activities")
-        r = requests.get(
-            url="{}account/activities".format(self.base_url),
-            headers=tokens[0]
-        )
+        if not 1 < limit < 100:
+            raise MethodInputError
+        if account_id == None:
+            account_id = self.get_account(tokens)["results"][0]["id"]
+        if type == "all":
+            logger.debug("get_activities")
+            r = requests.get(
+                url="{}account/activities".format(self.base_url),
+                headers=tokens[0]
+            )
+        else:
+            logger.debug("get_activities")
+            r = requests.get(
+                url="{}account/activities?type={}".format(self.base_url, type),
+                headers=tokens[0]
+            )
         logger.debug(f"get_activities {r.status_code}")
         if r.status_code == 401:
             raise InvalidAccessTokenError
