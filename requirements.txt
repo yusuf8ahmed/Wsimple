@@ -2,7 +2,7 @@ cachelib==0.1.1
 certifi==2020.6.20
 chardet==3.0.4
 click==7.1.2
-dnspython==1.16.0
+dnspython==2.0.0
 email-validator==1.1.1
 eventlet==0.26.1
 Flask==1.1.2
@@ -21,7 +21,7 @@ lxml==4.5.2
 MarkupSafe==1.1.1
 monotonic==1.5
 multitasking==0.0.9
-numpy==1.19.1
+numpy==1.19.2
 pandas==1.1.1
 python-dateutil==2.8.1
 python-dotenv==0.14.0
