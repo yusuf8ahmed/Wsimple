@@ -36,10 +36,12 @@ class Wsimple:
 
     def __init__(self, email, password, verbose=False, access_mode=False, tokens=""):
         """
-        Initializes and sets Access and Refresh tokens. The LOGIN endpoint.    
-        initializes a new session for the given email and password set. If.     
-        the login is successful, access and refresh tokens are returned in.   
-        the headers. The access token is the key for invoking all other endpoints.
+        This function initializes and logs the user in using the provided 
+        email and password. Alternatively, access_mode can be set to True then, 
+        users can access misc functions without using a Wealthsimple Trade account.
+        If the login is successful, access and refresh tokens are returned in the 
+        header. The access token is the key for invoking all endpoints 
+        that are not considered misc.  
         """
         self.logger = logger
         # self.logger.add("logfiles/file_{time}.log",  rotation="1 day")
@@ -48,6 +50,7 @@ class Wsimple:
         self.access_mode = access_mode
         self.verbose = verbose
         if self.access_mode:
+            # set function argument tokens to self.tokens
             pass
         else:
             payload = dict(email=email, password=password)
@@ -68,7 +71,7 @@ class Wsimple:
     @classmethod
     def access(cls, verbose=False):
         """
-        access api by using tokens
+        access misc functions without logging in
         """
         wsimple = cls("", "", verbose=verbose, access_mode=True)
         return wsimple
@@ -88,7 +91,8 @@ class Wsimple:
             self.logger.debug(f"refresh token {r.status_code} code")
             self._access_token = r.headers['X-Access-Token']
             self._refresh_token = r.headers['X-Refresh-Token']
-            return [{'Authorization': self._access_token}, {"refresh_token": self._refresh_token}]
+            self.tokens = [{'Authorization': self._access_token}, {"refresh_token": self._refresh_token}]
+            return self.tokens
 
     #! account related functions
     def get_account(self, tokens):
@@ -106,14 +110,13 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_historical_account_data(self, tokens, account: str = None, time: str = "1d"):
+    def get_historical_portfolio_data(self, tokens, account: str = None, time: str = "1d"):
         """
-        The HISTORY_ACCOUNT endpoint provides historical snapshots of the.   
-        WealthSimple account for a specified timeframe.  
-        1.Where TIME is one of [1d, 1w, 1m, 3m, 1y, all] autoset 1d.    
-        2.Where ACCOUNT is the account id received from /account/list: autoset to first accounts_id.  
+        Grabs historical portfolio info for your Wealthsimple Trade account for a specified timeframe. 
+        Where __time__ is one of [1d, 1w, 1m, 3m, 1y, all]: autoset 1d.    
+        Where __account__ is the account_id received from [get_account](#getaccount): autoset to first accounts_id.    
         """
-        logger.debug("get_historical_account_data call")
+        logger.debug("get_historical_portfolio_data call")
         if account == None:
             account = self.get_account(tokens)["results"][0]["id"]
         r = requests.get(
@@ -121,7 +124,7 @@ class Wsimple:
                 self.base_url, time, account),
             headers=tokens[0]
         )
-        logger.debug(f"get_historical_account_data {r.status_code}")
+        logger.debug(f"get_historical_portfolio_data {r.status_code}")
         if r.status_code == 401:
             raise InvalidAccessTokenError
         else:
@@ -129,7 +132,7 @@ class Wsimple:
 
     def get_me(self, tokens):
         """
-        Get Basic info of this WealthSimple Trade account.
+        Grabs Basic information about your Wealthsimple Trade account.
         """
         logger.debug("get_me call")
         r = requests.get(
@@ -144,7 +147,7 @@ class Wsimple:
 
     def get_person(self, tokens):
         """
-        Get more Advanced-Personal info of this WealthSimple Trade account. 
+        Grabs Advanced/Personal information about your Wealthsimple Trade account. 
         """
         logger.debug("get_person")
         r = requests.get(
@@ -159,7 +162,7 @@ class Wsimple:
 
     def get_bank_accounts(self, tokens):
         """
-        Get all linked bank accounts under the WealthSimple Trade account.
+        Grabs all bank accounts under to your Wealthsimple Trade account. 
         """
         logger.debug("get_bank_accounts")
         r = requests.get(
@@ -174,7 +177,7 @@ class Wsimple:
 
     def get_positions(self, tokens):
         """
-        Get all current position held by this WealthSimple Trade account. 
+        Grabs all securities held by your WealthSimple Trade account.    
         """
         logger.debug("get_positions")
         r = requests.get(
@@ -215,8 +218,8 @@ class Wsimple:
         """
         Places an order for a security.
         """
-        assert (order_type == 'sell_quantity' or 'buy_quantity')
-        assert (sub_type == 'market' or sub_type == 'limit')
+        assert (order_type == 'sell_quantity' or order_type == 'buy_quantity')
+        assert (sub_type == 'market' or sub_type == 'limit' or sub_type == 'stop_limit')
         if gtc:
             time_in_force = 'until_cancel'
         else:
@@ -248,7 +251,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def buy_market_order(self,
+    def market_buy_order(self,
                          tokens,
                          security_id: str,
                          account_id: Optional[str] = None,
@@ -273,7 +276,7 @@ class Wsimple:
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
-    def sell_market_order(self,
+    def market_sell_order(self,
                           tokens,
                           security_id: str,
                           account_id: Optional[str] = None,
@@ -295,7 +298,7 @@ class Wsimple:
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
-    def buy_limit_order(self,
+    def limit_buy_order(self,
                         tokens,
                         security_id,
                         limit_price,
@@ -321,7 +324,7 @@ class Wsimple:
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
-    def sell_limit_order(self,
+    def limit_sell_order(self,
                          tokens,
                          limit_price,
                          security_id,
@@ -347,10 +350,36 @@ class Wsimple:
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
+    def stop_limit_buy_order(self,
+                             tokens,
+                             stop,
+                             limit_price,
+                             security_id,
+                             account_id: Optional[str] = None,
+                             quantity=1,
+                             gtc=False):
+        """
+        Places a limit sell order for a security.  
+        """
+        raise NotImplementedError
+    
+    def stop_limit_sell_order(self,
+                              tokens,
+                              stop,
+                              limit_price,
+                              security_id,
+                              account_id: Optional[str] = None,
+                              quantity=1,
+                              gtc=False):
+        """
+        Places a limit sell order for a security.  
+        """
+        raise NotImplementedError
+    
     def delete_order(self, tokens, order: str):
         """
-        Cancels a specific order by its id.    
-        1.Where ORDER is order_id from place order. 
+        Cancels a order by its id.    
+        Where __order__ is order_id from the return of the above functions.   
         """
         logger.debug("delete_order")
         r = requests.delete(
@@ -367,7 +396,7 @@ class Wsimple:
     def find_securities(self, tokens, ticker: str):
         """
         Grabs information about the security resembled by the ticker.    
-        1.Where TICKER is the ticker of the company, API will fuzzy.     
+        1.Where ticke is the ticker of the company, API will fuzzy.     
         match this argument and therefore multiple results can appear. 
         """
         logger.debug("find_securities")
@@ -398,9 +427,10 @@ class Wsimple:
 
     def find_securities_by_id_historical(self, tokens, sec_id: str, time: str = "1d", mic: str = "XNAS"):
         """
-        Grabs information about the security resembled by the security id in a a specified timeframe.   
-        1.Where TIME is one of [1d, 1w, 1m, 3m, 1y, all] default to 1d.   
-        ?mic=XNAS: (XNAS: "US", XNYS: "US", XTSE: "CA", XTSX: "CA", BATS: "US", NEOE: "CA").   
+        Grabs historical information about the security by the security id in a specified timeframe.
+        Where __sec_id__ is the internal security id of the security    
+        Where __time_ is the timeframe one of [1d, 1w, 1m, 3m, 1y, all] autoset "1d".
+        Where __mic__ is the Market Identifier Code for the exchange autoset "XNAS"
         """
         logger.debug("find_securities_by_id_historical")
         r = requests.get(
@@ -417,12 +447,10 @@ class Wsimple:
     #! activities functions
     def get_activities(self, tokens, account_id: Optional[str] = None, limit:int = 20, type:str = "all"):
         """
-        Provides the most recent 20 activities (deposits, dividends, orders, etc).   
-        on this WealthSimple Trade account.  
-        WHERE type is the activites type you want can be deposit, withdrawal, dividend, buy, sell
-        WHERE limit is the limitation of the response has to be less than 100.       
-        ^> pages in following calls.    
-        ?account-id ->> ??????. 
+        Provides the most recent 20 activitieson this Wealthsimple Trade account.  
+        Where type is the activites type you want can be ["deposit", "withdrawal", "dividend", "buy", "sell"] autoset to "all"
+        Where limit is the limitation of the response has to be less than 100 autoset 20.       
+        Where account_id is the id of your Wealthsimple Trade account.
         """
         if not 1 < limit < 100:
             raise MethodInputError
@@ -431,13 +459,13 @@ class Wsimple:
         if type == "all":
             logger.debug("get_activities")
             r = requests.get(
-                url="{}account/activities".format(self.base_url),
+                url="{}account/activities?account-id={}".format(self.base_url, account_id),
                 headers=tokens[0]
             )
         else:
             logger.debug("get_activities")
             r = requests.get(
-                url="{}account/activities?type={}".format(self.base_url, type),
+                url="{}account/activities?type={}&account-id={}".format(self.base_url, type, account_id),
                 headers=tokens[0]
             )
         logger.debug(f"get_activities {r.status_code}")
@@ -448,9 +476,8 @@ class Wsimple:
 
     def get_activities_bookmark(self, tokens, bookmark):
         """
-        Provides the last 20 activities (deposits, dividends, orders, etc) on the WealthSimple Trade.   
-        account based on the url query bookmark.   
-        ?bookmark ->> [long string of alphanumeric characters from the response of [Wsimple.get_activities()](#getactivities) ].   
+        Provides the last 20 activities on the Wealthsimple Trade based on the bookmark.   
+        Where bookmark is the string that is that is in the response of [get_activities()](#getactivities).   
         """
         logger.debug("get_activities_bookmark")
         r = requests.get(
@@ -465,14 +492,19 @@ class Wsimple:
             return r.json()
 
     #! withdrawal functions
-    def make_withdrawal(self, tokens, amount: int, currency: str = "CAD", bank_account_id: str = None, account_id: str = None):
+    def make_withdrawal(self,
+                        tokens, 
+                        amount: int,
+                        currency: str = "CAD",
+                        bank_account_id: str = None,
+                        account_id: str = None):
         """
-        make a withdrawal under this WealthSimple Trade account.
-        1.Where amount is the amount to withdraw
-        2.Where currency is the currency need to be withdrawn(only CAD): autoset to "CAD"
-        3.Where bank_account_id is id of bank account where the money is going to be withdrawn from (can be found in get_bank_accounts function)
+        make a withdrawal under your Wealthsimple Trade account.
+        Where __amount__ is the amount to withdraw
+        Where __currency__ is the currency need to be withdrawn(only CAD): autoset to "CAD"
+        Where __bank_account_id__ is id of bank account where the money is going to be withdrawn from (can be found in get_bank_accounts function)
         if bank_account_id is not passed then it will pick the first result.
-        4.Where account_id is id of the account that is withdrawing the money (can be found in get_account function).
+        Where __account_id__ is id of the account that is withdrawing the money (can be found in get_account function).
         if account_id is not passed then it will pick the first result.
         """
         logger.debug("make_withdrawal")
@@ -504,9 +536,9 @@ class Wsimple:
 
     def get_withdrawal(self, tokens, funds_transfer_id: str):
         """
-        Get specific withdrawal under this WealthSimple Trade account.
-        1.Where funds_transfer_id is the id of the transfer and is in the result of make_withdrawal function
-        but can be also found in list_withdrawals function
+        Get specific withdrawal under this Wealthsimple Trade account.
+        Where __funds_transfer_id__ is the id of the transfer and is in the result of
+        make_withdrawal function but can be also found in list_withdrawals function
         """
         logger.debug("get_withdrawal")
         r = requests.get(
@@ -521,7 +553,7 @@ class Wsimple:
 
     def list_withdrawals(self, tokens):
         """
-        Get all withdrawals under this WealthSimple Trade account.
+        Get all withdrawals under your Wealthsimple Trade account.
         """
         logger.debug("list_withdrawals")
         r = requests.get(
@@ -536,7 +568,7 @@ class Wsimple:
 
     def delete_withdrawal(self, tokens, funds_transfer_id: str):
         """
-        Delete a specific withdrawals under this WealthSimple Trade account.
+        Delete a specific withdrawal your Wealthsimple Trade account.
         """
         logger.debug("delete_withdrawal")
         r = requests.delete(
@@ -550,14 +582,18 @@ class Wsimple:
             return r.json()
 
     #! deposits functions
-    def make_deposit(self, tokens, amount: int, currency: str = "CAD", bank_account_id: str = None, account_id: str = None):
+    def make_deposit(self, 
+                     tokens, 
+                     amount: int, currency: str = "CAD", 
+                     bank_account_id: str = None, 
+                     account_id: str = None):
         """
-        make a deposit under this WealthSimple Trade account.
-        1.Where amount is the amount to deposit
-        2.Where currency is the currency need to be transferred(Only CAD): autoset to "CAD"
-        3.Where bank_account_id is id of bank account where the money is going to be deposited to (can be found in get_bank_accounts function)
+        make a deposit under your Wealthsimple Trade account.
+        Where __amount__ is the amount to deposit
+        Where __currency__ is the currency need to be transferred(Only CAD): autoset to "CAD"
+        Where __bank_account_id__ is id of bank account where the money is going to be deposited to (can be found in get_bank_accounts function)
         if bank_account_id is not passed then it will pick the first result.
-        4.Where account_id is id of the account that is depositing the money (can be found in get_account function).
+        Where __account_id__ is id of the account that is depositing the money (can be found in get_account function).
         if account_id is not passed then it will pick the first result.
         """
         logger.debug("make_deposits")
@@ -587,8 +623,8 @@ class Wsimple:
     def get_deposit(self, tokens, funds_transfer_id: str):
         """
         Get specific deposit under this WealthSimple Trade account.
-        1.Where funds_transfer_id is the id of the transfer and is in the result of make_deposit function
-        but can be also found in list_deposits function
+        Where funds_transfer_id is the id of the transfer and is in the result of 
+        make_deposit function but can be also found in list_deposits function
         """
         logger.debug("get_deposits")
         r = requests.get(
@@ -603,7 +639,7 @@ class Wsimple:
 
     def list_deposits(self, tokens):
         """
-        Get all deposits under this WealthSimple Trade account.
+        Get all deposits under your WealthSimple Trade account.
         """
         logger.debug("list_deposits")
         r = requests.get(
@@ -618,7 +654,7 @@ class Wsimple:
 
     def delete_deposit(self, tokens, funds_transfer_id: str):
         """
-        Delete a specific deposit under this WealthSimple Trade account.
+        Delete a specific deposit under your WealthSimple Trade account.
         """
         logger.debug("delete_deposits")
         r = requests.delete(
@@ -651,8 +687,8 @@ class Wsimple:
     def get_market_hours(self, tokens, exchange: str):
         """
         Get all data about a specific exchange.  
-        1.Where EXCHANGE is the ticker of the company, can be only.     
-        ("TSX","CSE","NYSE","BATS","FINRA","OTCBB","TSX-V","NASDAQ","OTC MARKETS","AEQUITAS NEO EXCHANGE")
+        Where __exchange__ is the ticker of the company, can be only.     
+        {"TSX","CSE","NYSE","BATS","FINRA","OTCBB","TSX-V","NASDAQ","OTC MARKETS","AEQUITAS NEO EXCHANGE"}
         """
         try:
             logger.debug("get_market_hours")
@@ -670,7 +706,7 @@ class Wsimple:
     #! watchlist functions
     def get_watchlist(self, tokens):
         """
-        Get all securities under the watchlist in this WealthSimple Trade account. 
+        Get all watchlisted securities in your Wealthsimple trade account. 
         """
         logger.debug("get_watchlist")
         r = requests.get(
@@ -686,7 +722,7 @@ class Wsimple:
     def add_watchlist(self, tokens, sec_id):
         """
         Add security under this WealthSimple Trade account.    
-        1.Where SEC_ID is the security id for the security you want to add.            
+        Where __sec_id__ is the security id for the security you want to add.            
         """
         logger.debug("add_watchlist")
         r = requests.put(
@@ -701,8 +737,8 @@ class Wsimple:
 
     def delete_watchlist(self, tokens, sec_id):
         """
-        Delete a security from watchlist under this WealthSimple Trade account.  
-        1.Where SEC_ID is the security id for the security you want to delete.  
+        Delete a watchlisted securities in your WealthSimple Trade account.  
+        Where __sec_id__ is the security id for the security you want to delete. 
         """
         logger.debug("delete_watchlist")
         r = requests.delete(
@@ -748,14 +784,14 @@ class Wsimple:
         else:
             return r.json()
 
-    #! get_all_securities_groups
-    def get_all_securities_groups(self, tokens, offset=0, limit=25, sort_order="asc"):
+    #! securities groups functions
+    def get_all_securities_groups(self, tokens, offset=0, limit=25, sort_order="desc"):
         """
-        Grabs about all security groups
-        WHERE offset is >= 0 and defaults to 0
-        WHERE limit is >= 1 and <=250 and defaults to 25
-        WHERE sort_order is order of the results and can be "asc" or "desc" 
-        but defaults to "desc"
+        Grabs all security groups under Wealthsimple trade
+        Where __offset__ is >= 0 and autoset to 0
+        Where __limit__ is the limitation of the response, has to be greater than 1
+        and less than 250 and autoset to 25
+        Where __sort_order__ is order of the results and can be ["asc", "desc"] autoset to "desc"
         """
         if not (1 <= limit <= 250):
             raise MethodInputError
@@ -805,7 +841,7 @@ class Wsimple:
         """  
         not working correctly
         """
-        logger.debug("usd to cad => not working correctly")
+        logger.warning("not working correctly")
         forex = self.get_exchange_rate(tokens)['USD']
         buy_rate = forex['buy_rate']
         return round(amount * buy_rate, 3)
@@ -814,7 +850,7 @@ class Wsimple:
         """
         not working correctly
         """
-        logger.debug("cad to usd => not working correctly")
+        logger.warning("cad to usd => not working correctly")
         forex = self.get_exchange_rate(tokens)['USD']
         sell_rate = forex['sell_rate']
         return round(amount * sell_rate, 2)
@@ -872,7 +908,7 @@ class Wsimple:
         logger.debug("dashboard")
         try:
             account = self.get_account(tokens)["results"][0]
-            account_data = self.get_historical_account_data(tokens)
+            account_data = self.get_historical_portfolio_data(tokens)
             watchlist = self.get_watchlist(tokens)
             positions = self.get_positions(tokens)
 
@@ -921,10 +957,6 @@ class Wsimple:
     @staticmethod
     def public_find_securities_by_ticker(ticker):
         """
-        staticmethod: get a company historical data by the ticker.    
-        1.Where TICKER is the ticker of the company you want to search for.    
-        Ex. AMZN, APPL, GOOGL, SPY. May not work on smaller companies, ETF.    
-        ?May not work on smaller companies or ETFs.  
         """
         base_url_public = "https://trade-service.wealthsimple.com/public/"
         r = requests.get(
@@ -1007,7 +1039,7 @@ class Wsimple:
         return json.loads(r.content)
 
     @staticmethod
-    def previous_status():
+    def historical_status():
         """
         staticmethod: get all previous history status/incidents of wealthsimple trade.   
         ?the data is in json format in body/content, json is large.  
