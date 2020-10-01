@@ -37,4 +37,4 @@ Werkzeug==1.0.1
 WTForms==2.3.3
 yfinance==0.1.54
 zope.event==4.5.0
-zope.interface==5.1.0
+zope.interface==5.1.1
