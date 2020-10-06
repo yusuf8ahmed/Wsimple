@@ -10,17 +10,53 @@ import sys
 import json
 import pprint
 import datetime
+from sys import platform
 from loguru import logger
 from typing import Union, Optional
 # custom error
 from .errors import LoginError, MethodInputError
 from .errors import InvalidAccessTokenError, InvalidRefreshTokenError
+from .errors import WSOTPUser, WSOTPError
 # third party
 import requests
 
 class Wsimple:
     # class assumes first id in account/list is for trading
+    # 73 methods and 5 attributes
     base_url = "https://trade-service.wealthsimple.com/"
+    time_ranges = ['1d', '1w', '1m', '3m', '1y', 'all']
+    email_notification = [ 
+        'deposits',
+        'withdrawals',
+        'orders',
+        'dividends', 'referrals',
+        'institutional_transfers',
+        'news_and_announcements',
+        'promos_and_tips'
+    ]
+    push_notification = [
+        'deposits',
+        'withdrawals',
+        'orders',
+        'dividends',
+        'referrals',
+        'institutional_transfers',
+    ]
+    bank_logos = {
+        "TD Canada Trust": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/td.png",
+        "Royal Bank of Canada": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/rbc.png",
+        "Tangerine Bank": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/tangerine.png",
+        "CIBC": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/cibc.png",
+        "Bank of Montreal": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/bmo.png",
+        "Scotiabank": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/scotiabank.png",
+        "Sun Life": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/sunlife.png",
+        "Manulife": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/manulife.png",
+        "Simplii Financial": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/simplii.png",
+        "Great West Life": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/gwl.png",
+        "Investors Group": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/investors-group.png",
+        "Fidelity": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/fidelity.png",
+        "National Bank of Canada": "https://s3.amazonaws.com/bank-verification-ui/institution-logos/nbcn.png"
+    }
     exh_to_mic = {
         "TSX": "XTSE",
         "CSE": "XCNQ",
@@ -34,7 +70,14 @@ class Wsimple:
         "AEQUITAS NEO EXCHANGE": "NEOE"
     }
 
-    def __init__(self, email, password, verbose=False, access_mode=False, tokens=""):
+    def __init__(self, 
+                 email,
+                 password, 
+                 verbose_mode=False, 
+                 access_mode=False, 
+                 otp_mode=False,
+                 otp_number=0, 
+                 tokens=""):
         """
         This function initializes and logs the user in using the provided 
         email and password. Alternatively, access_mode can be set to True then, 
@@ -43,39 +86,67 @@ class Wsimple:
         header. The access token is the key for invoking all endpoints 
         that are not considered misc.  
         """
-        self.logger = logger
-        # self.logger.add("logfiles/file_{time}.log",  rotation="1 day")
-        self.logger.add(
-            sys.stderr, format="{time} {level} {message}", filter="my_module", level="DEBUG")
+        otp_status = None
+        self.logger = logger # self.logger.add("logfiles/file_{time}.log",  rotation="1 day")
+        self.logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="DEBUG")
         self.access_mode = access_mode
-        self.verbose = verbose
+        self.verbose = verbose_mode
         if self.access_mode:
             # set function argument tokens to self.tokens
             pass
         else:
-            payload = dict(email=email, password=password)
+            #"create_account": not 1
+            print(f"password: {password}")
+            payload = {"email":email, "password":password, "timeoutMs": 2e4}
+            if otp_mode:
+                payload["otp"] = otp_number
+                # otp_status = r.status_code
             r = requests.post(
                 url="{}auth/login".format(self.base_url),
                 data=payload
-            )
-            del password
-            if r.status_code == 200:
-                self._access_token = r.headers['X-Access-Token']
-                self._refresh_token = r.headers['X-Refresh-Token']
-                self.tokens = [{'Authorization': self._access_token}, {
-                    "refresh_token": self._refresh_token}]
-                del r
-            else:
-                raise LoginError
-
+            ) 
+            del payload
+            print(f"Login status code {r.status_code}")
+            # one time password code
+            if "x-wealthsimple-otp" in r.headers:
+                print("Need to Login with one time password")
+                try:
+                    otp_headers = r.headers['x-wealthsimple-otp'].replace(" ", "").split(";")
+                    method = otp_headers[1][7:] 
+                    self._otp_info = {  
+                                    "required": (otp_headers[0]),
+                                    "method": otp_headers[1][7:]
+                                }
+                    if method == "sms":
+                            self._otp_info["digits"] = otp_headers[2][7:]
+                except:
+                    raise WSOTPError
+                finally:
+                    raise WSOTPUser
+            else:         
+                if r.status_code == 200:
+                    self._access_token = r.headers['X-Access-Token']
+                    self._refresh_token = r.headers['X-Refresh-Token']
+                    self.tokens = [{'Authorization': self._access_token}, {
+                        "refresh_token": self._refresh_token}]
+                    del r
+                else:
+                    raise LoginError
+                         
     @classmethod
     def access(cls, verbose=False):
         """
         access misc functions without logging in
         """
-        wsimple = cls("", "", verbose=verbose, access_mode=True)
+        wsimple = cls("", "", verbose_mode=verbose, access_mode=True)
         return wsimple
 
+    @classmethod
+    def otp_login(cls, email, password, otp_number):
+        #as i don't want to hold email or password, the email and password will have to be sent again
+        wsimple = cls(email, password, otp_mode=True, otp_number=otp_number)
+        return wsimple
+        
     def refresh_token(self, tokens):
         """
         Generates and applies a new set of access and refresh tokens.  
@@ -95,6 +166,21 @@ class Wsimple:
             return self.tokens
 
     #! account related functions
+    def get_account_ids(self, tokens):
+        """
+        Grabs account ids of this WealthSimple Trade account. 
+        """
+        try:
+            logger.debug("get_account_ids call")
+            accounts = self.get_account(tokens)["results"]
+            account_ids = []
+            for account in accounts:
+                account_ids.append(account["id"])
+            logger.debug(f"get_account_ids XXX")
+            return account_ids  
+        except InvalidAccessTokenError:
+            raise InvalidAccessTokenError
+
     def get_account(self, tokens):
         """
         Grabs account info of this WealthSimple Trade account. 
@@ -170,6 +256,21 @@ class Wsimple:
             headers=tokens[0]
         )
         logger.debug(f"get_bank_accounts {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError()
+        else:
+            return r.json()
+
+    def delete_bank_accounts(self, tokens, bank_account_id):
+        """
+        Grabs all bank accounts under to your Wealthsimple Trade account. 
+        """
+        logger.debug("delete_bank_accounts")
+        r = requests.delete(
+            url="{}bank-accounts/{}".format(self.base_url, bank_account_id),
+            headers=tokens[0]
+        )
+        logger.debug(f"delete_bank_accounts {r.status_code}")
         if r.status_code == 401:
             raise InvalidAccessTokenError()
         else:
@@ -758,7 +859,7 @@ class Wsimple:
         """
         logger.debug("get_exchange_rate")
         r = requests.get(
-            url="{}forex".format(self.base_url),
+            url="{}api/statements".format(self.base_url),
             headers=tokens[0]
         )
         logger.debug(f"get_exchange_rate {r.status_code}")
@@ -785,6 +886,81 @@ class Wsimple:
             return r.json()
 
     #! securities groups functions
+    def get_top_losers_securities(self, tokens, offset=0,limit=20):
+        """
+        Grab a list of top losers securities under Wealthsimple trade today
+        """
+        logger.debug("get_top_losers_securities")
+        r = requests.get(
+            url='{}securities/top_market_movers?type=losers&limit={}'.format(self.base_url, limit),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_top_losers_securities {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json() 
+
+    def get_top_gainers_securities(self, tokens, offset=0,limit=20):
+        """
+        Grab a list of top gainers securities under Wealthsimple trade today
+        """
+        logger.debug("get_top_gainers_securities")
+        r = requests.get(
+            url='{}securities/top_market_movers?type=gainers&limit={}'.format(self.base_url,limit),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_top_gainers_securities {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()  
+    
+    def get_most_active_securities(self, tokens,  offset=0,limit=20):
+        """
+        Grab a list of most active securities under Wealthsimple trade today
+        """
+        logger.debug("get_most_active_securities")
+        r = requests.get(
+            url='{}securities/top_market_movers?type=most_active&limit={}'.format(self.base_url, limit),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_most_active_securities {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()      
+    
+    def get_most_watched_securities(self, tokens, offset=0,limit=20):
+        """
+        Grabs all most watched securities under Wealthsimple trade today
+        """
+        logger.debug("get_most_watched_securities")
+        r = requests.get(
+            url='{}securities/most_watched?offset={}&limit={}'.format(self.base_url, offset, limit),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_most_watched_securities {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()    
+    
+    def get_featured_security_groups(self, tokens):
+        """
+        Grabs all featured security groups under Wealthsimple trade today
+        """
+        logger.debug("get_featured_security_groups")
+        r = requests.get(
+            url='{}security-groups/featured'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_featured_security_groups {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+    
     def get_all_securities_groups(self, tokens, offset=0, limit=25, sort_order="desc"):
         """
         Grabs all security groups under Wealthsimple trade
@@ -793,7 +969,7 @@ class Wsimple:
         and less than 250 and autoset to 25
         Where __sort_order__ is order of the results and can be ["asc", "desc"] autoset to "desc"
         """
-        if not (1 <= limit <= 250):
+        if not (1 <= limit < 100):
             raise MethodInputError
         elif not offset >= 0:
             raise MethodInputError
@@ -810,31 +986,208 @@ class Wsimple:
             raise InvalidAccessTokenError
         else:
             return r.json()
-
-    #! /institutional_transfers
-    # i don't understand wot it does
-
-    #! /transfer_institutions
-    # lists all available transfer institutions useless
-
-    #! /relinquishing_accounts
-    # i don't understand wot it does
-
-    #! /documents
-    # General endpoint for uploading/retrieving documents
+        
+    #! mobile dashboard functions
+    def get_mobile_dashboard(self, tokens):
+        """
+        Get all info that is loaded when you Wealthsimple 
+        account dashboard
+        """
+        logger.debug("get_mobile_dashboard")
+        r = requests.get(
+            url='{}mobile-dashboard'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_mobile_dashboard {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+     
+    #! notification controls
+    def get_disabled_notifications(self, token):
+        logger.debug("get_disabled_notifications")
+        r = requests.get(
+            url='{}mute-notifications'.format(self.base_url),
+            headers=token[0]
+        )
+        logger.debug(f"get_disabled_notifications {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+    
+    def _notification(self, token, type, platform, enable=True):
+        logger.debug(f"get_disabled_notifications {type} {platform} {enable}")
+        if platform not in ["push", "email"]:
+            raise MethodInputError("""
+            platform given in incorrect use either 'push' (for mobile notifications) or 'email' (for email notifications)
+            """)
+        if enable: 
+            # enable notification here: delete req
+            r = requests.delete(
+                url='{}mute-notifications/{}/{}'.format(self.base_url, type, platform),
+                headers=token[0]
+            )
+            logger.debug(f"get_disabled_notifications {r.status_code}") 
+        else:
+            # disable notification here: put req
+            r = requests.put(
+                url='{}mute-notifications/{}/{}'.format(self.base_url, type, platform),
+                headers=token[0]
+            )
+            logger.debug(f"get_disabled_notifications {r.status_code}")            
+ 
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json() 
+    
+    def enable_moblie_notification(self, token, type):
+        """
+        enable a specific type of notification for moblie
+        """
+        if type not in self.push_notification:
+            raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.push_notification for allow notification type on moblie)""")
+        notif = self._notification(token, type, "push")
+        return notif
+    
+    def enable_email_notification(self, token, type):
+        """
+        disable a specific type of notification for email
+        """
+        if type not in self.email_notification:
+            raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.email_notification for allow notification type on email)""")
+        notif = self._notification(token, type, "email")
+        return notif
+    
+    def disable_moblie_notification(self, token, type):
+        """
+        disable a specific type of notification for moblie
+        """
+        if type not in self.push_notification:
+            raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.push_notification for allow notification type on moblie)""")
+        notif = self._notification(token, type, "push", enable=False)
+        return notif
+    
+    def disable_email_notification(self, token, type):
+        """
+        disable a specific type of notification for email
+        """
+        if type not in self.email_notification:
+            raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.email_notification for allow notification type on email)""")
+        notif = self._notification(token, type, "email", enable=False)
+        return notif 
+     
+    #! global alerts
+    def get_global_alerts(self, tokens):
+        logger.debug("get_global_alerts")
+        r = requests.get(
+            url='{}global-alerts'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_global_alerts {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+     
+    #! verification bank institutions 
+    def get_bank_verification_institutions(self, tokens):
+        logger.debug("get_bank_verification_institutions")
+        r = requests.get(
+            url='{}bank-verification/institutions'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_bank_verification_institutions {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+     
+    #! internal transfers 
+    def get_supported_internal_transfers(self, tokens):
+        logger.debug("get_supported_internal_transfers")
+        r = requests.get(
+            url='{}supported-internal-transfers'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_supported_internal_transfers {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+     
+    def create_internal_transfers(self, tokens, payload):
+        logger.debug("create_internal_transfers")
+        r = requests.post(
+            url='{}internal_transfers'.format(self.base_url),
+            headers=tokens[0],
+            data=payload
+        )
+        logger.debug(f"create_internal_transfers {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()    
+    
+    #! tax-documents
+    def get_tax_documents(self, tokens):
+        logger.debug("get_tax_documents")
+        account_id = self.get_account(tokens)["results"][0]["id"]
+        r = requests.get(
+            url='{}tax-documents?account_id={}'.format(self.base_url, account_id),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_tax_documents {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+     
+    #! monthly-statements
+    def get_monthly_statements(self, tokens):
+        logger.debug("get_monthly_statements")
+        r = requests.get(
+            url='{}monthly-statements'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_monthly_statements {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+    
+    def get_monthly_statements_url(self, tokens, pdf_statement_id):
+        """
+        uses the key id from get_monthly_statements method
+        """
+        logger.debug("get_monthly_statements")
+        r = requests.get(
+            url='{}monthly-statements/{}'.format(self.base_url, pdf_statement_id),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_monthly_statements {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
 
     #! functions after this point are not core to the API
     def test_endpoint(self, tokens):
+        """
+         '' ''
+        """
         logger.debug("test endpoint")
-        account = self.get_account(tokens)["results"][0]["id"]
+        account_id = self.get_account(tokens)["results"][0]["id"]
         r = requests.get(
-            url='{}institutional_transfers?account_ids={}'.format(
-                self.base_url, account),
+            url='{}monthly-statements'.format(self.base_url),
             headers=tokens[0]
         )
-        print(r.status_code)
+        print(f"{r.status_code} {r.url}")
+        print(r.headers)
         print(r.content)
-        print(r.json())
+        # print(r.json())
         return r.json()
 
     def usd_to_cad(self, tokens, amount: Union[float, int]) -> float:
@@ -859,11 +1212,11 @@ class Wsimple:
         """
         Get settings needed for /settings route.
         """
-        logger.debug("settings")
+        logger.debug("starting settings")
         try:
             me = self.get_me(tokens)
             person = self.get_person(tokens)
-            bank_account = self.get_deposits(tokens)
+            bank_account = self.get_bank_accounts(tokens)
             exchange_rate = self.get_exchange_rate(tokens)
             ws_current_operational_status = self.current_status()
             return {
@@ -881,7 +1234,7 @@ class Wsimple:
         """
         Get dashboard needed for /stock/<sec_id> route.
         """
-        print(f"API stock: {sec_id}")
+        logger.debug("starting stock {}".format(sec_id))
         try:
             sparkline = self.find_securities_by_id_historical(
                 tokens, sec_id, time)
@@ -893,7 +1246,7 @@ class Wsimple:
                 position
             ]
         except InvalidAccessTokenError:
-            logger.debug("stock InvalidAccessTokenError")
+            logger.error("stock InvalidAccessTokenError")
             raise InvalidAccessTokenError
 
     def dashboard(self, tokens):
@@ -904,20 +1257,21 @@ class Wsimple:
         #v1: 2+ seconds - 11 calls
         #v2: 1-2 seconds - 5 calls
         #-v3: 1-2 seconds - 4 calls
+         #-v3: 0-1 seconds - 2 calls
         """
-        logger.debug("dashboard")
+        logger.debug("calling dashboard")
         try:
-            account = self.get_account(tokens)["results"][0]
+            mobile_dashboard = self.get_mobile_dashboard(tokens)
             account_data = self.get_historical_portfolio_data(tokens)
-            watchlist = self.get_watchlist(tokens)
-            positions = self.get_positions(tokens)
-
+            
+            account = mobile_dashboard["accounts"][0]
+            watchlist = mobile_dashboard["watchlist"]
+            positions = mobile_dashboard["positions"]
+            previous_amount = account_data["previous_close_net_liquidation_value"]['amount']
             total_value = account_data["results"][-1]["value"]
             account_value_graph = account_data["results"]
-            previous_amount = account_data["previous_close_net_liquidation_value"]['amount']
             account_change = round(total_value['amount'] - previous_amount, 2)
-            account_change_percentage = round(
-                (account_change / previous_amount)*100, 2)
+            account_change_percentage = round((account_change / previous_amount)*100, 2)
             return {
                 'available_to_trade': {
                     'amount': account['buying_power']['amount'],
@@ -950,7 +1304,7 @@ class Wsimple:
                 }
             }
         except InvalidAccessTokenError:
-            logger.debug("dashboard InvalidAccessTokenError")
+            logger.error("dashboard InvalidAccessTokenError")
             raise InvalidAccessTokenError
 
     #! all functions after here are public and (can be used without logging in).
@@ -1048,3 +1402,31 @@ class Wsimple:
             url="https://status.wealthsimple.com/api/v2/incidents.json"
         )
         return json.loads(r.content)
+
+
+"""baseTradeUrl
+
+Headers:
+Accept: 'application/json',
+'Content-Type': 'application/json',
+Date: (new Date).toUTCString()
+
+login:
+
+        l = {
+            email: '',
+            password: '',
+            method: 'app',
+            loading: !1,
+            code: '1234',
+            error: null,
+            submitOtp: (0, c.action)('Submit OTP'),
+            resendCode: (0, c.action)('Resend code'),
+            resendOtpCode: function() {},
+            goBack: (0, c.action)('Go back'),
+            onPasteFromClipboardError: (0, c.action)('Show Clipboard paste error'),
+            navigation: {
+                getParam: function() {}
+            }
+
+"""

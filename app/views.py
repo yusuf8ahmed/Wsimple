@@ -10,6 +10,7 @@ from app.forms import LoginForm
 from app.api import Wsimple
 from app.api import LoginError 
 from app.api import InvalidAccessTokenError, InvalidRefreshTokenError
+from app.api import WSOTPUser, WSOTPError
 
 @app.route('/index', methods=['POST', 'GET'])
 @app.route('/', methods=['POST', 'GET'])
@@ -27,6 +28,8 @@ def index():
                 return redirect('/home') 
             except LoginError:
                 return render_template('index.html', form=form, pass_auth=True) 
+            except WSOTPUser:
+                socketio.send()
     return render_template('index.html', form=form, pass_auth=False)
 
 @app.route('/home', methods=['POST', 'GET'])

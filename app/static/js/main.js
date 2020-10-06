@@ -1,7 +1,8 @@
 var toggle_price_to_shares = false; // show current price auto
 var data_cache = {};
+var chart;
 const updated_on = document.getElementById("updated_on");
-var checkbox_price_shares = document.getElementById("checkbox_price_shares");
+const checkbox_price_shares = document.getElementById("checkbox_price_shares");
 var available_to_trade = document.getElementById("available_to_trade");
 var account_value = document.getElementById("account_value");
 var net_deposits = document.getElementById("net_deposits");
@@ -15,7 +16,8 @@ var gradient = ctx.createLinearGradient(0, 0, 0, 350);
 gradient.addColorStop(0, 'rgba(250, 177, 50,1)');
 gradient.addColorStop(1, 'rgba(250, 174, 50,0)');
 
-var socket = io("/dashboard", {transports: ['websocket'], upgrade: false});
+var socket = io("/dashboard");
+// var socket = io("/dashboard", {transports: ['websocket'], upgrade: false});
 
 function price_to_shares() {
     console.log(checkbox_price_shares.checked);
@@ -71,6 +73,7 @@ socket.on('invalid_token', function (data) {
 });
 
 socket.on('main_dashboard_info', function (data) {
+    checkbox_price_shares.disabled = false;
     updated_on.innerHTML = "";
     updated_on.appendChild(document.createTextNode(`U/${new Date().toLocaleTimeString()}`));
     console.log(`updated ${ data.account_value_graph.table.length } ${ new Date().toLocaleTimeString() }`);
@@ -80,7 +83,7 @@ socket.on('main_dashboard_info', function (data) {
     let account_value_list = [];
     let account_net_deposit_list = [];
     let account_label = [];
-
+   
     var chart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -126,7 +129,7 @@ socket.on('main_dashboard_info', function (data) {
             timeStyle: 'short'
         }));
         chart.data.datasets.forEach((dataset) => {
-            dataset.data.push(account_value.value.amount.toFixed(2));
+            dataset.data.push(parseFloat(account_value.value.amount).toFixed(2));
         });
         chart.update();
     }

@@ -1,4 +1,4 @@
-var socket = io();
+var socket = io("/settings");
 
 socket.on('invalid_token', function (data) {
     alert("Access Token is Invalid or Broken must return to login page");

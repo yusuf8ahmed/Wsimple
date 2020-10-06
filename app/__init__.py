@@ -3,10 +3,11 @@
  Copyright (c) 2020 Chromazmoves
  Released under the Tos of Wealthsimple Trade and Wsimple
 """
-from gevent import monkey
-monkey.patch_all()
+
+# from gevent import monkey
+# monkey.patch_all()
 # wsimple api part
-from .api import Wsimple
+from .api import Wsimple, WSOTPError, WSOTPUser
 
 # wsimple webserver part
 if not __name__ == "__main__":
@@ -27,11 +28,11 @@ if not __name__ == "__main__":
 
     # export FLASK_APP=Wsimple/app.py
     # export FLASK_ENV=development
-    # kill $(lsof -ti:3000)
+    # kill $(lsof -ti:8000)
 
     app = Flask(__name__)
     socketio = SocketIO(app, manage_session=False, logger=True)
-    build = "01/09/2020"
+    build = "01/10/2020" #build.js
     app.debug = True
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
     app.config['SESSION_TYPE'] = 'filesystem'
