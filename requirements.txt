@@ -24,7 +24,7 @@ multitasking==0.0.9
 numpy==1.19.2
 pandas==1.1.3
 python-dateutil==2.8.1
-python-dotenv==0.14.0
+python-dotenv==0.15.0
 python-engineio==3.13.1
 python-socketio==4.6.0
 pytz==2020.1
