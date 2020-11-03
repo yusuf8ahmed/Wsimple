@@ -32,7 +32,7 @@ redis==3.5.3
 requests==2.24.0
 six==1.15.0
 tinydb==4.2.0
-urllib3==1.25.10
+urllib3==1.25.11
 Werkzeug==1.0.1
 WTForms==2.3.3
 yfinance==0.1.55
