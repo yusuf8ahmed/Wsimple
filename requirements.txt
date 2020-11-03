@@ -17,7 +17,7 @@ gunicorn==20.0.4
 idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.2
-lxml==4.5.2
+lxml==4.6.1
 MarkupSafe==1.1.1
 monotonic==1.5
 multitasking==0.0.9
