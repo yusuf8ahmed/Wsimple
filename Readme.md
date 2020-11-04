@@ -14,12 +14,12 @@
 ### What is the Wsimple project?
 Welcome! This project is a web interface and API for Wealthsimple Trade. The main goal this project is to give a simple yet robust interface for Wealthsimple Trade users and also give the ability to allow developers to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](#index) for API wrapper documentation. 
 
-Please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available as.
+Please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available.
 
 ## Getting Started
 
   ### Project Status
-  <p style="color:red;font-size:35px;margin:0px;">
+  <p style="">
   Pre-alpha v1.0
   </p>
 
@@ -29,7 +29,7 @@ Please read the [disclamer](#disclamer), and due to the nature of this project a
   ### Prerequisites
   * python and pip is required to use/download wsimple
   * to download pip and python goto ["Download Python"](https://realpython.com/installing-python/)
-    * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows)
+    * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). Windows Subsystem for linux(wsl) is need for Wsimple Website to run
     * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
 
   ### Installation
@@ -39,12 +39,12 @@ Please read the [disclamer](#disclamer), and due to the nature of this project a
   # Testing
   git clone https://github.com/yusuf8ahmed/Wsimple.git
   ```
-  #### start webserver
+  #### start webserver/website
   ```bash
   # Production
   wsimple start
   # Testing
-  gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 8 app:app
+  python3.9 app
   ```
 
 <a id="index"></a> 
