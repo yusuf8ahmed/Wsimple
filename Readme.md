@@ -29,7 +29,7 @@ Please read the [disclamer](#disclamer), and due to the nature of this project a
   ### Prerequisites
   * python and pip is required to use/download wsimple
   * to download pip and python goto ["Download Python"](https://realpython.com/installing-python/)
-    * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). Windows Subsystem for linux(wsl) is need for Wsimple Website to run
+    * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). Windows Subsystem for linux(wsl) is need for wsimple website to run
     * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
 
   ### Installation
