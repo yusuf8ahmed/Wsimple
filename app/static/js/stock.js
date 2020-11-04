@@ -202,9 +202,12 @@ socket.on('return_stock_info', function (data) {
     console.log("stock search");
     console.dir(data);  
       
-    var graph = data[0];
-    var info = data[1];
-    var position = data[2];
+    var graph = data.sparkline;
+    var info = data.security_info;
+    var position = data.position;
+    var news = data.news;
+
+    console.log(news);
 
     ticker_symbol.innerHTML = '';
     ticker_name.innerHTML = '';

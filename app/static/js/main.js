@@ -72,6 +72,17 @@ socket.on('invalid_token', function (data) {
     window.location.href = "/";
 });
 
+socket.on('disconnect', function() {
+    console.log("socket.io disconnected");
+    socket.emit("close_dash");
+});
+
+window.onbeforeunload = function () {
+    console.log("socket.io disconnected");
+    socket.emit("close_dash");
+    return undefined;
+}
+
 socket.on('main_dashboard_info', function (data) {
     checkbox_price_shares.disabled = false;
     updated_on.innerHTML = "";
@@ -172,6 +183,8 @@ socket.on('main_dashboard_info', function (data) {
     account_change.innerHTML = `
     Account change: $${data.account_change.amount}(${data.account_change.percentage}%)
     `;    
+    document.title = `Account change: $${data.account_change.amount}(${data.account_change.percentage}%)
+    `;
     net_deposits.innerHTML = `
     Net deposit: ${data.net_deposits.amount} ${data.net_deposits.currency}
     `;    
@@ -181,7 +194,6 @@ socket.on('main_dashboard_info', function (data) {
     available_to_withdraw.innerHTML = `
     Available to withdraw: ${data.available_to_withdraw.amount} ${data.available_to_withdraw.currency}
     `;
-
 
     for (const watchlist of data.account_watchlist.table.securities) {
         var pwatchlist_div = document.createElement("div");

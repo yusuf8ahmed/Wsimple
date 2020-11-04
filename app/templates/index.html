@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- socket.io -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha512-v8ng/uGxkge3d1IJuEo6dJP8JViyvms0cly9pnbfRxT6/31c3dRWxIiwGnMSWwZjHKOuY3EVmijs7k1jz/9bLA==" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/errors.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <title>Wsimple index</title>
@@ -48,8 +50,15 @@
                     </div>
                     {% endif %}
 
+                    {% if show_auth_message %}
+                    <div class="materialert warning" role="alert">
+                        <div class="material-icons">warning</div>
+                        Wealthsimple requires a token
+                    </div>
+                    {% endif %}
+
                     <div class="custom-login login-padding">
-                        <form action="{{ url_for('index') }}" method="POST">
+                        <form id="forms" action="{{ url_for('index') }}" method="POST">
                             {{ form.csrf_token }}
                             <div class="input-field">
                                 {{ form.email(class_="validate") }}
@@ -63,6 +72,14 @@
                                 <!-- <input id="password" type="password" class="validate">
                                 <label for="password">Password</label> -->
                             </div>
+                            {% if use_auth %}
+                            <div class="input-field">
+                                {{ form.token(class_="validate") }}
+                                {{ form.token.label(class_="active") }}
+                                <!-- <input id="password" type="password" class="validate">
+                                <label for="password">Password</label> -->
+                            </div>
+                            {% endif %}
                             <p>
                                 <label>
                                     {{ form.tos() }}
@@ -71,7 +88,7 @@
                                 <span>Accept Terms of Service of Wealthsimple Trade and Crypto</span> -->
                                 </label>
                             </p>
-                            <input type="submit" value="Login" class="btn">
+                            <input id="login_submit" type="submit" value="Login" class="btn">
                         </form>
                     </div>
                 </div>
@@ -79,5 +96,16 @@
         </div>
     </div>
 </body>
+<script>
+    var socket = io();
 
+    socket.on('connect', function () {
+        console.log("connected")
+    });
+    
+    socket.on('ws_otpuser', function () {
+        console.log("enter otp")
+    });
+
+</script>
 </html>

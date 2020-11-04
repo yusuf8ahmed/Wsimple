@@ -6,6 +6,7 @@
 from app import app, session, render_template, redirect
 from app import socketio, thread, thread_lock, TIME
 from app import ALLOW_DASH, ALLOW_SETTINGS, ALLOW_STOCK_INFO
+from app import threading, exit_event
 from app.forms import LoginForm
 from app.api import Wsimple
 from app.api import LoginError 
@@ -19,18 +20,24 @@ def index():
     if form.validate_on_submit():
         email = str(form.email.data)
         password = str(form.password.data)
-        print(email,password)
+        token = str(form.token.data)
+        print(email,password,token)
         tos = form.tos.data
         if tos:
             try:
                 ws = Wsimple(email, password)
                 session["key"] = ws.tokens
                 return redirect('/home') 
-            except LoginError:
-                return render_template('index.html', form=form, pass_auth=True) 
             except WSOTPUser:
-                socketio.send()
-    return render_template('index.html', form=form, pass_auth=False)
+                if token:
+                    ws = Wsimple.otp_login(email, password, token)
+                    session["key"] = ws.tokens
+                    print(ws.tokens)
+                    return redirect('/home') 
+                return render_template('index.html', form=form, pass_auth=False, use_auth=True, show_auth_message=True) 
+            except LoginError:
+                return render_template('index.html', form=form, pass_auth=True, use_auth=False, show_auth_message=False) 
+    return render_template('index.html', form=form, pass_auth=False, use_auth=False, show_auth_message=False)
 
 @app.route('/home', methods=['POST', 'GET'])
 def home():
@@ -84,7 +91,7 @@ def settings():
 def tos():
     return render_template("tos.html")
 
-#socket.io stuff
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         
 @socketio.on('connect')
 def connect():
@@ -102,7 +109,7 @@ def dash_main_info(tokens):
         try:
             dashboard = ws.dashboard(tokens)
             socketio.sleep(TIME) 
-            socketio.emit('main_dashboard_info', dashboard, namespace='/dashboard')  
+            socketio.emit('main_dashboard_info', dashboard, namespace='/dashboard')              
         except InvalidAccessTokenError as e:
             try:
                 print(f"dash_main_info invalid token {tokens}")
@@ -126,6 +133,10 @@ def soc_dashboard():
             else:
                 print("Starting dashboard false key") 
                 socketio.emit('invalid_token', namespace='/dashboard')
+                
+@socketio.on('close_dash', namespace='/dashboard')
+def soc_close_dashboard():
+    print("PYTHON: => close_event")
  
 #? display the stock info you searched
 def stock_info(data):
@@ -180,6 +191,24 @@ def soc_settings(data):
         if thread is None:
             print("Starting settings")
             thread = socketio.start_background_task(settings_info, (session["key"]))        
+ 
+#? display your settings  
+def search_page_info(key):
+    """Example of how to send server generated events to clients."""
+    while True:
+        ws = Wsimple.access()
+        tokens = key
+        settings = ws.search_page(tokens)
+        socketio.sleep(TIME) 
+        socketio.emit('return_search_page', settings, namespace="/search")
+        
+@socketio.on("get_search_page", namespace="/search")
+def soc_search_page():
+    global thread
+    with thread_lock:
+        if thread is None:
+            print("Starting settings")
+            thread = socketio.start_background_task(settings_info, (session["key"]))  
   
 #? display search securities          
 @socketio.on('find_security', namespace="/search")

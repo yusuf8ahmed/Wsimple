@@ -4,8 +4,9 @@
  Released under the Tos of Wealthsimple Trade and Wsimple
 """
 
-# from gevent import monkey
-# monkey.patch_all()
+import threading
+from gevent import monkey
+monkey.patch_all()
 # wsimple api part
 from .api import Wsimple, WSOTPError, WSOTPUser
 
@@ -20,7 +21,7 @@ if not __name__ == "__main__":
     from dotenv import load_dotenv, find_dotenv
     load_dotenv(find_dotenv())
     #standard library
-    from threading import Lock
+    import threading
     import sqlite3
     import logging
     import pathlib
@@ -38,7 +39,8 @@ if not __name__ == "__main__":
     app.config['SESSION_TYPE'] = 'filesystem'
     Session(app)
     thread = None
-    thread_lock = Lock()
+    thread_lock = threading.Lock()
+    exit_event = threading.Event()
     TIME = 5
     ALLOW_DASH = True
     ALLOW_STOCK_INFO = True

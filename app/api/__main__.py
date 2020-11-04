@@ -21,15 +21,25 @@ from .errors import WSOTPUser, WSOTPError
 import requests
 
 class Wsimple:
+    """ Wsimple is the main access class to the wealthsimple trade api """
+    
     # class assumes first id in account/list is for trading
     # 73 methods and 5 attributes
     base_url = "https://trade-service.wealthsimple.com/"
-    time_ranges = ['1d', '1w', '1m', '3m', '1y', 'all']
+    time_ranges = [
+        '1d',
+        '1w',
+        '1m',
+        '3m',
+        '1y',
+        'all'
+    ]
     email_notification = [ 
         'deposits',
         'withdrawals',
         'orders',
-        'dividends', 'referrals',
+        'dividends',
+        'referrals',
         'institutional_transfers',
         'news_and_announcements',
         'promos_and_tips'
@@ -69,7 +79,12 @@ class Wsimple:
         "OTC MARKETS": "OTCM",
         "AEQUITAS NEO EXCHANGE": "NEOE"
     }
-
+    friendly_account_name = {
+        'ca_tfsa':'TFSA',
+        'ca_non_registered': 'Personal account',
+        'ca_rrsp':'RRSP account',
+        'ca_non_registered_crypto':'Crypto account'
+    }
     def __init__(self, 
                  email,
                  password, 
@@ -96,19 +111,17 @@ class Wsimple:
             pass
         else:
             #"create_account": not 1
-            print(f"password: {password}")
             payload = {"email":email, "password":password, "timeoutMs": 2e4}
             if otp_mode:
                 payload["otp"] = otp_number
-                # otp_status = r.status_code
             r = requests.post(
                 url="{}auth/login".format(self.base_url),
                 data=payload
             ) 
             del payload
             print(f"Login status code {r.status_code}")
-            # one time password code
             if "x-wealthsimple-otp" in r.headers:
+                #! one time password code login
                 print("Need to Login with one time password")
                 try:
                     otp_headers = r.headers['x-wealthsimple-otp'].replace(" ", "").split(";")
@@ -123,12 +136,15 @@ class Wsimple:
                     raise WSOTPError
                 finally:
                     raise WSOTPUser
-            else:         
+            else:
+                #! natural code login         
                 if r.status_code == 200:
                     self._access_token = r.headers['X-Access-Token']
                     self._refresh_token = r.headers['X-Refresh-Token']
-                    self.tokens = [{'Authorization': self._access_token}, {
-                        "refresh_token": self._refresh_token}]
+                    self.tokens = [
+                        {'Authorization': self._access_token},
+                        {"refresh_token": self._refresh_token}
+                        ]
                     del r
                 else:
                     raise LoginError
@@ -492,6 +508,36 @@ class Wsimple:
             raise InvalidAccessTokenError
         else:
             return r.json()
+
+    def pending_orders(self, tokens, account_id=None):
+        if account_id is None:
+            account_id = self.get_account(tokens)["results"][0]["id"]
+        orders = self.get_orders(tokens)['results']
+        result = []
+        for order in orders:
+            if order['filled_at'] is None and order['status'] != 'cancelled':
+                result.append(order)
+        return result
+    
+    def cancelled_orders(self, tokens, account_id=None):
+        if account_id is None:
+            account_id = self.get_account(tokens)["results"][0]["id"]
+        orders = self.get_orders(tokens)['results']
+        result = []
+        for order in orders:
+            if order['status'] == 'cancelled':
+                result.append(order)
+        return result
+
+    def filled_orders(self, tokens, account_id=None):
+        if account_id is None:
+            account_id = self.get_account(tokens)["results"][0]["id"]
+        orders = self.get_orders(tokens)['results']
+        result = []
+        for order in orders:
+            if order['status'] == 'posted':
+                result.append(order)
+        return result
 
     #! find securitites functions
     def find_securities(self, tokens, ticker: str):
@@ -859,7 +905,7 @@ class Wsimple:
         """
         logger.debug("get_exchange_rate")
         r = requests.get(
-            url="{}api/statements".format(self.base_url),
+            url="{}forex".format(self.base_url),
             headers=tokens[0]
         )
         logger.debug(f"get_exchange_rate {r.status_code}")
@@ -956,6 +1002,27 @@ class Wsimple:
             headers=tokens[0]
         )
         logger.debug(f"get_featured_security_groups {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+    
+    def get_securities_in_groups(self, tokens, group_id, offset=0, limit=20, filter_type=None):
+        """
+        Grabs all securities groups under Wealthsimple trade
+        """
+        logger.debug("get_securities_in_groups")
+        if filter_type == None: 
+            r = requests.get(
+                url='{}security-groups/{}/securities?offset={}&limit={}'.format(self.base_url, group_id, offset, limit),
+                headers=tokens[0]
+            )
+        else:
+            r = requests.get(
+                url='{}security-groups/{}/securities?offset={}&limit={}&filter_type={}'.format(self.base_url, group_id, offset, limit, filter_type),
+                headers=tokens[0]
+            )
+        logger.debug(f"get_securities_in_groups {r.status_code}")
         if r.status_code == 401:
             raise InvalidAccessTokenError
         else:
@@ -1078,6 +1145,8 @@ class Wsimple:
             raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.email_notification for allow notification type on email)""")
         notif = self._notification(token, type, "email", enable=False)
         return notif 
+    
+    #! quotes
      
     #! global alerts
     def get_global_alerts(self, tokens):
@@ -1173,15 +1242,34 @@ class Wsimple:
         else:
             return r.json()
 
+    #! websocket_ticket
+    def get_websocket_ticket(self, tokens):
+        """
+        get websocket ticket
+        """
+        logger.debug("get_websocket_ticket")
+        r = requests.post(
+            url='{}websocket-ticket'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_websocket_ticket {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()  
+
+    async def test(tokens):
+        return None
+    
     #! functions after this point are not core to the API
+    
     def test_endpoint(self, tokens):
         """
-         '' ''
         """
         logger.debug("test endpoint")
         account_id = self.get_account(tokens)["results"][0]["id"]
         r = requests.get(
-            url='{}monthly-statements'.format(self.base_url),
+            url='{}quotes'.format(self.base_url),
             headers=tokens[0]
         )
         print(f"{r.status_code} {r.url}")
@@ -1192,20 +1280,24 @@ class Wsimple:
 
     def usd_to_cad(self, tokens, amount: Union[float, int]) -> float:
         """  
-        not working correctly
+        change usd to cad:
+        This function is used when selling us dollars to wealthsimple so that they can 
+        return you cad dollars
         """
         logger.warning("not working correctly")
         forex = self.get_exchange_rate(tokens)['USD']
-        buy_rate = forex['buy_rate']
+        buy_rate = forex['sell_rate']
         return round(amount * buy_rate, 3)
 
     def cad_to_usd(self, tokens, amount: Union[float, int]) -> float:
         """
-        not working correctly
+        change cad to usd:
+        this function is used buying us dollars from wealthsimple so that they can 
+        return cad 
         """
         logger.warning("cad to usd => not working correctly")
         forex = self.get_exchange_rate(tokens)['USD']
-        sell_rate = forex['sell_rate']
+        sell_rate = forex['buy_rate']
         return round(amount * sell_rate, 2)
 
     def settings(self, tokens):
@@ -1230,23 +1322,52 @@ class Wsimple:
             logger.debug("settings InvalidAccessTokenError")
             raise InvalidAccessTokenError
 
+    def stock_home(self, tokens):
+        top_losers = self.get_top_losers_securities(tokens, limit=5)
+        top_gainers = self.get_top_gainers_securities(tokens, limit=5)
+        top_active = self.get_top_active_securities(tokens, limit=5)
+        top_watched = self.get_top_watched_securities(tokens, limit=5)
+        get_featured_security_groups = self.get_featured_security_groups(tokens, limit=5)
+
     def stock(self, tokens, sec_id, time="1d"):
         """
         Get dashboard needed for /stock/<sec_id> route.
         """
         logger.debug("starting stock {}".format(sec_id))
         try:
-            sparkline = self.find_securities_by_id_historical(
-                tokens, sec_id, time)
+            sparkline = self.find_securities_by_id_historical(tokens, sec_id, time)
             security_info = self.find_securities_by_id(tokens, sec_id)
+            news = self.public_find_securities_news(security_info["stock"]["symbol"])
             position = self.get_account(tokens)
-            return [
-                sparkline,
-                security_info,
-                position
-            ]
+            return {
+                "sparkline": sparkline,
+                "security_info": security_info,
+                "position": position,
+                "news": news 
+            }
         except InvalidAccessTokenError:
             logger.error("stock InvalidAccessTokenError")
+            raise InvalidAccessTokenError
+        
+    def search_page(self, tokens):
+        """
+        Get security groups need for search page
+        """
+        try:
+            featured_security_groups = self.get_featured_security_groups(tokens)
+            get_top_losers_securities = self.get_top_losers_securities(tokens)
+            get_top_gainers_securities = self.get_top_gainers_securities(tokens)
+            get_top_gainers_securities = self.get_most_active_securities(tokens)
+            get_most_watched_securities = self.get_most_watched_securities(tokens)
+            return {
+                "featured_security_groups": featured_security_groups,
+                "most_watched": get_top_losers_securities,
+                "most_active": get_top_gainers_securities,
+                "top_gainers": get_top_gainers_securities,
+                "top_losers": get_most_watched_securities,
+            }
+        except InvalidAccessTokenError:
+            logger.error("search_page InvalidAccessTokenError")
             raise InvalidAccessTokenError
 
     def dashboard(self, tokens):
@@ -1402,31 +1523,3 @@ class Wsimple:
             url="https://status.wealthsimple.com/api/v2/incidents.json"
         )
         return json.loads(r.content)
-
-
-"""baseTradeUrl
-
-Headers:
-Accept: 'application/json',
-'Content-Type': 'application/json',
-Date: (new Date).toUTCString()
-
-login:
-
-        l = {
-            email: '',
-            password: '',
-            method: 'app',
-            loading: !1,
-            code: '1234',
-            error: null,
-            submitOtp: (0, c.action)('Submit OTP'),
-            resendCode: (0, c.action)('Resend code'),
-            resendOtpCode: function() {},
-            goBack: (0, c.action)('Go back'),
-            onPasteFromClipboardError: (0, c.action)('Show Clipboard paste error'),
-            navigation: {
-                getParam: function() {}
-            }
-
-"""

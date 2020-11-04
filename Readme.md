@@ -12,7 +12,9 @@
 </p>
 
 ### What is the Wsimple project?
-Welcome! This project is a web interface and API for Wealthsimple Trade. The main goal this project is to give a simple yet robust interface for Wealthsimple Trade users and also give the ability to allow developers to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](#index) for API wrapper documentation.
+Welcome! This project is a web interface and API for Wealthsimple Trade. The main goal this project is to give a simple yet robust interface for Wealthsimple Trade users and also give the ability to allow developers to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](#index) for API wrapper documentation. 
+
+Please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available as.
 
 ## Getting Started
 
@@ -612,16 +614,18 @@ generates and returns a new set of access and refresh tokens.
 </div>
 </div>
 
+<a id="disclamer"></a> 
+
 ## Disclaimer 
   #### **DO NOT LEVERAGE THIS IN ATTEMPT TO DISRUPT ORDERLY MARKET FUNCTIONS**.
-  This software is provided so you can use Wealthsimple trade on your computer. This software is not built or maintained by Wealthsimple Trade or the company Wealthsimple. Remember your responsibility to not engage in illegal or unethical trading behaviours that can disrupt orderly market functions. Flooding the website with orders in a short timeframe may result in getting banned or locked out by Wealthsimple Trade.
+  This software is provided so you can use Wealthsimple trade on your computer. This software is not built or maintained by Wealthsimple Trade or the company Wealthsimple. Remember your responsibility to not engage in illegal or unethical trading behaviours that can disrupt orderly market functions. Flooding the website/api with orders in a short timeframe may result in getting banned or locked out by Wealthsimple Trade.
 
-  Remember when using this website you are still in agreement with Wealthsimple Trade terms of service and they reserve the right to terminate anyone.
+  Remember when using this website/api you are still under Wealthsimple Trade services and they reserve the right to terminate anyone.
 
   Users of [wstrade-api](https://github.com/ahmedsakr/wstrade-api) have observed that trades in excess of 7 per hour are rejected by the WealthSimple Trade servers. You can use this observation as a baseline of how many trades you can perform on an hourly basis.
 
-  This product was built with security in mind. This means users have to run this software on personal webserver and that no data is being sent out. 
+  This product was built with security in mind. This software was made to run personal and local webserver and to assure no data/credentials is being sent out. 
   
-  The use of this software is done at your own discretion and risk and with the agreement that you will be solely responsible for any damages or loss of data. By using this software you agree that you are solely responsible for any damages incurred to you or your account, and that I will not be liable for any damages that you may suffer in connection with downloading, installing, using, modifying or distributing this software.
+  The use of this software is done at your own discretion and risk and with the agreement that you will be solely responsible for any damages. By using this software you agree that you are solely responsible for any damages incurred to you or your account, and that I will not be liable for any damages that you may suffer in connection with downloading, installing, using, modifying or distributing this software.
 
   Parts of this disclaimer are adapted from [wstrade-api](https://github.com/ahmedsakr/wstrade-api)
