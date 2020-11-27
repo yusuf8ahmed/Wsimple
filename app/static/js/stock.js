@@ -45,13 +45,9 @@ var socket = io("/stock", {
     upgrade: false
 });
 
-Array.prototype.contains = function (str) {
-    return this.indexOf(str) > -1;
-};
+Array.prototype.contains = (str) => { return this.indexOf(str) > -1; };
 
-Object.prototype.keys = function () {
-    return Object.keys(this);
-};
+Object.prototype.keys = () => { return Object.keys(this); };
 
 add_watchlist.addEventListener("click", function(e) {
     e.preventDefault();
@@ -65,19 +61,19 @@ function buy_market() {
 }
 
 function display_stock(graph, info, position) {
-    high.innerHTML = ''; whigh.innerHTML = ''; low.innerHTML = ''; wlow.innerHTML = '';
-    open.innerHTML = ''; mktcap.innerHTML = ''; vol.innerHTML = ''; avgvol.innerHTML = '';
-    pe.innerHTML = ''; yield_.innerHTML = ''; exg.innerHTML = ''; beta.innerHTML = '';
-    debt.innerHTML = ''; revenue.innerHTML = ''; tassets.innerHTML = ''; gpm.innerHTML = '';
-    cash.innerHTML = ''; growth.innerHTML = ''; ceo.innerHTML = ''; website.innerHTML = '';
+    high.innerHTML, whigh.innerHTML, low.innerHTML, wlow.innerHTML = '';
+    open.innerHTML, mktcap.innerHTML, vol.innerHTML, avgvol.innerHTML = '';
+    pe.innerHTML, yield_.innerHTML, exg.innerHTML, beta.innerHTML = '';
+    debt.innerHTML, revenue.innerHTML, tassets.innerHTML, gpm.innerHTML = '';
+    cash.innerHTML, growth.innerHTML, ceo.innerHTML, website.innerHTML = '';
 
     var ticker_symbol_text = document.createTextNode(info.stock.symbol);
-    var ticker_name_text = document.createTextNode(info.stock.name);
-    var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
-    var about_text = document.createTextNode(info.fundamentals.description);
     ticker_symbol.appendChild(ticker_symbol_text);
+    var ticker_name_text = document.createTextNode(info.stock.name);
     ticker_name.appendChild(ticker_name_text);
+    var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
     ticker_value.appendChild(ticker_value_text);
+    var about_text = document.createTextNode(info.fundamentals.description);
     about.appendChild(about_text);
 
     var chart = new Chart(ctx, {
@@ -126,7 +122,6 @@ function display_stock(graph, info, position) {
     });
 
     position_dict = position.results[0].position_quantities;
-
     if (position_dict.keys().contains(info.id)) {
         // this security is owned by you
         console.log("you own this security");
@@ -155,20 +150,20 @@ function display_stock(graph, info, position) {
     growth.innerHTML = parseFloat(info.fundamentals.company_earnings_growth).toFixed(2);
     ceo.innerHTML = info.fundamentals.company_ceo;  
     
+    var stats_website_text = document.createTextNode("Website");
+    stats_website_link.appendChild(stats_website_text);    
     var stats_website_link = document.createElement("a");
     stats_website_link.setAttribute("target", "_blank");
     stats_website_link.setAttribute("href", `${info.fundamentals.website}`);
-    var stats_website_text = document.createTextNode("Website");
-    stats_website_link.appendChild(stats_website_text);
     website.appendChild(stats_website_link);
-    
+
     for (const stock_chart of graph.results.slice(1)) {
-        var date = new Date('1970-01-01T' +stock_chart.time  + 'Z');
+        var date = new Date('1970-01-01T'+stock_chart.time+'Z');
         chart.data.labels.push(date.toLocaleTimeString({},
-            { timeZone:'UTC',hour12:true,hour:'numeric',minute:'numeric'}
+            { timeZone:'UTC', hour12:true, hour:'numeric', minute:'numeric'}
         ));
         chart.data.datasets.forEach((dataset) => {
-            dataset.data.push(stock_chart.adj_close);
+            dataset.data.push(stock_chart.close);
         });
         chart.update();
     }
@@ -176,13 +171,17 @@ function display_stock(graph, info, position) {
 }
 
 function display_etf(graph, info, position) {
+    // header text
     var ticker_symbol_text = document.createTextNode(info.stock.symbol);
-    var ticker_name_text = document.createTextNode(info.stock.name);
-    var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
-    var about_text = document.createTextNode(info.fundamentals.description);
     ticker_symbol.appendChild(ticker_symbol_text);
+    var ticker_name_text = document.createTextNode(info.stock.name);
     ticker_name.appendChild(ticker_name_text);
+    var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
     ticker_value.appendChild(ticker_value_text);
+
+
+    // about text
+    var about_text = document.createTextNode(info.fundamentals.description);
     about.appendChild(about_text);
 }
 
@@ -200,22 +199,20 @@ socket.on('connect', function () {
 
 socket.on('return_stock_info', function (data) {
     console.log("stock search");
-    console.dir(data);  
-      
+
     var graph = data.sparkline;
     var info = data.security_info;
     var position = data.position;
     var news = data.news;
 
-    console.log(news);
+    console.log(`${info.asset_class}|${info.security_type}|${info.object}`);
+    console.dir(data);
 
     ticker_symbol.innerHTML = '';
     ticker_name.innerHTML = '';
     ticker_value.innerHTML = '';
     activities.innerHTML = '';
     about.innerHTML = '';    
-
-    console.log(info.asset_class, info.security_type);
 
     stock_asset_classes = ["us_stocks", "canadian_stocks", "individual_stocks"];
     if ((stock_asset_classes.contains(info.asset_class)) && (info.security_type == "equity") ) {

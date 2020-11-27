@@ -1,14 +1,13 @@
 """
  Project Name: Wsimple
  Copyright (c) 2020 Chromazmoves
- Released under the Tos of Wealthsimple Trade and Wsimple
 """
 
 import threading
 from gevent import monkey
 monkey.patch_all()
 # wsimple api part
-from .api import Wsimple, WSOTPError, WSOTPUser
+from .api import Wsimple, WSOTPError, WSOTPUser, WSOTPLoginError
 
 # wsimple webserver part
 if not __name__ == "__main__":
@@ -22,6 +21,7 @@ if not __name__ == "__main__":
     load_dotenv(find_dotenv())
     #standard library
     import threading
+    from loguru import logger
     import sqlite3
     import logging
     import pathlib
@@ -29,7 +29,7 @@ if not __name__ == "__main__":
 
     # export FLASK_APP=Wsimple/app.py
     # export FLASK_ENV=development
-    # kill $(lsof -ti:8000)
+    # kill $(lsof -ti:5000)
 
     app = Flask(__name__)
     socketio = SocketIO(app, manage_session=False, logger=True)
@@ -40,8 +40,12 @@ if not __name__ == "__main__":
     Session(app)
     thread = None
     thread_lock = threading.Lock()
-    exit_event = threading.Event()
-    TIME = 5
+    exit_dash_event = threading.Event()
+    exit_settings_event = threading.Event()
+    exit_search_event = threading.Event()
+    TIME_DASH = 5
+    TIME_SETTINGS = 15
+    TIME_STOCK_INFO = 15
     ALLOW_DASH = True
     ALLOW_STOCK_INFO = True
     ALLOW_SETTINGS = True

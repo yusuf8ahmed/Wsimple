@@ -3,7 +3,6 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    background-color: #F9F6F6;
     margin: 0;
     padding: 0;
 }
@@ -40,3 +39,19 @@
 .search-bar {
     margin-top: 7px;
 }
+
+.search-drop-box {
+    display: block;
+    width: 40vw;
+    height: auto;
+    max-height: 40%;
+    border: none;
+    background: #ffffff;
+    border-radius: 23px;
+    z-index: 1;
+    position: absolute;
+    padding: 6px;
+    overflow-y: scroll;
+}
+
+#search:empty { display: none }

@@ -19,6 +19,30 @@ gradient.addColorStop(1, 'rgba(250, 174, 50,0)');
 var socket = io("/dashboard");
 // var socket = io("/dashboard", {transports: ['websocket'], upgrade: false});
 
+updated_on.appendChild(document.createTextNode(`S|${new Date().toLocaleTimeString()}`));
+
+socket.on('connect', function () {
+    console.log("socket.io connected");
+    socket.emit('dashboard');
+    console.log("emitted to dashboard");
+});
+
+socket.on('invalid_token', function (data) {
+    alert("Access Token is Invalid or Broken must return to login page");
+    window.location.href = "/";
+});
+
+socket.on('disconnect', function() {
+    console.log("socket.io disconnected");
+    socket.emit("close_dash");
+});
+
+window.onbeforeunload = function () {
+    console.log("socket.io disconnected");
+    socket.emit("close_dash");
+    return undefined;
+}
+
 function price_to_shares() {
     console.log(checkbox_price_shares.checked);
     account_positions_box.innerHTML = '';
@@ -59,35 +83,12 @@ function price_to_shares() {
     }
 }
 
-updated_on.appendChild(document.createTextNode(`S/${new Date().toLocaleTimeString()}`));
-
-socket.on('connect', function () {
-    console.log("socket.io connected");
-    socket.emit('dashboard');
-    console.log("emitted to dashboard");
-});
-
-socket.on('invalid_token', function (data) {
-    alert("Access Token is Invalid or Broken must return to login page");
-    window.location.href = "/";
-});
-
-socket.on('disconnect', function() {
-    console.log("socket.io disconnected");
-    socket.emit("close_dash");
-});
-
-window.onbeforeunload = function () {
-    console.log("socket.io disconnected");
-    socket.emit("close_dash");
-    return undefined;
-}
-
 socket.on('main_dashboard_info', function (data) {
     checkbox_price_shares.disabled = false;
     updated_on.innerHTML = "";
-    updated_on.appendChild(document.createTextNode(`U/${new Date().toLocaleTimeString()}`));
+    updated_on.appendChild(document.createTextNode(`U|${new Date().toLocaleTimeString()}`));
     console.log(`updated ${ data.account_value_graph.table.length } ${ new Date().toLocaleTimeString() }`);
+    
     data_cache = null;  data_cache = data;
     account_positions_box.innerHTML = '';
     account_watchlist_box.innerHTML = '';

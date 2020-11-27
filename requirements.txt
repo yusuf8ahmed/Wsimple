@@ -16,7 +16,9 @@ idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.2
 loguru==0.5.3
+lxml==4.6.1
 MarkupSafe==1.1.1
+multitasking==0.0.9
 numpy==1.19.4
 pandas==1.1.4
 python-dateutil==2.8.1
@@ -27,7 +29,9 @@ pytz==2020.4
 requests==2.24.0
 six==1.15.0
 urllib3==1.25.11
+websockets==8.1
 Werkzeug==1.0.1
 WTForms==2.3.3
+yfinance==0.1.55
 zope.event==4.5.0
 zope.interface==5.1.2
