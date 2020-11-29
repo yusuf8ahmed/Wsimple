@@ -1,9 +1,9 @@
 cachelib==0.1.1
-certifi==2020.6.20
+certifi==2020.11.8
 chardet==3.0.4
 click==7.1.2
 dnspython==2.0.0
-email-validator==1.1.1
+email-validator==1.1.2
 Flask==1.1.2
 Flask-Session==0.3.2
 Flask-SocketIO==4.3.1
@@ -26,12 +26,12 @@ python-dotenv==0.15.0
 python-engineio==3.13.2
 python-socketio==4.6.0
 pytz==2020.4
-requests==2.24.0
+requests==2.25.0
 six==1.15.0
-urllib3==1.25.11
+urllib3==1.26.2
 websockets==8.1
 Werkzeug==1.0.1
 WTForms==2.3.3
 yfinance==0.1.55
 zope.event==4.5.0
-zope.interface==5.1.2
+zope.interface==5.2.0
