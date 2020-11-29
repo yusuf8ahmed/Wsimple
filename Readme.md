@@ -34,11 +34,11 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
   * to use the web-interface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
 
   ### Project Ideas
-    * Buy/sell a stock as the end of every month.
-    * Automatically create a deposit/withdrawal order every month.
-    * Create a internal transfer order to your wealthsimple TSFA, invest accounts every month.
-    * Automatically send tax and monthly trading statements to your email.
-    * Create a System to do dollar Cost Averaging (**DCA**) and dividend reinvestment plan (**DRIP**)
+  * Buy/sell a stock as the end of every month.
+  * Automatically create a deposit/withdrawal order every month.
+  * Create a internal transfer order to your wealthsimple TSFA, invest accounts every month.
+  * Automatically send tax and monthly trading statements to your email.
+  * Create a System to do dollar Cost Averaging (**DCA**) and dividend reinvestment plan (**DRIP**)
 
   ### Installation
   ```bash
