@@ -45,10 +45,6 @@ var socket = io("/stock", {
     upgrade: false
 });
 
-Array.prototype.contains = (str) => { return this.indexOf(str) > -1; };
-
-Object.prototype.keys = () => { return Object.keys(this); };
-
 add_watchlist.addEventListener("click", function(e) {
     e.preventDefault();
     console.log("add to watchlist");
@@ -122,7 +118,7 @@ function display_stock(graph, info, position) {
     });
 
     position_dict = position.results[0].position_quantities;
-    if (position_dict.keys().contains(info.id)) {
+    if (Object.keys(position_dict).includes(info.id)) {
         // this security is owned by you
         console.log("you own this security");
         sell_button.style.display = 'inline-block';
@@ -150,11 +146,11 @@ function display_stock(graph, info, position) {
     growth.innerHTML = parseFloat(info.fundamentals.company_earnings_growth).toFixed(2);
     ceo.innerHTML = info.fundamentals.company_ceo;  
     
-    var stats_website_text = document.createTextNode("Website");
-    stats_website_link.appendChild(stats_website_text);    
     var stats_website_link = document.createElement("a");
     stats_website_link.setAttribute("target", "_blank");
-    stats_website_link.setAttribute("href", `${info.fundamentals.website}`);
+    stats_website_link.setAttribute("href", `${info.fundamentals.website}`);    
+    var stats_website_text = document.createTextNode("Website");
+    stats_website_link.appendChild(stats_website_text);    
     website.appendChild(stats_website_link);
 
     for (const stock_chart of graph.results.slice(1)) {
@@ -178,8 +174,6 @@ function display_etf(graph, info, position) {
     ticker_name.appendChild(ticker_name_text);
     var ticker_value_text = document.createTextNode(`${parseFloat(info.quote.amount).toFixed(2)} ${info.quote.currency}`);
     ticker_value.appendChild(ticker_value_text);
-
-
     // about text
     var about_text = document.createTextNode(info.fundamentals.description);
     about.appendChild(about_text);
@@ -192,7 +186,8 @@ socket.on('invalid_token', function (data) {
 
 socket.on('connect', function () {
     console.log("connected");
-    var sec_id = window.location.pathname.split("/")[2];
+    const url = new URL(window.location.href);
+    var sec_id = url.searchParams.get('ticker');
     console.log(sec_id);
     socket.emit("get_security_info", sec_id);
 });
@@ -208,14 +203,12 @@ socket.on('return_stock_info', function (data) {
     console.log(`${info.asset_class}|${info.security_type}|${info.object}`);
     console.dir(data);
 
-    ticker_symbol.innerHTML = '';
-    ticker_name.innerHTML = '';
-    ticker_value.innerHTML = '';
-    activities.innerHTML = '';
+    ticker_symbol.innerHTML, ticker_name.innerHTML,  = '';
+    ticker_value.innerHTML, activities.innerHTML = '';
     about.innerHTML = '';    
 
     stock_asset_classes = ["us_stocks", "canadian_stocks", "individual_stocks"];
-    if ((stock_asset_classes.contains(info.asset_class)) && (info.security_type == "equity") ) {
+    if ((stock_asset_classes.includes(info.asset_class)) && (info.security_type == "equity") ) {
         display_stock(graph, info, position);
         console.log("display stock");
     } else if (info.security_type == "exchange_traded_fund") {
@@ -224,5 +217,33 @@ socket.on('return_stock_info', function (data) {
     } else {
         console.log("display unknown equity type")
     }
-    // socket.emit("get_security_info", [info.id]);
 });
+
+/* 
+    Company stock details:
+    Open
+    High
+    Low
+    Market Cap
+    P/E ratio
+    52W High
+    52W Low
+    Volume
+    EPS
+
+    About Company:
+    about
+    ceo
+    employees
+    gross profit
+    cash
+    HQ
+    Revenue
+    Earnings
+    Debts
+    Website
+
+    Company News:
+    news
+
+ */

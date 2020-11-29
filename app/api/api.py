@@ -24,7 +24,6 @@ import requests
 class Requestor:
     """Requestor class for Wsimple api as requests code is very repetitive 
     always stay.  
-    **DRY** Dont Repeat Yourself
     """
     def get(url, funcname, **kwargs):
         """make a get request to a ***url***"""
@@ -77,8 +76,7 @@ class Requestor:
             raise InvalidAccessTokenError
         else:
             return r.json()
-        
-# ActivitiesSection        
+          
         
 class Wsimple:
     """Wsimple is the main access class to the wealthsimple trade api."""
@@ -208,18 +206,19 @@ class Wsimple:
             pass
         else:
             #"create_account": not 1
+            self.email = email
             payload = {"email":email, "password":password, "timeoutMs": 2e4}
-            if otp_mode:
+            if otp_mode: 
                 payload["otp"] = otp_number
             r = requests.post(
                 url="{}auth/login".format(self.base_url),
                 data=payload
             ) 
             del payload
-            print(f"Login status code {r.status_code}")
-            if "x-wealthsimple-otp" in r.headers:
+            logger.debug(f"Login status code {r.status_code}")
+            if "x-wealthsimple-otp" in r.headers: 
                 #! one time password code login
-                print("Need to Login with one time password")
+                logger.info("One time password needed")
                 try:
                     otp_headers = r.headers['x-wealthsimple-otp'].replace(" ", "").split(";")
                     method = otp_headers[1][7:] 

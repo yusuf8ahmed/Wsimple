@@ -2,7 +2,7 @@
  Project Name: Wsimple
  Copyright (c) 2020 Chromazmoves
 """
-from app import app, session, render_template, redirect, logger
+from app import app, session, render_template, redirect, logger, request
 from app import socketio, thread, thread_lock
 from app import ALLOW_DASH, ALLOW_SETTINGS, ALLOW_STOCK_INFO
 from app import TIME_DASH, TIME_SETTINGS, TIME_STOCK_INFO
@@ -29,7 +29,7 @@ def index():
                 session["key"] = ws.tokens
                 return redirect('/home') 
             except WSOTPUser:
-                # Wealthsimple OTP User
+                logger.debug("WEB: Wsimple OTP User")
                 if token:
                     try:
                         ws = Wsimple.otp_login(email, password, token)
@@ -37,20 +37,18 @@ def index():
                         print(ws.tokens)
                         return redirect('/home') 
                     except WSOTPLoginError:
-                        # Wealthsimple OTP User login error
+                        logger.error("WEB: Wsimple OTP user login error")
                         return render_template('index.html', form=form, pass_auth=False, use_auth=False, show_auth_message=False)
                 return render_template('index.html', form=form, pass_auth=False, use_auth=True, show_auth_message=True) 
             except LoginError:
-                # enter worng password
+                logger.error("WEB: Wsimple user login error")
                 return render_template('index.html', form=form, pass_auth=True, use_auth=False, show_auth_message=False) 
     return render_template('index.html', form=form, pass_auth=False, use_auth=False, show_auth_message=False)
 
 @app.route('/home', methods=['POST', 'GET'])
 def home():
     try:
-        # account = str(session["key"]).split(",")
-        # login = Wsimple.auth(account[0], account[1])
-        # if "OK" in login:
+        logger.debug("WEB: Portfolio page")
         return render_template("main.html")
     except KeyError:
         return redirect('/') 
@@ -58,20 +56,13 @@ def home():
 @app.route('/search', methods=['POST', 'GET'])
 def search():
     try:
-        # account = str(session["key"]).split(",")
-        # login = Wsimple.auth(account[0], account[1])
-        # if "OK" in login:
-        return render_template("search.html")
+        sec_id = request.args.get('ticker')
+        if sec_id == None:
+            return render_template("search.html")
+        else:
+            return render_template("stock.html")
     except KeyError:
-        return redirect('/')     
-    
-@app.route('/search/<sec_id>', methods=['POST', 'GET']) 
-def search_stock(sec_id):
-    try:
-        print(f"route stock: {sec_id}")
-        return render_template("stock.html")
-    except KeyError:
-        return redirect('/')    
+        return redirect('/')        
     
 @app.route('/activities', methods=['POST', 'GET'])
 def activities():
@@ -104,11 +95,11 @@ def index2():
         
 @socketio.on('connect')
 def connect():
-    print('Client connected')
+    logger.info("WEB: Client connected")
     
 @socketio.on('disconnect')
 def disconnect():
-    print('Client disconnected')  
+    logger.info("WEB: Client disconnected")
     
 #? display the "/home" dashboard  
 def dash_main_info(tokens):
@@ -231,9 +222,9 @@ def soc_search_page():
     global thread
     with thread_lock:
         if thread is None:
-            logger.info("Start get_search_page")      
+            logger.debug("Start get_search_page")      
             if isinstance(session.get('key'), list):
-                logger.info(f"Starting get_search_page key={session.get('key')}") 
+                logger.debug(f"Starting get_search_page") 
                 thread = socketio.start_background_task(search_page_info, (session["key"]))   
             else:
                 logger.error("Starting stock_info false key") 

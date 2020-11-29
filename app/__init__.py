@@ -14,7 +14,7 @@ if not __name__ == "__main__":
     #flask/flask-addon libraries
     import random
     from flask import Flask, render_template, redirect
-    from flask import session, g, current_app
+    from flask import session, g, current_app, request
     from flask_socketio import SocketIO
     from flask_session import Session
     from dotenv import load_dotenv, find_dotenv

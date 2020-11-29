@@ -120,7 +120,7 @@ socket.on('return_security', function (data) {
         var security = document.createElement("p");
         var security_box = document.createElement("a");
         security_box.setAttribute("target", "_blank");
-        security_box.setAttribute("href", `${window.location.origin}/search/${securities.id}`);
+        security_box.setAttribute("href", `${window.location.origin}/search?ticker=${securities.id}`);
         security_box.innerHTML = `${securities.stock.symbol}`;
         security.appendChild(security_box);
         search_box.appendChild(security);

@@ -12,24 +12,33 @@
   </a>
 </p>
 
-### What is the Wsimple project?
-Welcome! This project is a web interface and API for Wealthsimple Trade. The main goal this project is to give a simple yet robust interface for Wealthsimple Trade users and also give the ability to allow developers to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](#index) for API wrapper documentation. 
+## What is the Wsimple project?
+Welcome! This project is a web interface and API for Wealthsimple Trade. The main goal this project is to give a simple yet robust interface for Wealthsimple Trade users and also give the ability to allow developers to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/app/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
 
 Before using this please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available.
 
+**This library was created with non-coders in mind and needs minimal understand of python to get started**
+
 ## Getting Started
   ### Project Status
-  <p style="">
-  Pre-alpha v1.0
-  </p>
+
+  _Pre-alpha v1.0_  
 
   This project is in the pre-alpha stage. if you find any bugs please submit an [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new).
 
   ### Prerequisites
-  * python and pip is required to use/download wsimple
+  * Python and Pip is required to use wsimple
   * to download pip and python goto ["Download Python"](https://realpython.com/installing-python/)
-    * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). Windows Subsystem for linux(wsl) is need for wsimple website to run
+    * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). 
     * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
+  * to use the web-interface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
+
+  ### Project Ideas
+    * Buy/sell a stock as the end of every month.
+    * Automatically create a deposit/withdrawal order every month.
+    * Create a internal transfer order to your wealthsimple TSFA, invest accounts every month.
+    * Automatically send tax and monthly trading statements to your email.
+    * Create a System to do dollar Cost Averaging (**DCA**) and dividend reinvestment plan (**DRIP**)
 
   ### Installation
   ```bash
@@ -49,7 +58,6 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
 <a id="index"></a> 
 
 ## API
-
 ### Usage
   ```python
   from Wsimple import Wsimple
@@ -57,33 +65,36 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
   email = str(input("Enter email: \n>>>"))
   password = str(input("Enter password: \n>>>"))
   try:
-      ws = Wsimple(email, password) # Wsimple("email_account", "password")
-      tokens = ws.tokens
-  except WSOTPUser: # Exception occurs on one time password only.
+      # login to Wealthsimple
+      ws = Wsimple(email, password) 
+      # token are the access keys to your account
+      tokens = ws.tokens 
+  except WSOTPUser:
+      # Exception occurs on one time password only.
       otpnumber = int(input("Enter otpnumber: \n>>>"))
       ws = Wsimple.otp_login(email, passw, otpnumber)
       tokens = ws.tokens  
 
-  ws.current_status()
   # check the current operation status of internal Wealthsimple Trade
-
-  print(ws.find_securities(tokens, "GOOG")) 
+  print(ws.current_status())
+  
   # return a list of securities that include GOOG and GOOGL
-
-  ws.make_deposit(tokens, 2000)
+  print(ws.find_securities(tokens, "GOOG")) 
+  
   # create deposit order for 2000 CAD into your account
-
-  ws.make_withdrawal(tokens, 6000)
+  ws.make_deposit(tokens, 2000)
+  
   # create withdrawal order for 6000 CAD into your account
-
-  ws.get_market_hours(tokens, exchange="NYSE")
-  # return opening and closing of the exchange NYSE 
-
+  ws.make_withdrawal(tokens, 6000)
+  
+  # return opening and closing of the exchange NYSE
+  print(ws.get_market_hours(tokens, exchange="NYSE"))
   ```
 
 <a id="disclamer"></a> 
-## Disclaimer 
-  #### **DO NOT LEVERAGE THIS IN ATTEMPT TO DISRUPT ORDERLY MARKET FUNCTIONS**.
+
+## Disclaimer
+
   This software is provided so you can use Wealthsimple trade on your computer. **This software is not built or maintained by Wealthsimple Trade or the company Wealthsimple.** Remember your responsibility to not engage in illegal or unethical trading behaviours that can disrupt orderly market functions. Flooding the website/api with orders in a short timeframe may result in getting banned or locked out by Wealthsimple Trade.
 
   Remember when using this website and/or api you are still under Wealthsimple Trade services and they reserve the right to terminate anyone.
