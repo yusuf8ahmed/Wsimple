@@ -23,7 +23,7 @@ numpy==1.19.4
 pandas==1.1.4
 python-dateutil==2.8.1
 python-dotenv==0.15.0
-python-engineio==3.13.2
+python-engineio==3.14.2
 python-socketio==4.6.0
 pytz==2020.4
 requests==2.25.0
