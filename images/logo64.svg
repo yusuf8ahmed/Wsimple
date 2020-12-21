@@ -1,0 +1,15 @@
+<svg width="128" height="116" viewBox="0 0 128 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="logo64">
+<g id="Vector 1">
+<path d="M79 102H95L92.2308 82.6L88.8461 63.2L79 102Z" fill="black"/>
+<path d="M28 5C28 5 17.6089 5 11 5C17.6089 42.8809 28 102 28 102L39.2051 69.6667L28 5Z" fill="black"/>
+<path d="M28 102H45L39.2051 69.6667L28 102Z" fill="black"/>
+<path d="M62 5L39.2051 69.6667L45 102L67.4103 37.3333L62 5Z" fill="black"/>
+<path d="M79 5H62L67.4103 37.3333L79 5Z" fill="black"/>
+<path d="M88.8461 63.2L79 5L67.4103 37.3333L79 102L88.8461 63.2Z" fill="black"/>
+<path d="M121 5H104.5L88.8461 63.2L92.2308 82.6L95 102L121 5Z" fill="black"/>
+</g>
+<path id="Vector 3" d="M79 5L45 102L62 5H79Z" fill="#00FE91"/>
+<path id="Vector 4" d="M121 5L95 102L104.5 5H121Z" fill="#00FE91"/>
+</g>
+</svg>

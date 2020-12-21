@@ -1,6 +1,6 @@
 <p align="center">
   <a>
-    <img src="app/static/media/logo64.svg">
+    <img src="images/media/logo64.svg">
     <br>
     <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
     <img src="https://forthebadge.com/images/badges/open-source.svg">
