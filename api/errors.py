@@ -18,22 +18,22 @@ class MethodInputError(Exception):
 class EmptyTokensError(Exception):
     """Error thrown when an tokens list is empty"""
     def __init__(self):
-        super(EmptyTokensError, self).__init__("Some how the tokens are Empty?")
+        super(EmptyTokensError, self).__init__("tokens are empty?")
 
 class InvalidAccessTokenError(Exception):
     """Error thrown when an access token is invalid"""
     def __init__(self):
-        super(InvalidAccessTokenError, self).__init__("An Invalid Access Token Error was, given please try again")
+        super(InvalidAccessTokenError, self).__init__("An Invalid access token error was given, please try again")
 
 class InvalidRefreshTokenError(Exception):
     """Error thrown when an refresh token is invalid"""
     def __init__(self):
-        super(InvalidRefreshTokenError, self).__init__("An Invalid Refresh Token Error was given, please try again")
+        super(InvalidRefreshTokenError, self).__init__("An Invalid refresh token error was given, please try again")
 
 class WSOTPUser(Exception):
     """Error thrown when an user is an otp user"""
     def __init__(self):
-        super(WSOTPUser, self).__init__("An Wealthsimple otp user account was triggered, please try again and use a try block")
+        super(WSOTPUser, self).__init__("An wealthsimple otp user account was triggered, please try again and use a try block")
 
 class WSOTPError(Exception):
     """Error thrown when an otp error occurs"""

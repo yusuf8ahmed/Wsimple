@@ -20,64 +20,7 @@ from .errors import InvalidAccessTokenError, InvalidRefreshTokenError
 from .errors import WSOTPUser, WSOTPError, WSOTPLoginError, TSXStopLimitPriceError
 # third party
 import requests
-
-class Requestor:
-    """Requestor class for Wsimple api as requests code is very repetitive 
-    always stay.  
-    """
-    def get(url, funcname, **kwargs):
-        """make a get request to a ***url***"""
-        logger.debug("{}".format(funcname))
-        r = requests.get(
-            "".format(url), 
-            kwargs
-        )
-        logger.debug("{} {}".format(funcname, r.status_code))
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r
-    
-    def post(url, funcname, **kwargs):
-        """make a post request to a ***url***"""
-        logger.debug("{}".format(funcname))
-        r = requests.post(
-            "".format(url), 
-            kwargs
-        )
-        logger.debug("{} {}".format(funcname, r.status_code))
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r
-    
-    def delete(url, funcname, **kwargs):
-        """make a delete request to a ***url***"""
-        logger.debug("{}".format(funcname))
-        r = requests.delete(
-            "".format(url), 
-            kwargs
-        )
-        logger.debug("{} {}".format(funcname, r.status_code))
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
-    
-    def put(url, funcname, **kwargs):
-        """make a put request to a ***url***"""
-        logger.debug("{}".format(funcname))
-        r = requests.put(
-            "".format(url), 
-            kwargs
-        )
-        logger.debug("{} {}".format(funcname, r.status_code))
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
-          
-        
+             
 class Wsimple:
     """Wsimple is the main access class to the wealthsimple trade api."""
     base_url = "https://trade-service.wealthsimple.com/"
@@ -165,51 +108,35 @@ class Wsimple:
         'ca_rrsp':'RRSP account',
         'ca_non_registered_crypto':'Crypto account'
     }
-    name_security_group = { 
-        'most_watched': {
-            "title": 'Top 100 on Trade',
-            "description": 'The most popular stocks on Wealthsimple Trade'
-        },
-        'most_active': {
-            "title": 'Most active',
-            "description": 'Most actively traded stocks and ETFs today'
-        },
-        'gainers': {
-            "title": 'Top gainers',
-            "description": 'Stocks and ETFs with the largest gains in stock price today'
-        },
-        'losers': {
-            "title": 'Top losers',
-            "description": 'Stocks and ETFs with the largest losses in stock price today'
-        }
-    }
-    iscanadiansecurity = lambda x: x in ["TSX","TSX-V"]
+    iscanadiansecurity = lambda self, x: x in ["TSX","TSX-V"]
     
     def __init__(self, 
-                 email,
+                 email, 
                  password, 
-                 verbose_mode=False, 
-                 access_mode=False, 
-                 otp_mode=False,
-                 otp_number=0, 
-                 tokens=""):
+                 otp_number: int = 0,
+                 otp_mode: bool = False,
+                 public_mode: bool = False,     
+                 oauth_mode: bool = False,              
+                 verbose_mode: bool = False, 
+                 tokens: Optional[list] = None):
         """
         Wsimple._\_\_init_\_\_() initializes the Wsimple class and logs the user in using 
         the provided email and password. Alternatively, ***access_mode*** can be set 
         to True then and users can access the functions prefixed with public without using 
         a Wealthsimple Trade account.
         """
-        otp_status = None
-        self.access_mode = access_mode
+        self.public_mode = public_mode
         self.verbose = verbose_mode
-        if self.access_mode:
+        self.oauth_mode = oauth_mode
+        if self.public_mode:
             pass
+        elif self.oauth_mode:
+            self.tokens = tokens
         else:
             #"create_account": not 1
             self.email = email
             payload = {"email":email, "password":password, "timeoutMs": 2e4}
-            if otp_mode: 
-                payload["otp"] = otp_number
+            if otp_mode: payload["otp"] = otp_number
             r = requests.post(
                 url="{}auth/login".format(self.base_url),
                 data=payload
@@ -227,7 +154,7 @@ class Wsimple:
                                     "method": otp_headers[1][7:]
                                 }
                     if method == "sms":
-                            self._otp_info["digits"] = otp_headers[2][7:]
+                        self._otp_info["digits"] = otp_headers[2][7:]
                 except:
                     raise WSOTPError
                 finally:
@@ -263,24 +190,73 @@ class Wsimple:
             self._refresh_token = r.headers['X-Refresh-Token']
             self.tokens = [{'Authorization': self._access_token}, {"refresh_token": self._refresh_token}]
             return self.tokens
-                         
+  
     @classmethod
-    def access(cls, verbose=False):
-        """
-        access functions prefixed with public
-        """
-        wsimple = cls("", "", verbose_mode=verbose, access_mode=True)
-        return wsimple
-
-    @classmethod
-    def otp_login(cls, email, password, otp_number):
+    def otp_login(cls,
+                  email,
+                  password,
+                  otp_number,
+                  verbose=False):
         """
         One time password(otp) login function:
         """
         wsimple = cls(email, password, otp_mode=True, otp_number=int(otp_number))
+        return wsimple 
+   
+    @classmethod
+    def oauth_login(cls, token_dict, verbose=False):
+        """login with an appropriate list of tokens"""
+        wsimple = cls("", "", oauth_mode=True, tokens=token_dict, verbose_mode=verbose)
         return wsimple
-        
+                         
+    @classmethod
+    def public(cls, verbose=False):
+        """
+        use Wsimple.public to access functions prefixed with public without a ws account
+        """
+        wsimple = cls("", "", public_mode=True, verbose_mode=verbose)
+        return wsimple
+ 
     #! account related functions
+    def get_account(self, tokens, id):
+        """
+        Grab a specific accounts information by id 
+        """
+        logger.debug("get_account call")
+        r = requests.get(
+            url="{}account/{}".format(self.base_url, id),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_account {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+    
+    def get_accounts(self, tokens):
+        """
+        Grabs all accounts information
+        """
+        logger.debug("get_accounts call")
+        r = requests.get(
+            url="{}account/list".format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_account {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json() 
+           
+    def get_trade_account_id(self, tokens):
+        """ 
+        If any function 'account_id' param is empty, it will use 
+        this function to get the first trading id  """
+        accounts = self.get_accounts(tokens)["results"]
+        for account in accounts:
+            if account["account_type"] == "ca_non_registered":
+                return account["id"]
+
     def get_account_ids(self, tokens):
         """
         Grabs all account ids under your your Wealthsimple Trade account. 
@@ -291,34 +267,23 @@ class Wsimple:
             account_ids = []
             for account in accounts:
                 account_ids.append(account["id"])
-            logger.debug(f"get_account_ids XXX")
+            logger.debug(f"get_account_ids ^^^")
             return account_ids  
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
-
-    def get_account(self, tokens):
-        """
-        Grabs all account information under your Wealthsimple Trade account. 
-        """
-        logger.debug("get_account call")
-        r = requests.get(
-            url="{}account/list".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_account {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
-
-    def get_historical_portfolio_data(self, tokens, account_id: str = None, time: str = "1d"):
+        
+    def get_historical_portfolio_data(self,
+                                      tokens,
+                                      time: str = "1d",
+                                      account_id: Optional[str] = None
+                                      ):
         """
         Grabs historical portfolio information for your Wealthsimple Trade account for a specified timeframe.  
         Where ***time*** is one of [1d, 1w, 1m, 3m, 1y, all]: autoset to 1d.  
         """
         logger.debug("get_historical_portfolio_data call")
         if account_id == None:
-            account_id = self.get_account(tokens)["results"][0]["id"]
+            account_id = self.get_trade_account_id(tokens)
         r = requests.get(
             url="{}account/history/{}".format(self.base_url, time),
             params={"account_id":account_id},
@@ -406,76 +371,13 @@ class Wsimple:
         else:
             return r.json()
 
-    def _place_order(self,
-                     tokens: str,
-                     security_id: str,
-                     account_id: str,
-                     order_type: str,
-                     sub_type: str,
-                     stop_price = None,
-                     quantity: int = 1,
-                     limit_price: float = 1,
-                     time_in_force: str = "day"):
-        """
-        Private function: places an order for a security.
-        Where ***security_id*** is security id of the security that want to put an order on.
-        Where ***account_id*** is you wealthsimple account id
-        Where ***order_type*** is the major order type you want to make: ['sell_quantity' , 'buy_quantity']
-        Where ***sub_type*** is the minor order type you want to attach to the major order type: ['market', 'limit', 'stop_limit']
-        Where ***stop_price*** is the stop price used for "stop_limit" sub_type orders.
-        Where ***quantity*** is the amount that you want to put in the order.
-        Where ***limit_price*** is the limit price that you want to use in 'limit' and 'stop_limit' sub_type orders.
-        Where ***time_in_force*** is when you
-        
-        """
-        assert (order_type == 'sell_quantity' or order_type == 'buy_quantity')
-        assert (sub_type == 'market' or sub_type == 'limit' or sub_type == 'stop_limit')
-        # default time_in_force to 'day'
-        if (order_type == "sell_quantity" and sub_type == "market"):
-            # no limit_price: market sell
-            order_dict = {
-                "account_id": account_id,
-                "quantity": quantity,
-                "security_id": security_id,
-                "order_type": order_type,
-                "order_sub_type": sub_type,
-                "time_in_force": time_in_force,
-            }  
-        elif(sub_type == "stop_limit"):
-            # add stop_price: stop limit buy and sell
-            order_dict = {
-                "account_id": account_id,
-                "quantity": quantity,
-                "security_id": security_id,
-                "order_type": order_type,
-                "order_sub_type": sub_type,
-                "time_in_force": time_in_force,
-                "limit_price": limit_price,
-                "stop_price": stop_price,
-            }     
-        else:
-            # for market buy, limit buy and sell
-            order_dict = {
-                "account_id": account_id,
-                "quantity": quantity,
-                "security_id": security_id,
-                "order_type": order_type,
-                "order_sub_type": sub_type,
-                "time_in_force": time_in_force,
-                "limit_price": limit_price
-            }     
-        r = requests.post("{}orders".format(self.base_url),
-                          headers=tokens[0],
-                          json=order_dict)
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
-
-    def create_order(self, tokens, payload):
+    def _send_order(self, tokens, payload):
+        """ send order to wealthsimple servers """
+        logger.debug("create_order")
         r = requests.post("{}orders".format(self.base_url),
                     headers=tokens[0],
                     json=payload)
+        logger.debug(f"create_order {r.status_code}")
         if r.status_code == 401:
             raise InvalidAccessTokenError
         else:
@@ -486,9 +388,8 @@ class Wsimple:
         
     def market_buy_order(self,
                          tokens,
-                         security_id,
-                         quantity,
-                         limit_price=None,
+                         security_id: str,
+                         quantity: int = 1,
                          account_id: Optional[str] = None,
                          ):
         """
@@ -497,17 +398,16 @@ class Wsimple:
         try:
             logger.debug("buy_market_order")
             if account_id is None:
-                account_id = self.get_account(tokens)["results"][0]["id"]
-            limit_price = self.find_securities_by_id(tokens, security_id)["quote"]["amount"]
-            res = self._place_order(tokens,
-                                    account_id,
-                                    security_id,
-                                    order_type='buy_quantity',
-                                    sub_type='market',
-                                    limit_price=limit_price,
-                                    quantity=quantity
-                                    )
-            return res
+                account_id = self.get_trade_account_id(tokens)
+            return self._send_order(tokens, {
+                "security_id": security_id,
+                "limit_price": 1,
+                "quantity": quantity,
+                "order_type": "buy_quantity",
+                "order_sub_type": "market",
+                "time_in_force": "day",
+                "account_id": account_id
+            })
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
@@ -515,25 +415,25 @@ class Wsimple:
                         tokens,
                         security_id,
                         limit_price,
-                        quantity,
+                        quantity: int = 1,
                         account_id: Optional[str] = None,
-                        gtc="day"):
+                        time_in_force: str ="day"):
         """
         Places a limit buy order for a security.    
         """
         try:
             logger.debug("buy_limit_order")
             if account_id is None:
-                account_id = self.get_account(tokens)["results"][0]["id"]
-            res = self._place_order(tokens,
-                                    account_id,
-                                    security_id,
-                                    order_type='buy_quantity',
-                                    sub_type='limit',
-                                    limit_price=limit_price,
-                                    quantity=quantity,
-                                    gtc=gtc)
-            return res
+                account_id = self.get_trade_account_id(tokens)
+            return self._send_order(tokens, {
+                "security_id": security_id,
+                "account_id": account_id,
+                "limit_price": limit_price,
+                "quantity": quantity,
+                "order_type": "buy_quantity",
+                "order_sub_type": "limit",
+                "time_in_force": time_in_force,
+            })
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
@@ -542,48 +442,54 @@ class Wsimple:
                              stop_price,
                              limit_price,
                              security_id,
-                             quantity,
+                             quantity: int = 1,
                              account_id: Optional[str] = None,
-                             gtc="day"):
+                             time_in_force: str = "day"):
         """
-        Places a stop limit buy order for a security.  
+        Places a stop limit buy order for a security. 
         """
         try:
-            security = self.find_securities_by_id(security_id)
+            if account_id is None:
+                account_id = self.get_trade_account_id(tokens)
+            security = self.find_securities_by_id(tokens, security_id)
             exchange = security["stock"]["primary_exchange"]    
             if (self.iscanadiansecurity(exchange) and (stop_price != limit_price)):
                 raise TSXStopLimitPriceError    
-            res = self._place_order(tokens,
-                                    account_id,
-                                    security_id,
-                                    order_type='buy_quantity',
-                                    sub_type='stop_limit',
-                                    limit_price=limit_price,
-                                    quantity=quantity,
-                                    gtc=gtc)
-            return res       
+            return self._send_order(tokens, {
+                "security_id": security_id,
+                "account_id": account_id,
+                "stop_price": stop_price,
+                "limit_price": limit_price,
+                "quantity": quantity,
+                "order_type": "buy_quantity",
+                "order_sub_type": "stop_limit",
+                "time_in_force": time_in_force,
+            })
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
     def market_sell_order(self,
                           tokens,
                           security_id: str,
-                          account_id: Optional[str] = None,
-                          quantity: int = 1):
+                          quantity: int = 1,
+                          account_id: Optional[str] = None
+                          ):
         """
         Places a market sell order for a security.
         """
         try:
             logger.debug("sell_market_order")
             if account_id is None:
-                account_id = self.get_account(tokens)["results"][0]["id"]
-            res = self._place_order(tokens,
-                                    account_id,
-                                    security_id,
-                                    order_type='sell_quantity',
-                                    sub_type='market',
-                                    quantity=quantity)
-            return res
+                account_id = self.get_trade_account_id(tokens)
+            return self._send_order(tokens, {
+                "security_id": security_id,
+                "market_value": 1,
+                "quantity": quantity,
+                "order_type": "sell_quantity",
+                "order_sub_type": "market",
+                "time_in_force": "day",
+                "account_id": account_id,
+            })
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
@@ -591,25 +497,26 @@ class Wsimple:
                          tokens,
                          limit_price,
                          security_id,
-                         account_id: Optional[str] = None,
-                         quantity=1,
-                         gtc="day"):
+                         quantity: int = 1,
+                         time_in_force: str = "day",
+                         account_id: Optional[str] = None
+                         ):
         """
         Places a limit sell order for a security.  
         """
         try:
             logger.debug("sell_limit_order")
             if account_id is None:
-                account_id = self.get_account(tokens)["results"][0]["id"]
-            res = self._place_order(tokens,
-                                    account_id,
-                                    security_id,
-                                    order_type='sell_quantity',
-                                    sub_type='limit',
-                                    limit_price=limit_price,
-                                    quantity=quantity,
-                                    gtc=gtc)
-            return res
+                account_id = self.get_trade_account_id(tokens)
+            return self._send_order(tokens, {
+                "security_id": security_id,
+                "limit_price": limit_price,
+                "quantity": quantity,
+                "order_type": "sell_quantity",
+                "order_sub_type": "limit",
+                "time_in_force": time_in_force,
+                "account_id": account_id
+            })
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
@@ -617,31 +524,36 @@ class Wsimple:
                               tokens,
                               stop_price,
                               limit_price,
-                              security_id,
+                              security_id: str,
                               account_id: Optional[str] = None,
-                              quantity=1,
-                              gtc="day"):
+                              quantity: int = 1,
+                              time_in_force: str = "day"):
         """
-        Places a limit sell order for a security.  
+        Places a limit sell order for a security.
         """
         try:
-            security = self.find_securities_by_id(security_id)
+            if account_id is None:
+                account_id = self.get_trade_account_id(tokens)
+            security = self.find_securities_by_id(tokens, security_id)
             exchange = security["stock"]["primary_exchange"]    
             if (self.iscanadiansecurity(exchange) and (stop_price != limit_price)):
                 raise TSXStopLimitPriceError   
-            res = self._place_order(tokens,
-                                    account_id,
-                                    security_id,
-                                    order_type='sell_quantity',
-                                    sub_type='stop_limit',
-                                    limit_price=limit_price,
-                                    quantity=quantity,
-                                    gtc=gtc)
-            return res       
+            return self._send_order(tokens, {
+                "security_id": security_id,
+                "stop_price": stop_price,
+                "limit_price": limit_price,
+                "quantity": quantity,
+                "order_type": "sell_quantity",
+                "order_sub_type": "stop_limit",
+                "time_in_force": time_in_force,
+                "account_id": account_id
+            })        
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
     
-    def cancel_order(self, tokens, order_id: str):
+    def cancel_order(self, 
+                     tokens, 
+                     order_id: str):
         """
         Cancels a order by its id.    
         Where ***order*** is order_id.   
@@ -657,12 +569,14 @@ class Wsimple:
         else:
             return r.json()
 
-    def pending_orders(self, tokens, account_id=None):
+    def pending_orders(self, 
+                       tokens, 
+                       account_id: Optional[str] = None):
         """
         Grabs all pending orders under your Wealthsimple Trade account.
         """
         if account_id is None:
-            account_id = self.get_account(tokens)["results"][0]["id"]
+            account_id = self.get_trade_account_id(tokens)
         orders = self.get_orders(tokens)['results']
         result = []
         for order in orders:
@@ -670,13 +584,15 @@ class Wsimple:
                 result.append(order)
         return result
     
-    def cancelled_orders(self, tokens, account_id=None):
+    def cancelled_orders(self, 
+                         tokens, 
+                         account_id: Optional[str] = None):
         """
         Grabs all cancelled orders under your Wealthsimple Trade account.
         """
         try:
             if account_id is None:
-                account_id = self.get_account(tokens)["results"][0]["id"]
+                account_id = self.get_trade_account_id(tokens)
             orders = self.get_orders(tokens)['results']
             result = []
             for order in orders:
@@ -686,12 +602,14 @@ class Wsimple:
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
-    def filled_orders(self, tokens, account_id=None):
+    def filled_orders(self, 
+                      tokens,
+                      account_id: Optional[str] = None):
         """
         Grabs all filled orders under your Wealthsimple Trade account.
         """
         if account_id is None:
-            account_id = self.get_account(tokens)["results"][0]["id"]
+            account_id = self.get_trade_account_id(tokens)
         orders = self.get_orders(tokens)['results']
         result = []
         for order in orders:
@@ -700,18 +618,20 @@ class Wsimple:
         return result
 
     def cancel_pending_orders(self, tokens):
+        """ cancel all pending order """
         try:
             pending = self.pending_orders(tokens)
             result = []
             for orders in pending:
-                print(orders["order_id"])
                 result.append(self.cancel_order(tokens, orders["order_id"]))
             return result
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
         
     #! find securitites functions
-    def find_securities(self, tokens, ticker: str):
+    def find_securities(self, 
+                        tokens, 
+                        ticker: str):
         """
         Grabs information about the security resembled by the ticker.    
         Where ***ticker*** is the ticker of the company, API will fuzzy    
@@ -729,7 +649,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def find_securities_by_id(self, tokens, sec_id: str) -> dict:
+    def find_securities_by_id(self, 
+                              tokens, 
+                              sec_id: str):
         """
         Grabs information about the security resembled by the security id.  
         Where ***ticker*** is the ticker of the company. 
@@ -748,8 +670,8 @@ class Wsimple:
     def find_securities_by_id_historical(self, 
                                          tokens,
                                          sec_id: str,
-                                         time: str="1d",
-                                         mic: str="XNAS"):
+                                         time: str = "1d",
+                                         mic: str = "XNAS"):
         """
         Grabs historical information about the security by the security id in a specified timeframe.  
         Where ***time*** is the timeframe one of [1d, 1w, 1m, 3m, 1y, all]: autoset "1d".  
@@ -768,7 +690,11 @@ class Wsimple:
             return r.json()
 
     #! activities functions
-    def get_activities(self, tokens, account_id: Optional[str] = None, limit:int = 20, type:str = "all"):
+    def get_activities(self, 
+                       tokens, 
+                       account_id: Optional[str] = None, 
+                       limit: int = 20,
+                       type:str = "all"):
         """
         Grabs the 20 most recent activities on under your Wealthsimple Trade account.    
         Where ***type*** is the activities type you want can be ["deposit", "withdrawal", "dividend", "buy", "sell"] autoset to all.  
@@ -796,7 +722,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_activities_bookmark(self, tokens, bookmark=None):
+    def get_activities_bookmark(self, 
+                                tokens, 
+                                bookmark = None):
         """
         Provides the last 20 activities on the Wealthsimple Trade based on the bookmark.   
         Where ***bookmark*** is the bookmark id.   
@@ -831,7 +759,7 @@ class Wsimple:
         if bank_account_id == None:
             bank_account_id = self.get_bank_accounts()["results"][0]["id"]
         if account_id == None:
-            account_id = self.get_account()["results"][0]["id"]
+            account_id = self.get_trade_account_id(tokens)
         person = self.get_person()
         payload = {
             "bank_account_id": str(bank_account_id),
@@ -854,7 +782,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_withdrawal(self, tokens, funds_transfer_id: str):
+    def get_withdrawal(self, 
+                       tokens, 
+                       funds_transfer_id: str):
         """
         Get specific withdrawal under yout Wealthsimple Trade account.
         Where ***funds_transfer_id*** is the id of the withdrawal
@@ -885,7 +815,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def delete_withdrawal(self, tokens, funds_transfer_id: str):
+    def delete_withdrawal(self, 
+                          tokens, 
+                          funds_transfer_id: str):
         """
         Delete a specific withdrawal your Wealthsimple Trade account.
         """
@@ -918,7 +850,7 @@ class Wsimple:
         if bank_account_id == None:
             bank_account_id = self.get_bank_accounts()["results"][0]["id"]
         if account_id == None:
-            account_id = self.get_account()["results"][0]["id"]
+            account_id = self.get_trade_account_id(tokens)
         person = self.get_person()
         payload = {
             "client_id": str(person["id"]),
@@ -938,7 +870,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_deposit(self, tokens, funds_transfer_id: str):
+    def get_deposit(self, 
+                    tokens, 
+                    funds_transfer_id: str):
         """
         Get specific deposit under this Wealthsimple Trade account.  
         Where ***funds_transfer_id*** is the id of the deposit  
@@ -969,7 +903,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def delete_deposit(self, tokens, funds_transfer_id: str):
+    def delete_deposit(self, 
+                       tokens, 
+                       funds_transfer_id: str):
         """
         Delete a specific deposit under your Wealthsimple Trade account.
         """
@@ -1000,7 +936,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_market_hours(self, tokens, exchange: str):
+    def get_market_hours(self, 
+                         tokens, 
+                         exchange: str):
         """
         Get all market data about a specific exchange.  
         Where ***exchange*** is the exchange name.
@@ -1034,7 +972,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def add_watchlist(self, tokens, sec_id):
+    def add_watchlist(self, 
+                      tokens, 
+                      sec_id):
         """
         Add security under this Wealthsimple Trade account.    
         Where ***sec_id*** is the security id for the security you want to add.            
@@ -1050,7 +990,9 @@ class Wsimple:
         else:
             return r.json()
 
-    def delete_watchlist(self, tokens, sec_id):
+    def delete_watchlist(self, 
+                         tokens, 
+                         sec_id):
         """
         Delete a watchlisted securities in your Wealthsimple Trade account.  
         Where ***sec_id*** is the security id for the security you want to delete. 
@@ -1099,7 +1041,10 @@ class Wsimple:
             return r.json()
 
     #! securities groups functions
-    def get_top_losers_securities(self, tokens, offset=0, limit=20):
+    def get_top_losers_securities(self,
+                                  tokens,
+                                  offset: int = 0,
+                                  limit: int = 20):
         """
         Grab a list of top losers securities under Wealthsimple trade today
         """
@@ -1115,7 +1060,10 @@ class Wsimple:
         else:
             return r.json() 
 
-    def get_top_gainers_securities(self, tokens, offset=0, limit=20):
+    def get_top_gainers_securities(self,
+                                   tokens,
+                                   offset: int = 0,
+                                   limit: int = 20):
         """
         Grab a list of top gainers securities under Wealthsimple trade today
         """
@@ -1131,7 +1079,9 @@ class Wsimple:
         else:
             return r.json()  
     
-    def get_most_active_securities(self, tokens, limit=20):
+    def get_most_active_securities(self,
+                                   tokens,
+                                   limit: int = 20):
         """
         Grab a list of most active securities under Wealthsimple trade today
         """
@@ -1147,7 +1097,10 @@ class Wsimple:
         else:
             return r.json()      
     
-    def get_most_watched_securities(self, tokens, offset=0, limit=20):
+    def get_most_watched_securities(self,
+                                    tokens,
+                                    offset: int = 0,
+                                    limit: int = 20):
         """
         Grabs all most watched securities under Wealthsimple trade today
         """
@@ -1178,7 +1131,12 @@ class Wsimple:
         else:
             return r.json()
     
-    def get_securities_in_groups(self, tokens, group_id, offset=0, limit=20, filter_type=None):
+    def get_securities_in_groups(self, 
+                                 tokens,
+                                 group_id: str,
+                                 offset: int = 0,
+                                 limit: int = 20,
+                                 filter_type: str = None):
         """
         Grabs all securities groups under Wealthsimple trade
         """
@@ -1194,7 +1152,11 @@ class Wsimple:
         else:
             return r.json()
     
-    def get_all_securities_groups(self, tokens, offset=0, limit=25, order="desc"):
+    def get_all_securities_groups(self, 
+                                  tokens,
+                                  offset: int = 0,
+                                  limit: int = 25,
+                                  order: str = "desc"):
         """
         Grabs all security groups under Wealthsimple trade  
         Where ***offset*** is >= 0: autoset to 0  
@@ -1236,96 +1198,6 @@ class Wsimple:
         else:
             return r.json()
      
-    #! notification controls
-    def get_disabled_notifications(self, token):
-        """
-        Grab all disabled notifications
-        """
-        logger.debug("get_disabled_notifications")
-        r = requests.get(
-            url='{}mute-notifications'.format(self.base_url),
-            headers=token[0]
-        )
-        logger.debug(f"get_disabled_notifications {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
-    
-    def _notification(self, token, type, platform, enable=True):
-        logger.debug(f"get_disabled_notifications {type} {platform} {enable}")
-        if platform not in ["push", "email"]:
-            raise MethodInputError("""
-            platform given in incorrect use either 'push' (for mobile notifications) or 'email' (for email notifications)
-            """)
-        if enable: 
-            # enable notification here: delete req
-            r = requests.delete(
-                url='{}mute-notifications/{}/{}'.format(self.base_url, type, platform),
-                headers=token[0]
-            )
-            logger.debug(f"get_disabled_notifications {r.status_code}") 
-        else:
-            # disable notification here: put req
-            r = requests.put(
-                url='{}mute-notifications/{}/{}'.format(self.base_url, type, platform),
-                headers=token[0]
-            )
-            logger.debug(f"get_disabled_notifications {r.status_code}")            
- 
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json() 
-    
-    def enable_mobile_notification(self, token, type):
-        """
-        enable a specific type of notification for mobile
-        """
-        try:
-            if type not in self.push_notification:
-                raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.push_notification for allow notification type on moblie)""")
-            notif = self._notification(token, type, "push")
-            return notif            
-        except InvalidAccessTokenError:
-            raise InvalidAccessTokenError
- 
-    def enable_email_notification(self, token, type):
-        """
-        enable a specific type of notification for email
-        """
-        try:
-            if type not in self.email_notification:
-                raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.email_notification for allow notification type on email)""")
-            notif = self._notification(token, type, "email")
-            return notif           
-        except InvalidAccessTokenError:
-            raise InvalidAccessTokenError
-    
-    def disable_moblie_notification(self, token, type):
-        """
-        disable a specific type of notification for moblie
-        """
-        try:
-            if type not in self.push_notification:
-                raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.push_notification for allow notification type on moblie)""")
-            notif = self._notification(token, type, "push", enable=False)
-            return notif        
-        except InvalidAccessTokenError:
-            raise InvalidAccessTokenError
- 
-    def disable_email_notification(self, token, type):
-        """
-        disable a specific type of notification for email
-        """
-        try:
-            if type not in self.email_notification:
-                raise MethodInputError(f"""given type of notification("{type}") is not allowed (check ws.email_notification for allow notification type on email)""")
-            notif = self._notification(token, type, "email", enable=False)
-            return notif       
-        except InvalidAccessTokenError:
-            raise InvalidAccessTokenError
-
     #! global alerts
     def get_global_alerts(self, tokens):
         """
@@ -1333,7 +1205,7 @@ class Wsimple:
         """
         logger.debug("get_global_alerts")
         r = requests.get(
-            url='{}global-alerts'.format(self.base_url),
+            url='{}global-alerts/user'.format(self.base_url),
             headers=tokens[0]
         )
         logger.debug(f"get_global_alerts {r.status_code}")
@@ -1358,10 +1230,12 @@ class Wsimple:
         else:
             return r.json()
      
-    def create_internal_transfers(self, tokens, payload):
+    def create_internal_transfers(self, 
+                                  tokens, 
+                                  payload):
         """
         create a internal transfer request
-        currently no wrapper code
+        currently no wrapper functions.
         """
         logger.debug("create_internal_transfers")
         r = requests.post(
@@ -1376,13 +1250,15 @@ class Wsimple:
             return r.json()    
     
     #! tax-documents
-    def get_tax_documents(self, tokens, account_id=None):
+    def get_tax_documents(self, 
+                          tokens, 
+                          account_id: str = None):
         """
         Grab tax documents of your Wealthsimple account
         """
         logger.debug("get_tax_documents")
         if account_id == None:
-            account_id = self.get_account(tokens)["results"][0]["id"]
+            account_id = self.get_trade_account_id(tokens)
         r = requests.get(
             url='{}tax-documents'.format(self.base_url),
             param={"account_id", account_id},
@@ -1410,7 +1286,9 @@ class Wsimple:
         else:
             return r.json()
     
-    def get_monthly_statements_url(self, tokens, pdf_statement_id):
+    def get_monthly_statements_url(self,
+                                   tokens,
+                                   pdf_statement_id):
         """
         Grabs a url to a pdf of your statement.  
         Where ***pdf_statement_id*** is the id of the month you want to get.  
@@ -1509,7 +1387,10 @@ class Wsimple:
             logger.debug("settings InvalidAccessTokenError")
             raise InvalidAccessTokenError
 
-    def stock(self, tokens, sec_id, time="1d"):
+    def stock(self,
+              tokens,
+              sec_id: str,
+              time: str = "1d"):
         """
         Get dashboard needed for /stock/<sec_id> route.
         """
@@ -1635,7 +1516,8 @@ class Wsimple:
         return r.json()
 
     @staticmethod
-    def public_top_traded(offset=0, limit=5):
+    def public_top_traded(offset: int = 0, 
+                          limit: int = 5):
         """
         Get top traded companies on Wealthsimple trade.  
         Where ***offset*** is the displacement between the selected offset and the beginning.   

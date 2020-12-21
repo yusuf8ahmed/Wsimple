@@ -13,7 +13,7 @@
 </p>
 
 ## What is the Wsimple project?
-Welcome! This project is a web interface and API for Wealthsimple Trade. The main goal this project is to give a simple yet robust interface for Wealthsimple Trade users and also give the ability to allow developers to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/app/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
+Welcome! This project is a API(Web interface) for Wealthsimple Trade. The main goal this project is to give developers the ability to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/app/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
 
 Before using this please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available.
 
@@ -28,17 +28,17 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
 
   ### Prerequisites
   * Python and Pip is required to use wsimple
-  * to download pip and python goto ["Download Python"](https://realpython.com/installing-python/)
+  * to download pip and python go to ["Download Python"](https://realpython.com/installing-python/)
     * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). 
     * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
-  * to use the web-interface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
+  * to use the Web- nterface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
 
   ### Project Ideas
   * Buy/sell a stock as the end of every month.
   * Automatically create a deposit/withdrawal order every month.
   * Create a internal transfer order to your wealthsimple TSFA, invest accounts every month.
   * Automatically send tax and monthly trading statements to your email.
-  * Create a System to do dollar Cost Averaging (**DCA**) and dividend reinvestment plan (**DRIP**)
+  * Create a system to do dollar cost averaging (**DCA**) or dividend reinvestment plan (**DRIP**)
 
   ### Installation
   ```bash
@@ -67,7 +67,7 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
   try:
       # login to Wealthsimple
       ws = Wsimple(email, password) 
-      # token are the access keys to your account
+      # token are the keys to your account
       tokens = ws.tokens 
   except WSOTPUser:
       # Exception occurs on one time password only.

@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>api.api API documentation</title>
+<meta name="description" content="Name: Chromazmoves
+Project Name: Wsimple
+File Name: Wsimple/api/api.py
+**File: Main access point to Wsimple API**" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>api.api</code></h1>
+</header>
+<section id="section-intro">
+<p>Name: Chromazmoves<br>
+Project Name: Wsimple <br>
+File Name: Wsimple/api/api.py <br>
+<strong>File: Main access point to Wsimple API</strong></p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="api.api.Wsimple"><code class="flex name class">
+<span>class <span class="ident">Wsimple</span></span>
+<span>(</span><span>email, password, otp_number: int = 0, otp_mode: bool = False, public_mode: bool = False, oauth_mode: bool = False, verbose_mode: bool = False, tokens: Optional[list] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wsimple is the main access class to the wealthsimple trade api.</p>
+<p>Wsimple.<em>__init</em>__() initializes the Wsimple class and logs the user in using
+the provided email and password. Alternatively, <strong><em>access_mode</em></strong> can be set
+to True then and users can access the functions prefixed with public without using
+a Wealthsimple Trade account.</p></div>
+<h3>Class variables</h3>
+<dl>
+<dt id="api.api.Wsimple.activities_types"><code class="name">var <span class="ident">activities_types</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.bank_logos"><code class="name">var <span class="ident">bank_logos</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.base_url"><code class="name">var <span class="ident">base_url</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.email_notification"><code class="name">var <span class="ident">email_notification</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.exchanges"><code class="name">var <span class="ident">exchanges</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.exh_to_mic"><code class="name">var <span class="ident">exh_to_mic</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.friendly_account_name"><code class="name">var <span class="ident">friendly_account_name</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.push_notification"><code class="name">var <span class="ident">push_notification</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.time_ranges"><code class="name">var <span class="ident">time_ranges</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="api.api.Wsimple.current_status"><code class="name flex">
+<span>def <span class="ident">current_status</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get current status/incidents of wealthsimple trade.
+<br>
+the data is in body(content), data could be large.</p></div>
+</dd>
+<dt id="api.api.Wsimple.historical_status"><code class="name flex">
+<span>def <span class="ident">historical_status</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all previous history status/incidents of wealthsimple trade. <br>
+the data is in body(content), data could be large.</p></div>
+</dd>
+<dt id="api.api.Wsimple.oauth_login"><code class="name flex">
+<span>def <span class="ident">oauth_login</span></span>(<span>token_dict, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>login with an appropriate list of tokens</p></div>
+</dd>
+<dt id="api.api.Wsimple.otp_login"><code class="name flex">
+<span>def <span class="ident">otp_login</span></span>(<span>email, password, otp_number, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>One time password(otp) login function:</p></div>
+</dd>
+<dt id="api.api.Wsimple.public"><code class="name flex">
+<span>def <span class="ident">public</span></span>(<span>verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>use Wsimple.public to access functions prefixed with public without a ws account</p></div>
+</dd>
+<dt id="api.api.Wsimple.public_find_securities_by_ticker"><code class="name flex">
+<span>def <span class="ident">public_find_securities_by_ticker</span></span>(<span>ticker)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs information about the security resembled by the ticker.<br>
+Where <strong><em>ticker</em></strong> is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.</p></div>
+</dd>
+<dt id="api.api.Wsimple.public_find_securities_by_ticker_historical"><code class="name flex">
+<span>def <span class="ident">public_find_securities_by_ticker_historical</span></span>(<span>ticker, time)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a company historical data based on a time.
+<br>
+Where <strong><em>ticker</em></strong> is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.<br>
+Where <strong><em>time</em></strong> is ("1d", "1w", "1m", "3m", "1y"): DOES NOT INCLUDE ("all"). <br>
+!May not work on smaller companies or ETFs.</p></div>
+</dd>
+<dt id="api.api.Wsimple.public_find_securities_news"><code class="name flex">
+<span>def <span class="ident">public_find_securities_news</span></span>(<span>ticker)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get public news based on the ticker.
+<br>
+Where <strong><em>ticker</em></strong> is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY. <br>
+!May not work on smaller companies or ETF.</p></div>
+</dd>
+<dt id="api.api.Wsimple.public_top_traded"><code class="name flex">
+<span>def <span class="ident">public_top_traded</span></span>(<span>offset: int = 0, limit: int = 5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get top traded companies on Wealthsimple trade.<br>
+Where <strong><em>offset</em></strong> is the displacement between the selected offset and the beginning. <br>
+Where <strong><em>limit</em></strong> is the amount of response you want from the request.</p></div>
+</dd>
+<dt id="api.api.Wsimple.summary_status"><code class="name flex">
+<span>def <span class="ident">summary_status</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get current summary status/incidents of Wealthsimple trade.
+<br>
+This function returns data on these systems:<br>
+Login and Account Access, Deposits and Withdrawals, <br>
+Security Search, Order execution, Order submission, <br>
+Order Cancellation, Linking bank accounts, <br>
+Quotes, Order status, Trading, Market Data,<br>
+Account Values, Account Opening, <br>
+Apps,
+iOS app, Android App<br>
+the data is in the body(content), data is large.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="api.api.Wsimple.add_watchlist"><code class="name flex">
+<span>def <span class="ident">add_watchlist</span></span>(<span>self, tokens, sec_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add security under this Wealthsimple Trade account.
+<br>
+Where <strong><em>sec_id</em></strong> is the security id for the security you want to add.</p></div>
+</dd>
+<dt id="api.api.Wsimple.cancel_order"><code class="name flex">
+<span>def <span class="ident">cancel_order</span></span>(<span>self, tokens, order_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cancels a order by its id.
+<br>
+Where <strong><em>order</em></strong> is order_id.</p></div>
+</dd>
+<dt id="api.api.Wsimple.cancel_pending_orders"><code class="name flex">
+<span>def <span class="ident">cancel_pending_orders</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.cancelled_orders"><code class="name flex">
+<span>def <span class="ident">cancelled_orders</span></span>(<span>self, tokens, account_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all cancelled orders under your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.create_internal_transfers"><code class="name flex">
+<span>def <span class="ident">create_internal_transfers</span></span>(<span>self, tokens, payload)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>create a internal transfer request
+currently no wrapper code</p></div>
+</dd>
+<dt id="api.api.Wsimple.create_order"><code class="name flex">
+<span>def <span class="ident">create_order</span></span>(<span>self, tokens, payload)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.dashboard"><code class="name flex">
+<span>def <span class="ident">dashboard</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get dashboard needed for /home route.<br>
+v1: 2+ seconds - 11 calls
+<br>
+v2: 1-2 seconds - 5 calls <br>
+v3: 1-2 seconds - 4 calls <br>
+v4: 0-1 seconds - 2 calls</p></div>
+</dd>
+<dt id="api.api.Wsimple.delete_deposit"><code class="name flex">
+<span>def <span class="ident">delete_deposit</span></span>(<span>self, tokens, funds_transfer_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete a specific deposit under your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.delete_watchlist"><code class="name flex">
+<span>def <span class="ident">delete_watchlist</span></span>(<span>self, tokens, sec_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete a watchlisted securities in your Wealthsimple Trade account.<br>
+Where <strong><em>sec_id</em></strong> is the security id for the security you want to delete.</p></div>
+</dd>
+<dt id="api.api.Wsimple.delete_withdrawal"><code class="name flex">
+<span>def <span class="ident">delete_withdrawal</span></span>(<span>self, tokens, funds_transfer_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete a specific withdrawal your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.filled_orders"><code class="name flex">
+<span>def <span class="ident">filled_orders</span></span>(<span>self, tokens, account_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all filled orders under your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.find_securities"><code class="name flex">
+<span>def <span class="ident">find_securities</span></span>(<span>self, tokens, ticker: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs information about the security resembled by the ticker.
+<br>
+Where <strong><em>ticker</em></strong> is the ticker of the company, API will fuzzy
+<br>
+match this argument and therefore multiple results can appear.</p></div>
+</dd>
+<dt id="api.api.Wsimple.find_securities_by_id"><code class="name flex">
+<span>def <span class="ident">find_securities_by_id</span></span>(<span>self, tokens, sec_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs information about the security resembled by the security id.<br>
+Where <strong><em>ticker</em></strong> is the ticker of the company.</p></div>
+</dd>
+<dt id="api.api.Wsimple.find_securities_by_id_historical"><code class="name flex">
+<span>def <span class="ident">find_securities_by_id_historical</span></span>(<span>self, tokens, sec_id: str, time: str = '1d', mic: str = 'XNAS')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs historical information about the security by the security id in a specified timeframe.<br>
+Where <strong><em>time</em></strong> is the timeframe one of [1d, 1w, 1m, 3m, 1y, all]: autoset "1d".<br>
+Where <strong><em>mic</em></strong> is the Market Identifier Code for the exchange: autoset "XNAS"</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_account"><code class="name flex">
+<span>def <span class="ident">get_account</span></span>(<span>self, tokens, id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grab a specific accounts information by id</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_account_ids"><code class="name flex">
+<span>def <span class="ident">get_account_ids</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all account ids under your your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_accounts"><code class="name flex">
+<span>def <span class="ident">get_accounts</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all accounts information</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_activities"><code class="name flex">
+<span>def <span class="ident">get_activities</span></span>(<span>self, tokens, account_id: Optional[str] = None, limit: int = 20, type: str = 'all')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs the 20 most recent activities on under your Wealthsimple Trade account.
+<br>
+Where <strong><em>type</em></strong> is the activities type you want can be ["deposit", "withdrawal", "dividend", "buy", "sell"] autoset to all.<br>
+Where <strong><em>limit</em></strong> is the limitation of the response has to be less than 100: autoset 20.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_activities_bookmark"><code class="name flex">
+<span>def <span class="ident">get_activities_bookmark</span></span>(<span>self, tokens, bookmark=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides the last 20 activities on the Wealthsimple Trade based on the bookmark. <br>
+Where <strong><em>bookmark</em></strong> is the bookmark id.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_all_markets"><code class="name flex">
+<span>def <span class="ident">get_all_markets</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all market data including opening and closing hours</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_all_securities_groups"><code class="name flex">
+<span>def <span class="ident">get_all_securities_groups</span></span>(<span>self, tokens, offset: int = 0, limit: int = 25, order: str = 'desc')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all security groups under Wealthsimple trade<br>
+Where <strong><em>offset</em></strong> is &gt;= 0: autoset to 0<br>
+Where <strong><em>limit</em></strong> is the limitation of the response, (1 &lt;= limit &lt; 99): autoset to 25<br>
+Where <strong><em>sort_order</em></strong> is order of the results and can be ["asc", "desc"]: autoset to "desc"</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_bank_accounts"><code class="name flex">
+<span>def <span class="ident">get_bank_accounts</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all bank accounts under your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_deposit"><code class="name flex">
+<span>def <span class="ident">get_deposit</span></span>(<span>self, tokens, funds_transfer_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get specific deposit under this Wealthsimple Trade account.<br>
+Where <strong><em>funds_transfer_id</em></strong> is the id of the deposit</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_exchange_rate"><code class="name flex">
+<span>def <span class="ident">get_exchange_rate</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Current Wealthsimple Trade forex USD/CAD exchange rates.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_fact_sheets"><code class="name flex">
+<span>def <span class="ident">get_fact_sheets</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all fact-sheets that you have access to under your Wealthsimple account</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_featured_security_groups"><code class="name flex">
+<span>def <span class="ident">get_featured_security_groups</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all featured security groups under Wealthsimple trade today</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_global_alerts"><code class="name flex">
+<span>def <span class="ident">get_global_alerts</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grab all global alerts</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_historical_portfolio_data"><code class="name flex">
+<span>def <span class="ident">get_historical_portfolio_data</span></span>(<span>self, tokens, time: str = '1d', account_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs historical portfolio information for your Wealthsimple Trade account for a specified timeframe.<br>
+Where <strong><em>time</em></strong> is one of [1d, 1w, 1m, 3m, 1y, all]: autoset to 1d.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_market_hours"><code class="name flex">
+<span>def <span class="ident">get_market_hours</span></span>(<span>self, tokens, exchange: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all market data about a specific exchange.<br>
+Where <strong><em>exchange</em></strong> is the exchange name.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_me"><code class="name flex">
+<span>def <span class="ident">get_me</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs basic information about your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_mobile_dashboard"><code class="name flex">
+<span>def <span class="ident">get_mobile_dashboard</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all info in the mobile dashboard</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_monthly_statements"><code class="name flex">
+<span>def <span class="ident">get_monthly_statements</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all monthly statements under your Wealthsimple account</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_monthly_statements_cleaned"><code class="name flex">
+<span>def <span class="ident">get_monthly_statements_cleaned</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all monthly statements under your Wealthsimple account.<br>
+Is diffrent from <strong><em>get_monthly_statements</em></strong> as it clean the response data.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_monthly_statements_url"><code class="name flex">
+<span>def <span class="ident">get_monthly_statements_url</span></span>(<span>self, tokens, pdf_statement_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs a url to a pdf of your statement.<br>
+Where <strong><em>pdf_statement_id</em></strong> is the id of the month you want to get.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_most_active_securities"><code class="name flex">
+<span>def <span class="ident">get_most_active_securities</span></span>(<span>self, tokens, limit: int = 20)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grab a list of most active securities under Wealthsimple trade today</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_most_watched_securities"><code class="name flex">
+<span>def <span class="ident">get_most_watched_securities</span></span>(<span>self, tokens, offset: int = 0, limit: int = 20)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all most watched securities under Wealthsimple trade today</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_orders"><code class="name flex">
+<span>def <span class="ident">get_orders</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all current and past orders.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_person"><code class="name flex">
+<span>def <span class="ident">get_person</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs Advanced/information about your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_positions"><code class="name flex">
+<span>def <span class="ident">get_positions</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs your current Wealthsimple Trade positions.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_securities_in_groups"><code class="name flex">
+<span>def <span class="ident">get_securities_in_groups</span></span>(<span>self, tokens, group_id: str, offset: int = 0, limit: int = 20, filter_type: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all securities groups under Wealthsimple trade</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_supported_internal_transfers"><code class="name flex">
+<span>def <span class="ident">get_supported_internal_transfers</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs a list of all support interal transfers</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_tax_documents"><code class="name flex">
+<span>def <span class="ident">get_tax_documents</span></span>(<span>self, tokens, account_id: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grab tax documents of your Wealthsimple account</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_top_gainers_securities"><code class="name flex">
+<span>def <span class="ident">get_top_gainers_securities</span></span>(<span>self, tokens, offset: int = 0, limit: int = 20)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grab a list of top gainers securities under Wealthsimple trade today</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_top_losers_securities"><code class="name flex">
+<span>def <span class="ident">get_top_losers_securities</span></span>(<span>self, tokens, offset: int = 0, limit: int = 20)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grab a list of top losers securities under Wealthsimple trade today</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_trade_account_id"><code class="name flex">
+<span>def <span class="ident">get_trade_account_id</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>If any function 'account_id' param is empty, it will use
+this function to get the first trading id</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_watchlist"><code class="name flex">
+<span>def <span class="ident">get_watchlist</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all watchlisted securities under your Wealthsimple trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_websocket_ticket"><code class="name flex">
+<span>def <span class="ident">get_websocket_ticket</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs a websocket ticket, need to connect to the wealthsimple websocket</p></div>
+</dd>
+<dt id="api.api.Wsimple.get_withdrawal"><code class="name flex">
+<span>def <span class="ident">get_withdrawal</span></span>(<span>self, tokens, funds_transfer_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get specific withdrawal under yout Wealthsimple Trade account.
+Where <strong><em>funds_transfer_id</em></strong> is the id of the withdrawal</p></div>
+</dd>
+<dt id="api.api.Wsimple.iscanadiansecurity"><code class="name flex">
+<span>def <span class="ident">iscanadiansecurity</span></span>(<span>self, x)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="api.api.Wsimple.limit_buy_order"><code class="name flex">
+<span>def <span class="ident">limit_buy_order</span></span>(<span>self, tokens, security_id, limit_price, quantity: int = 1, account_id: Optional[str] = None, time_in_force: str = 'day')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Places a limit buy order for a security.</p></div>
+</dd>
+<dt id="api.api.Wsimple.limit_sell_order"><code class="name flex">
+<span>def <span class="ident">limit_sell_order</span></span>(<span>self, tokens, limit_price, security_id, quantity: int = 1, time_in_force: str = 'day', account_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Places a limit sell order for a security.</p></div>
+</dd>
+<dt id="api.api.Wsimple.list_deposits"><code class="name flex">
+<span>def <span class="ident">list_deposits</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all deposits under your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.list_withdrawals"><code class="name flex">
+<span>def <span class="ident">list_withdrawals</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all withdrawals under your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.make_deposit"><code class="name flex">
+<span>def <span class="ident">make_deposit</span></span>(<span>self, tokens, amount: int, currency: str = 'CAD', bank_account_id: str = None, account_id: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a deposit under your Wealthsimple Trade account.
+Where <strong><em>amount</em></strong> is the amount to deposit<br>
+Where <strong><em>currency</em></strong> is the currency need to be transferred: autoset to "CAD"<br>
+Where <strong><em>bank_account_id</em></strong> is id of bank account.<br>
+Where <strong><em>account_id</em></strong> is id of the account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.make_withdrawal"><code class="name flex">
+<span>def <span class="ident">make_withdrawal</span></span>(<span>self, tokens, amount: int, currency: str = 'CAD', bank_account_id: str = None, account_id: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a withdrawal under your Wealthsimple Trade account.<br>
+Where <strong><em>amount</em></strong> is the amount to withdraw.<br>
+Where <strong><em>currency</em></strong> is the currency need to be withdrawn(): autoset to "CAD"<br>
+Where <strong><em>bank_account_id</em></strong> is id of bank account where the money is going to be withdrawn from (get_bank_accounts function)<br>
+Where <strong><em>account_id</em></strong> is id of the account that is withdrawing the money (get_account function).</p></div>
+</dd>
+<dt id="api.api.Wsimple.market_buy_order"><code class="name flex">
+<span>def <span class="ident">market_buy_order</span></span>(<span>self, tokens, security_id: str, quantity: int = 1, account_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Places a market buy order for a security.</p></div>
+</dd>
+<dt id="api.api.Wsimple.market_sell_order"><code class="name flex">
+<span>def <span class="ident">market_sell_order</span></span>(<span>self, tokens, security_id: str, quantity: int = 1, account_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Places a market sell order for a security.</p></div>
+</dd>
+<dt id="api.api.Wsimple.pending_orders"><code class="name flex">
+<span>def <span class="ident">pending_orders</span></span>(<span>self, tokens, account_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Grabs all pending orders under your Wealthsimple Trade account.</p></div>
+</dd>
+<dt id="api.api.Wsimple.refresh_token"><code class="name flex">
+<span>def <span class="ident">refresh_token</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates and applies a new set of access and refresh tokens.</p></div>
+</dd>
+<dt id="api.api.Wsimple.search_page"><code class="name flex">
+<span>def <span class="ident">search_page</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get security groups need for /search route</p></div>
+</dd>
+<dt id="api.api.Wsimple.settings"><code class="name flex">
+<span>def <span class="ident">settings</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get settings needed for /settings route.</p></div>
+</dd>
+<dt id="api.api.Wsimple.stock"><code class="name flex">
+<span>def <span class="ident">stock</span></span>(<span>self, tokens, sec_id: str, time: str = '1d')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get dashboard needed for /stock/<sec_id> route.</p></div>
+</dd>
+<dt id="api.api.Wsimple.stop_limit_buy_order"><code class="name flex">
+<span>def <span class="ident">stop_limit_buy_order</span></span>(<span>self, tokens, stop_price, limit_price, security_id, quantity: int = 1, account_id: Optional[str] = None, time_in_force: str = 'day')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Places a stop limit buy order for a security.</p></div>
+</dd>
+<dt id="api.api.Wsimple.stop_limit_sell_order"><code class="name flex">
+<span>def <span class="ident">stop_limit_sell_order</span></span>(<span>self, tokens, stop_price, limit_price, security_id: str, account_id: Optional[str] = None, quantity: int = 1, time_in_force: str = 'day')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Places a limit sell order for a security.</p></div>
+</dd>
+<dt id="api.api.Wsimple.test_endpoint"><code class="name flex">
+<span>def <span class="ident">test_endpoint</span></span>(<span>self, tokens)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>function for testing new endpoints</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="api" href="index.html">api</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="api.api.Wsimple" href="#api.api.Wsimple">Wsimple</a></code></h4>
+<ul class="">
+<li><code><a title="api.api.Wsimple.activities_types" href="#api.api.Wsimple.activities_types">activities_types</a></code></li>
+<li><code><a title="api.api.Wsimple.add_watchlist" href="#api.api.Wsimple.add_watchlist">add_watchlist</a></code></li>
+<li><code><a title="api.api.Wsimple.bank_logos" href="#api.api.Wsimple.bank_logos">bank_logos</a></code></li>
+<li><code><a title="api.api.Wsimple.base_url" href="#api.api.Wsimple.base_url">base_url</a></code></li>
+<li><code><a title="api.api.Wsimple.cancel_order" href="#api.api.Wsimple.cancel_order">cancel_order</a></code></li>
+<li><code><a title="api.api.Wsimple.cancel_pending_orders" href="#api.api.Wsimple.cancel_pending_orders">cancel_pending_orders</a></code></li>
+<li><code><a title="api.api.Wsimple.cancelled_orders" href="#api.api.Wsimple.cancelled_orders">cancelled_orders</a></code></li>
+<li><code><a title="api.api.Wsimple.create_internal_transfers" href="#api.api.Wsimple.create_internal_transfers">create_internal_transfers</a></code></li>
+<li><code><a title="api.api.Wsimple.create_order" href="#api.api.Wsimple.create_order">create_order</a></code></li>
+<li><code><a title="api.api.Wsimple.current_status" href="#api.api.Wsimple.current_status">current_status</a></code></li>
+<li><code><a title="api.api.Wsimple.dashboard" href="#api.api.Wsimple.dashboard">dashboard</a></code></li>
+<li><code><a title="api.api.Wsimple.delete_deposit" href="#api.api.Wsimple.delete_deposit">delete_deposit</a></code></li>
+<li><code><a title="api.api.Wsimple.delete_watchlist" href="#api.api.Wsimple.delete_watchlist">delete_watchlist</a></code></li>
+<li><code><a title="api.api.Wsimple.delete_withdrawal" href="#api.api.Wsimple.delete_withdrawal">delete_withdrawal</a></code></li>
+<li><code><a title="api.api.Wsimple.email_notification" href="#api.api.Wsimple.email_notification">email_notification</a></code></li>
+<li><code><a title="api.api.Wsimple.exchanges" href="#api.api.Wsimple.exchanges">exchanges</a></code></li>
+<li><code><a title="api.api.Wsimple.exh_to_mic" href="#api.api.Wsimple.exh_to_mic">exh_to_mic</a></code></li>
+<li><code><a title="api.api.Wsimple.filled_orders" href="#api.api.Wsimple.filled_orders">filled_orders</a></code></li>
+<li><code><a title="api.api.Wsimple.find_securities" href="#api.api.Wsimple.find_securities">find_securities</a></code></li>
+<li><code><a title="api.api.Wsimple.find_securities_by_id" href="#api.api.Wsimple.find_securities_by_id">find_securities_by_id</a></code></li>
+<li><code><a title="api.api.Wsimple.find_securities_by_id_historical" href="#api.api.Wsimple.find_securities_by_id_historical">find_securities_by_id_historical</a></code></li>
+<li><code><a title="api.api.Wsimple.friendly_account_name" href="#api.api.Wsimple.friendly_account_name">friendly_account_name</a></code></li>
+<li><code><a title="api.api.Wsimple.get_account" href="#api.api.Wsimple.get_account">get_account</a></code></li>
+<li><code><a title="api.api.Wsimple.get_account_ids" href="#api.api.Wsimple.get_account_ids">get_account_ids</a></code></li>
+<li><code><a title="api.api.Wsimple.get_accounts" href="#api.api.Wsimple.get_accounts">get_accounts</a></code></li>
+<li><code><a title="api.api.Wsimple.get_activities" href="#api.api.Wsimple.get_activities">get_activities</a></code></li>
+<li><code><a title="api.api.Wsimple.get_activities_bookmark" href="#api.api.Wsimple.get_activities_bookmark">get_activities_bookmark</a></code></li>
+<li><code><a title="api.api.Wsimple.get_all_markets" href="#api.api.Wsimple.get_all_markets">get_all_markets</a></code></li>
+<li><code><a title="api.api.Wsimple.get_all_securities_groups" href="#api.api.Wsimple.get_all_securities_groups">get_all_securities_groups</a></code></li>
+<li><code><a title="api.api.Wsimple.get_bank_accounts" href="#api.api.Wsimple.get_bank_accounts">get_bank_accounts</a></code></li>
+<li><code><a title="api.api.Wsimple.get_deposit" href="#api.api.Wsimple.get_deposit">get_deposit</a></code></li>
+<li><code><a title="api.api.Wsimple.get_exchange_rate" href="#api.api.Wsimple.get_exchange_rate">get_exchange_rate</a></code></li>
+<li><code><a title="api.api.Wsimple.get_fact_sheets" href="#api.api.Wsimple.get_fact_sheets">get_fact_sheets</a></code></li>
+<li><code><a title="api.api.Wsimple.get_featured_security_groups" href="#api.api.Wsimple.get_featured_security_groups">get_featured_security_groups</a></code></li>
+<li><code><a title="api.api.Wsimple.get_global_alerts" href="#api.api.Wsimple.get_global_alerts">get_global_alerts</a></code></li>
+<li><code><a title="api.api.Wsimple.get_historical_portfolio_data" href="#api.api.Wsimple.get_historical_portfolio_data">get_historical_portfolio_data</a></code></li>
+<li><code><a title="api.api.Wsimple.get_market_hours" href="#api.api.Wsimple.get_market_hours">get_market_hours</a></code></li>
+<li><code><a title="api.api.Wsimple.get_me" href="#api.api.Wsimple.get_me">get_me</a></code></li>
+<li><code><a title="api.api.Wsimple.get_mobile_dashboard" href="#api.api.Wsimple.get_mobile_dashboard">get_mobile_dashboard</a></code></li>
+<li><code><a title="api.api.Wsimple.get_monthly_statements" href="#api.api.Wsimple.get_monthly_statements">get_monthly_statements</a></code></li>
+<li><code><a title="api.api.Wsimple.get_monthly_statements_cleaned" href="#api.api.Wsimple.get_monthly_statements_cleaned">get_monthly_statements_cleaned</a></code></li>
+<li><code><a title="api.api.Wsimple.get_monthly_statements_url" href="#api.api.Wsimple.get_monthly_statements_url">get_monthly_statements_url</a></code></li>
+<li><code><a title="api.api.Wsimple.get_most_active_securities" href="#api.api.Wsimple.get_most_active_securities">get_most_active_securities</a></code></li>
+<li><code><a title="api.api.Wsimple.get_most_watched_securities" href="#api.api.Wsimple.get_most_watched_securities">get_most_watched_securities</a></code></li>
+<li><code><a title="api.api.Wsimple.get_orders" href="#api.api.Wsimple.get_orders">get_orders</a></code></li>
+<li><code><a title="api.api.Wsimple.get_person" href="#api.api.Wsimple.get_person">get_person</a></code></li>
+<li><code><a title="api.api.Wsimple.get_positions" href="#api.api.Wsimple.get_positions">get_positions</a></code></li>
+<li><code><a title="api.api.Wsimple.get_securities_in_groups" href="#api.api.Wsimple.get_securities_in_groups">get_securities_in_groups</a></code></li>
+<li><code><a title="api.api.Wsimple.get_supported_internal_transfers" href="#api.api.Wsimple.get_supported_internal_transfers">get_supported_internal_transfers</a></code></li>
+<li><code><a title="api.api.Wsimple.get_tax_documents" href="#api.api.Wsimple.get_tax_documents">get_tax_documents</a></code></li>
+<li><code><a title="api.api.Wsimple.get_top_gainers_securities" href="#api.api.Wsimple.get_top_gainers_securities">get_top_gainers_securities</a></code></li>
+<li><code><a title="api.api.Wsimple.get_top_losers_securities" href="#api.api.Wsimple.get_top_losers_securities">get_top_losers_securities</a></code></li>
+<li><code><a title="api.api.Wsimple.get_trade_account_id" href="#api.api.Wsimple.get_trade_account_id">get_trade_account_id</a></code></li>
+<li><code><a title="api.api.Wsimple.get_watchlist" href="#api.api.Wsimple.get_watchlist">get_watchlist</a></code></li>
+<li><code><a title="api.api.Wsimple.get_websocket_ticket" href="#api.api.Wsimple.get_websocket_ticket">get_websocket_ticket</a></code></li>
+<li><code><a title="api.api.Wsimple.get_withdrawal" href="#api.api.Wsimple.get_withdrawal">get_withdrawal</a></code></li>
+<li><code><a title="api.api.Wsimple.historical_status" href="#api.api.Wsimple.historical_status">historical_status</a></code></li>
+<li><code><a title="api.api.Wsimple.iscanadiansecurity" href="#api.api.Wsimple.iscanadiansecurity">iscanadiansecurity</a></code></li>
+<li><code><a title="api.api.Wsimple.limit_buy_order" href="#api.api.Wsimple.limit_buy_order">limit_buy_order</a></code></li>
+<li><code><a title="api.api.Wsimple.limit_sell_order" href="#api.api.Wsimple.limit_sell_order">limit_sell_order</a></code></li>
+<li><code><a title="api.api.Wsimple.list_deposits" href="#api.api.Wsimple.list_deposits">list_deposits</a></code></li>
+<li><code><a title="api.api.Wsimple.list_withdrawals" href="#api.api.Wsimple.list_withdrawals">list_withdrawals</a></code></li>
+<li><code><a title="api.api.Wsimple.make_deposit" href="#api.api.Wsimple.make_deposit">make_deposit</a></code></li>
+<li><code><a title="api.api.Wsimple.make_withdrawal" href="#api.api.Wsimple.make_withdrawal">make_withdrawal</a></code></li>
+<li><code><a title="api.api.Wsimple.market_buy_order" href="#api.api.Wsimple.market_buy_order">market_buy_order</a></code></li>
+<li><code><a title="api.api.Wsimple.market_sell_order" href="#api.api.Wsimple.market_sell_order">market_sell_order</a></code></li>
+<li><code><a title="api.api.Wsimple.oauth_login" href="#api.api.Wsimple.oauth_login">oauth_login</a></code></li>
+<li><code><a title="api.api.Wsimple.otp_login" href="#api.api.Wsimple.otp_login">otp_login</a></code></li>
+<li><code><a title="api.api.Wsimple.pending_orders" href="#api.api.Wsimple.pending_orders">pending_orders</a></code></li>
+<li><code><a title="api.api.Wsimple.public" href="#api.api.Wsimple.public">public</a></code></li>
+<li><code><a title="api.api.Wsimple.public_find_securities_by_ticker" href="#api.api.Wsimple.public_find_securities_by_ticker">public_find_securities_by_ticker</a></code></li>
+<li><code><a title="api.api.Wsimple.public_find_securities_by_ticker_historical" href="#api.api.Wsimple.public_find_securities_by_ticker_historical">public_find_securities_by_ticker_historical</a></code></li>
+<li><code><a title="api.api.Wsimple.public_find_securities_news" href="#api.api.Wsimple.public_find_securities_news">public_find_securities_news</a></code></li>
+<li><code><a title="api.api.Wsimple.public_top_traded" href="#api.api.Wsimple.public_top_traded">public_top_traded</a></code></li>
+<li><code><a title="api.api.Wsimple.push_notification" href="#api.api.Wsimple.push_notification">push_notification</a></code></li>
+<li><code><a title="api.api.Wsimple.refresh_token" href="#api.api.Wsimple.refresh_token">refresh_token</a></code></li>
+<li><code><a title="api.api.Wsimple.search_page" href="#api.api.Wsimple.search_page">search_page</a></code></li>
+<li><code><a title="api.api.Wsimple.settings" href="#api.api.Wsimple.settings">settings</a></code></li>
+<li><code><a title="api.api.Wsimple.stock" href="#api.api.Wsimple.stock">stock</a></code></li>
+<li><code><a title="api.api.Wsimple.stop_limit_buy_order" href="#api.api.Wsimple.stop_limit_buy_order">stop_limit_buy_order</a></code></li>
+<li><code><a title="api.api.Wsimple.stop_limit_sell_order" href="#api.api.Wsimple.stop_limit_sell_order">stop_limit_sell_order</a></code></li>
+<li><code><a title="api.api.Wsimple.summary_status" href="#api.api.Wsimple.summary_status">summary_status</a></code></li>
+<li><code><a title="api.api.Wsimple.test_endpoint" href="#api.api.Wsimple.test_endpoint">test_endpoint</a></code></li>
+<li><code><a title="api.api.Wsimple.time_ranges" href="#api.api.Wsimple.time_ranges">time_ranges</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
