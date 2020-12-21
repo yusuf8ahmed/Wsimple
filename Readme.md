@@ -13,7 +13,7 @@
 </p>
 
 ## What is the Wsimple project?
-Welcome! This project is a API(Web interface) for Wealthsimple Trade. The main goal this project is to give developers the ability to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/app/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
+Welcome! This project is a API(Web interface) for Wealthsimple Trade. The main goal this project is to give developers the ability to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
 
 Before using this please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available.
 
@@ -42,8 +42,8 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
 
   ### Installation
   ```bash
-  # Production
-  pip install wsimple
+  # Production (not in use yet)
+  pip install wsimple 
   # Testing
   git clone https://github.com/yusuf8ahmed/Wsimple.git
   ```
