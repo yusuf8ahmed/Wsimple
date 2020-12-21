@@ -1,6 +1,6 @@
 aiocontextvars==0.2.2
 attrs==20.2.0
-certifi==2020.6.20
+certifi==2020.12.5
 chardet==3.0.4
 click==7.1.2
 contextvars==2.4
