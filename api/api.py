@@ -301,7 +301,7 @@ class Wsimple:
         )
         logger.debug(f"get_person {r.status_code}")
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -316,7 +316,7 @@ class Wsimple:
         )
         logger.debug(f"get_bank_accounts {r.status_code}")
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -331,7 +331,7 @@ class Wsimple:
         )
         logger.debug(f"get_positions {r.status_code}")
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -393,8 +393,9 @@ class Wsimple:
                         security_id: str,
                         limit_price,
                         quantity: int = 1,
-                        account_id: Optional[str] = None,
-                        time_in_force: str ="day"):
+                        time_in_force: str = "day",
+                        account_id: Optional[str] = None
+                        ):
         """
         Places a limit buy order for a security.    
         """
