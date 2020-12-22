@@ -25,7 +25,7 @@ pyparsing==2.4.7
 pytest==6.0.2
 requests==2.24.0
 six==1.15.0
-toml==0.10.1
+toml==0.10.2
 urllib3==1.25.10
 Werkzeug==1.0.1
 zipp==3.1.0
