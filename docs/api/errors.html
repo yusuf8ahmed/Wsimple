@@ -29,6 +29,62 @@ File Name: Wsimple/api/errors.py
 Project Name: Wsimple <br>
 File Name: Wsimple/api/errors.py <br>
 <strong>File: Definition of all Wsimple Exceptions</strong></p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Name: Chromazmoves  
+Project Name: Wsimple   
+File Name: Wsimple/api/errors.py   
+**File: Definition of all Wsimple Exceptions** 
+&#34;&#34;&#34;
+
+class LoginError(Exception):
+    &#34;&#34;&#34;Error thrown when user login failed&#34;&#34;&#34;
+    def __init__(self):
+        super(LoginError, self).__init__(&#34;A Login Error has occurred&#34;)
+    
+class MethodInputError(Exception):
+    &#34;&#34;&#34;Error thrown when an input to a method is unacceptable&#34;&#34;&#34;
+    def __init__(self, message):
+        super(MethodInputError, self).__init__(str(message).strip())
+
+class EmptyTokensError(Exception):
+    &#34;&#34;&#34;Error thrown when an tokens list is empty&#34;&#34;&#34;
+    def __init__(self):
+        super(EmptyTokensError, self).__init__(&#34;tokens are empty?&#34;)
+
+class InvalidAccessTokenError(Exception):
+    &#34;&#34;&#34;Error thrown when an access token is invalid&#34;&#34;&#34;
+    def __init__(self):
+        super(InvalidAccessTokenError, self).__init__(&#34;An Invalid access token error was given, please try again&#34;)
+
+class InvalidRefreshTokenError(Exception):
+    &#34;&#34;&#34;Error thrown when an refresh token is invalid&#34;&#34;&#34;
+    def __init__(self):
+        super(InvalidRefreshTokenError, self).__init__(&#34;An Invalid refresh token error was given, please try again&#34;)
+
+class WSOTPUser(Exception):
+    &#34;&#34;&#34;Error thrown when an user is an otp user&#34;&#34;&#34;
+    def __init__(self):
+        super(WSOTPUser, self).__init__(&#34;An wealthsimple otp user account was triggered, please try again and use a try block&#34;)
+
+class WSOTPError(Exception):
+    &#34;&#34;&#34;Error thrown when an otp error occurs&#34;&#34;&#34;
+    def __init__(self):
+        super(WSOTPError, self).__init__(&#34;An Wealthsimple otp error happend, please try again and use a try block&#34;)
+        
+class WSOTPLoginError(Exception):
+    &#34;&#34;&#34;Error thrown when an otp login error occurs&#34;&#34;&#34;
+    def __init__(self):
+        super(WSOTPLoginError, self).__init__(&#34;An Wealthsimple otp login error happend, please try again&#34;)
+        
+class TSXStopLimitPriceError(Exception):
+    &#34;&#34;&#34;Error thrown when a stop order with a diffrent stop and limit price is made on a TSX/TSX-V securities&#34;&#34;&#34;
+    def __init__(self):
+        super(TSXStopLimitPriceError, self).__init__(&#34;TSX/TSX-V securities must have an equivalent stop and limit price&#34;)</code></pre>
+</details>
 </section>
 <section>
 </section>
@@ -44,6 +100,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when an tokens list is empty</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EmptyTokensError(Exception):
+    &#34;&#34;&#34;Error thrown when an tokens list is empty&#34;&#34;&#34;
+    def __init__(self):
+        super(EmptyTokensError, self).__init__(&#34;tokens are empty?&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -55,6 +120,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when an access token is invalid</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InvalidAccessTokenError(Exception):
+    &#34;&#34;&#34;Error thrown when an access token is invalid&#34;&#34;&#34;
+    def __init__(self):
+        super(InvalidAccessTokenError, self).__init__(&#34;An Invalid access token error was given, please try again&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -66,6 +140,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when an refresh token is invalid</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InvalidRefreshTokenError(Exception):
+    &#34;&#34;&#34;Error thrown when an refresh token is invalid&#34;&#34;&#34;
+    def __init__(self):
+        super(InvalidRefreshTokenError, self).__init__(&#34;An Invalid refresh token error was given, please try again&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -77,6 +160,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when user login failed</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoginError(Exception):
+    &#34;&#34;&#34;Error thrown when user login failed&#34;&#34;&#34;
+    def __init__(self):
+        super(LoginError, self).__init__(&#34;A Login Error has occurred&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -89,6 +181,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when an input to a method is unacceptable</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MethodInputError(Exception):
+    &#34;&#34;&#34;Error thrown when an input to a method is unacceptable&#34;&#34;&#34;
+    def __init__(self, message):
+        super(MethodInputError, self).__init__(str(message).strip())</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -100,6 +201,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when a stop order with a diffrent stop and limit price is made on a TSX/TSX-V securities</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TSXStopLimitPriceError(Exception):
+    &#34;&#34;&#34;Error thrown when a stop order with a diffrent stop and limit price is made on a TSX/TSX-V securities&#34;&#34;&#34;
+    def __init__(self):
+        super(TSXStopLimitPriceError, self).__init__(&#34;TSX/TSX-V securities must have an equivalent stop and limit price&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -111,6 +221,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when an otp error occurs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WSOTPError(Exception):
+    &#34;&#34;&#34;Error thrown when an otp error occurs&#34;&#34;&#34;
+    def __init__(self):
+        super(WSOTPError, self).__init__(&#34;An Wealthsimple otp error happend, please try again and use a try block&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -122,6 +241,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when an otp login error occurs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WSOTPLoginError(Exception):
+    &#34;&#34;&#34;Error thrown when an otp login error occurs&#34;&#34;&#34;
+    def __init__(self):
+        super(WSOTPLoginError, self).__init__(&#34;An Wealthsimple otp login error happend, please try again&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -133,6 +261,15 @@ File Name: Wsimple/api/errors.py <br>
 </code></dt>
 <dd>
 <div class="desc"><p>Error thrown when an user is an otp user</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WSOTPUser(Exception):
+    &#34;&#34;&#34;Error thrown when an user is an otp user&#34;&#34;&#34;
+    def __init__(self):
+        super(WSOTPUser, self).__init__(&#34;An wealthsimple otp user account was triggered, please try again and use a try block&#34;)</code></pre>
+</details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>

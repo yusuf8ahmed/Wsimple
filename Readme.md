@@ -31,7 +31,7 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
   * to download pip and python go to ["Download Python"](https://realpython.com/installing-python/)
     * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). 
     * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
-  * to use the Web- nterface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
+  * to use the Web interface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
 
   ### Project Ideas
   * Buy/sell a stock as the end of every month.
@@ -95,9 +95,11 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
 
 ## Disclaimer
 
-  This software is provided so you can use Wealthsimple trade on your computer. **This software is not built or maintained by Wealthsimple Trade or the company Wealthsimple.** Remember your responsibility to not engage in illegal or unethical trading behaviours that can disrupt orderly market functions. Flooding the website/api with orders in a short timeframe may result in getting banned or locked out by Wealthsimple Trade.
+  This software is provided so you can use Wealthsimple trade on your computer. **This software is not built or maintained by Wealthsimple Trade or the company Wealthsimple.** Remember your responsibility to not engage in illegal or unethical trading behaviours that can disrupt orderly market functions. Flooding the website/api with orders in a short time-frame may result in getting banned or locked out by Wealthsimple Trade.
 
   Remember when using this website and/or api you are still under Wealthsimple Trade services and they reserve the right to terminate anyone.
+
+  **Wealthsimple Trade reserves the right to monitor anyone's trading activity and block transactions if the trading activity is determined to be inappropriate**
 
   Users of [wstrade-api](https://github.com/ahmedsakr/wstrade-api) have observed that trades in excess of 7 per hour are rejected by the WealthSimple Trade servers. You can use this observation as a baseline of how many trades you can perform on an hourly basis.
 

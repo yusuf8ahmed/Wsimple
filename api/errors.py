@@ -48,5 +48,5 @@ class WSOTPLoginError(Exception):
 class TSXStopLimitPriceError(Exception):
     """Error thrown when a stop order with a diffrent stop and limit price is made on a TSX/TSX-V securities"""
     def __init__(self):
-        super(WSOTPLoginError, self).__init__("TSX/TSX-V securities must have an equivalent stop and limit price")
+        super(TSXStopLimitPriceError, self).__init__("TSX/TSX-V securities must have an equivalent stop and limit price")
 

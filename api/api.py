@@ -1,21 +1,17 @@
 """
-Name: Chromazmoves  
+Name: Yusuf Ahmed  
 Project Name: Wsimple   
-File Name: Wsimple/api/api.py   
-**File: Main access point to Wsimple API** 
+File Name: api/api.py   
+**File: Main access point to API** 
 """
 
 #!/usr/bin/env python3
 # standard library
-import sys
 import json
-import pprint
-import datetime
-from sys import platform
 from loguru import logger
-from typing import Union, Optional
+from typing import Optional
 # custom error
-from .errors import LoginError, MethodInputError
+from .errors import LoginError
 from .errors import InvalidAccessTokenError, InvalidRefreshTokenError
 from .errors import WSOTPUser, WSOTPError, WSOTPLoginError, TSXStopLimitPriceError
 # third party
@@ -31,25 +27,7 @@ class Wsimple:
         '3m',
         '1y',
         'all'
-    ]
-    email_notification = [ 
-        'deposits',
-        'withdrawals',
-        'orders',
-        'dividends',
-        'referrals',
-        'institutional_transfers',
-        'news_and_announcements',
-        'promos_and_tips'
-    ]
-    push_notification = [
-        'deposits',
-        'withdrawals',
-        'orders',
-        'dividends',
-        'referrals',
-        'institutional_transfers',
-    ]  
+    ] 
     activities_types = [
         'all',
         'deposit',
@@ -108,7 +86,7 @@ class Wsimple:
         'ca_rrsp':'RRSP account',
         'ca_non_registered_crypto':'Crypto account'
     }
-    iscanadiansecurity = lambda self, x: x in ["TSX","TSX-V"]
+    iscanadiansecurity = lambda _, x: x in ["TSX","TSX-V"]
     
     def __init__(self, 
                  email, 
@@ -198,21 +176,23 @@ class Wsimple:
                   otp_number,
                   verbose=False):
         """
-        One time password(otp) login function:
+        constructor: login with a otp code:
         """
         wsimple = cls(email, password, otp_mode=True, otp_number=int(otp_number))
         return wsimple 
    
     @classmethod
     def oauth_login(cls, token_dict, verbose=False):
-        """login with an appropriate list of tokens"""
+        """
+        constructor: login with a predefined list of tokens:
+        """
         wsimple = cls("", "", oauth_mode=True, tokens=token_dict, verbose_mode=verbose)
         return wsimple
                          
     @classmethod
     def public(cls, verbose=False):
         """
-        use Wsimple.public to access functions prefixed with public without a ws account
+        constructor: Use Wsimple.public functions without an wealthsimple account:
         """
         wsimple = cls("", "", public_mode=True, verbose_mode=verbose)
         return wsimple
@@ -381,9 +361,6 @@ class Wsimple:
         if r.status_code == 401:
             raise InvalidAccessTokenError
         else:
-            print(r.status_code)
-            print(r.content)
-            print(json.loads(r.content))
             return r.json()
         
     def market_buy_order(self,
@@ -413,7 +390,7 @@ class Wsimple:
 
     def limit_buy_order(self,
                         tokens,
-                        security_id,
+                        security_id: str,
                         limit_price,
                         quantity: int = 1,
                         account_id: Optional[str] = None,
@@ -439,12 +416,13 @@ class Wsimple:
 
     def stop_limit_buy_order(self,
                              tokens,
+                             security_id: str,
                              stop_price,
                              limit_price,
-                             security_id,
                              quantity: int = 1,
-                             account_id: Optional[str] = None,
-                             time_in_force: str = "day"):
+                             time_in_force: str = "day",
+                             account_id: Optional[str] = None
+                            ):
         """
         Places a stop limit buy order for a security. 
         """
@@ -495,8 +473,8 @@ class Wsimple:
 
     def limit_sell_order(self,
                          tokens,
+                         security_id: str,
                          limit_price,
-                         security_id,
                          quantity: int = 1,
                          time_in_force: str = "day",
                          account_id: Optional[str] = None
@@ -522,12 +500,13 @@ class Wsimple:
 
     def stop_limit_sell_order(self,
                               tokens,
+                              security_id: str,
                               stop_price,
                               limit_price,
-                              security_id: str,
-                              account_id: Optional[str] = None,
                               quantity: int = 1,
-                              time_in_force: str = "day"):
+                              time_in_force: str = "day",
+                              account_id: Optional[str] = None,
+                              ):
         """
         Places a limit sell order for a security.
         """
@@ -551,9 +530,7 @@ class Wsimple:
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
     
-    def cancel_order(self, 
-                     tokens, 
-                     order_id: str):
+    def cancel_order(self, tokens, order_id: str):
         """
         Cancels a order by its id.    
         Where ***order*** is order_id.   
@@ -569,30 +546,25 @@ class Wsimple:
         else:
             return r.json()
 
-    def pending_orders(self, 
-                       tokens, 
-                       account_id: Optional[str] = None):
+    def pending_orders(self, tokens):
         """
         Grabs all pending orders under your Wealthsimple Trade account.
         """
-        if account_id is None:
-            account_id = self.get_trade_account_id(tokens)
-        orders = self.get_orders(tokens)['results']
-        result = []
-        for order in orders:
-            if order['status'] == 'submitted':
-                result.append(order)
-        return result
+        try:
+            orders = self.get_orders(tokens)['results']
+            result = []
+            for order in orders:
+                if order['status'] == 'submitted':
+                    result.append(order)
+            return result
+        except InvalidAccessTokenError:
+            raise InvalidAccessTokenError
     
-    def cancelled_orders(self, 
-                         tokens, 
-                         account_id: Optional[str] = None):
+    def cancelled_orders(self, tokens):
         """
         Grabs all cancelled orders under your Wealthsimple Trade account.
         """
         try:
-            if account_id is None:
-                account_id = self.get_trade_account_id(tokens)
             orders = self.get_orders(tokens)['results']
             result = []
             for order in orders:
@@ -602,20 +574,19 @@ class Wsimple:
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
-    def filled_orders(self, 
-                      tokens,
-                      account_id: Optional[str] = None):
+    def filled_orders(self, tokens):
         """
         Grabs all filled orders under your Wealthsimple Trade account.
         """
-        if account_id is None:
-            account_id = self.get_trade_account_id(tokens)
-        orders = self.get_orders(tokens)['results']
-        result = []
-        for order in orders:
-            if order['status'] == 'posted':
-                result.append(order)
-        return result
+        try:
+            orders = self.get_orders(tokens)['results']
+            result = []
+            for order in orders:
+                if order['status'] == 'posted':
+                    result.append(order)
+            return result
+        except InvalidAccessTokenError:
+            raise InvalidAccessTokenError
 
     def cancel_pending_orders(self, tokens):
         """ cancel all pending order """
@@ -629,9 +600,7 @@ class Wsimple:
             raise InvalidAccessTokenError
         
     #! find securitites functions
-    def find_securities(self, 
-                        tokens, 
-                        ticker: str):
+    def find_securities(self, tokens, ticker: str):
         """
         Grabs information about the security resembled by the ticker.    
         Where ***ticker*** is the ticker of the company, API will fuzzy    
@@ -649,9 +618,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def find_securities_by_id(self, 
-                              tokens, 
-                              sec_id: str):
+    def find_securities_by_id(self, tokens, sec_id: str):
         """
         Grabs information about the security resembled by the security id.  
         Where ***ticker*** is the ticker of the company. 
@@ -692,16 +659,17 @@ class Wsimple:
     #! activities functions
     def get_activities(self, 
                        tokens, 
-                       account_id: Optional[str] = None, 
                        limit: int = 20,
-                       type:str = "all"):
+                       type: str = "all",
+                       account_id: Optional[str] = None,
+                       ):
         """
         Grabs the 20 most recent activities on under your Wealthsimple Trade account.    
         Where ***type*** is the activities type you want can be ["deposit", "withdrawal", "dividend", "buy", "sell"] autoset to all.  
         Where ***limit*** is the limitation of the response has to be less than 100: autoset 20.         
         """
-        if not 1 < limit < 100:
-            raise MethodInputError
+        if account_id is None:
+            account_id = self.get_trade_account_id(tokens)
         if type == "all":
             logger.debug("get_activities")
             r = requests.get(
@@ -722,9 +690,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_activities_bookmark(self, 
-                                tokens, 
-                                bookmark = None):
+    def get_activities_bookmark(self, tokens, bookmark = None):
         """
         Provides the last 20 activities on the Wealthsimple Trade based on the bookmark.   
         Where ***bookmark*** is the bookmark id.   
@@ -747,13 +713,13 @@ class Wsimple:
                         amount: int,
                         currency: str = "CAD",
                         bank_account_id: str = None,
-                        account_id: str = None):
+                        account_id: Optional[str] = None):
         """
         Make a withdrawal under your Wealthsimple Trade account.  
         Where ***amount*** is the amount to withdraw.  
-        Where ***currency*** is the currency need to be withdrawn(): autoset to "CAD"  
+        Where ***currency*** is the currency need to be withdrawn: autoset to "CAD"  
         Where ***bank_account_id*** is id of bank account where the money is going to be withdrawn from (get_bank_accounts function)  
-        Where ***account_id*** is id of the account that is withdrawing the money (get_account function).  
+        Where ***account_id*** is id of the account that is withdrawing the money.  
         """
         logger.debug("make_withdrawal")
         if bank_account_id == None:
@@ -782,9 +748,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_withdrawal(self, 
-                       tokens, 
-                       funds_transfer_id: str):
+    def get_withdrawal(self, tokens, funds_transfer_id: str):
         """
         Get specific withdrawal under yout Wealthsimple Trade account.
         Where ***funds_transfer_id*** is the id of the withdrawal
@@ -815,9 +779,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def delete_withdrawal(self, 
-                          tokens, 
-                          funds_transfer_id: str):
+    def delete_withdrawal(self, tokens, funds_transfer_id: str):
         """
         Delete a specific withdrawal your Wealthsimple Trade account.
         """
@@ -838,7 +800,7 @@ class Wsimple:
                      amount: int,
                      currency: str = "CAD", 
                      bank_account_id: str = None, 
-                     account_id: str = None):
+                     account_id: Optional[str] = None):
         """
         Make a deposit under your Wealthsimple Trade account. 
         Where ***amount*** is the amount to deposit  
@@ -870,9 +832,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_deposit(self, 
-                    tokens, 
-                    funds_transfer_id: str):
+    def get_deposit(self, tokens, funds_transfer_id: str):
         """
         Get specific deposit under this Wealthsimple Trade account.  
         Where ***funds_transfer_id*** is the id of the deposit  
@@ -903,9 +863,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def delete_deposit(self, 
-                       tokens, 
-                       funds_transfer_id: str):
+    def delete_deposit(self, tokens, funds_transfer_id: str):
         """
         Delete a specific deposit under your Wealthsimple Trade account.
         """
@@ -936,9 +894,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def get_market_hours(self, 
-                         tokens, 
-                         exchange: str):
+    def get_market_hours(self, tokens, exchange: str):
         """
         Get all market data about a specific exchange.  
         Where ***exchange*** is the exchange name.
@@ -972,9 +928,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def add_watchlist(self, 
-                      tokens, 
-                      sec_id):
+    def add_watchlist(self, tokens, sec_id: str):
         """
         Add security under this Wealthsimple Trade account.    
         Where ***sec_id*** is the security id for the security you want to add.            
@@ -990,9 +944,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def delete_watchlist(self, 
-                         tokens, 
-                         sec_id):
+    def delete_watchlist(self, tokens, sec_id: str):
         """
         Delete a watchlisted securities in your Wealthsimple Trade account.  
         Where ***sec_id*** is the security id for the security you want to delete. 
@@ -1046,7 +998,9 @@ class Wsimple:
                                   offset: int = 0,
                                   limit: int = 20):
         """
-        Grab a list of top losers securities under Wealthsimple trade today
+        Grab a list of top losers securities under Wealthsimple trade today.
+        Where ***offset*** is the displacement between the selected offset and the beginning.   
+        Where ***limit*** is the amount of response you want from the request.  
         """
         logger.debug("get_top_losers_securities")
         r = requests.get(
@@ -1065,7 +1019,9 @@ class Wsimple:
                                    offset: int = 0,
                                    limit: int = 20):
         """
-        Grab a list of top gainers securities under Wealthsimple trade today
+        Grab a list of top gainers securities under Wealthsimple trade today.
+        Where ***offset*** is the displacement between the selected offset and the beginning.   
+        Where ***limit*** is the amount of response you want from the request.  
         """
         logger.debug("get_top_gainers_securities")
         r = requests.get(
@@ -1083,7 +1039,8 @@ class Wsimple:
                                    tokens,
                                    limit: int = 20):
         """
-        Grab a list of most active securities under Wealthsimple trade today
+        Grab a list of most active securities under Wealthsimple trade today.  
+        Where ***limit*** is the amount of response you want from the request.  
         """
         logger.debug("get_most_active_securities")
         r = requests.get(
@@ -1102,7 +1059,9 @@ class Wsimple:
                                     offset: int = 0,
                                     limit: int = 20):
         """
-        Grabs all most watched securities under Wealthsimple trade today
+        Grabs all most watched securities under Wealthsimple trade today.
+        Where ***offset*** is the displacement between the selected offset and the beginning.   
+        Where ***limit*** is the amount of response you want from the request.  
         """
         logger.debug("get_most_watched_securities")
         r = requests.get(
@@ -1138,7 +1097,10 @@ class Wsimple:
                                  limit: int = 20,
                                  filter_type: str = None):
         """
-        Grabs all securities groups under Wealthsimple trade
+        Grabs all securities groups under Wealthsimple trade. 
+        Where ***filter_type*** - "most_watched" ? 
+        Where ***offset*** is the displacement between the selected offset and the beginning.   
+        Where ***limit*** is the amount of response you want from the request.  
         """
         logger.debug("get_securities_in_groups")
         r = requests.get(
@@ -1163,12 +1125,6 @@ class Wsimple:
         Where ***limit*** is the limitation of the response, (1 <= limit < 99): autoset to 25  
         Where ***sort_order*** is order of the results and can be ["asc", "desc"]: autoset to "desc"  
         """
-        # if not (1 <= limit < 99):
-        #     raise MethodInputError(f"limit argument(int): must between 1 and 100 not {limit} {type(limit)}")
-        # elif not offset >= 0:
-        #     raise MethodInputError(f"offset argument(int): must be greater than or equal to 0 not {offset} {type(offset)}")
-        # elif order not in ["asc", "desc"]:
-        #     raise MethodInputError(f"order argument(str): must be either 'asc' or 'desc' not {order} {type(order)}")
         logger.debug("get_all_securities_groups")
         r = requests.get(
             url="{}security-groups".format(self.base_url),
@@ -1199,20 +1155,27 @@ class Wsimple:
             return r.json()
      
     #! global alerts
-    def get_global_alerts(self, tokens):
+    def get_alerts(self, tokens):
         """
         Grab all global alerts
         """
-        logger.debug("get_global_alerts")
-        r = requests.get(
+        logger.debug("get_alerts")
+        result = {}
+        r_user = requests.get(
             url='{}global-alerts/user'.format(self.base_url),
             headers=tokens[0]
         )
-        logger.debug(f"get_global_alerts {r.status_code}")
-        if r.status_code == 401:
+        r_all = requests.get(
+            url='{}global-alerts'.format(self.base_url),
+            headers=tokens[0]
+        ) 
+        result["user"] = r_user.json()["results"]
+        result["all"] = r_all.json()["results"]
+        logger.debug(f"get_alerts user:{r_user.status_code} all:{r_all.status_code}")
+        if (r_user.status_code == 401 or r_all.status_code == 401) :
             raise InvalidAccessTokenError
         else:
-            return r.json()
+            return result
      
     #! internal transfers 
     def get_supported_internal_transfers(self, tokens):
@@ -1230,11 +1193,9 @@ class Wsimple:
         else:
             return r.json()
      
-    def create_internal_transfers(self, 
-                                  tokens, 
-                                  payload):
+    def create_internal_transfers(self, tokens, payload):
         """
-        create a internal transfer request
+        create a internal transfer request  
         currently no wrapper functions.
         """
         logger.debug("create_internal_transfers")
@@ -1252,12 +1213,12 @@ class Wsimple:
     #! tax-documents
     def get_tax_documents(self, 
                           tokens, 
-                          account_id: str = None):
+                          account_id: Optional[str] = None):
         """
         Grab tax documents of your Wealthsimple account
         """
         logger.debug("get_tax_documents")
-        if account_id == None:
+        if account_id is None:
             account_id = self.get_trade_account_id(tokens)
         r = requests.get(
             url='{}tax-documents'.format(self.base_url),
@@ -1286,9 +1247,7 @@ class Wsimple:
         else:
             return r.json()
     
-    def get_monthly_statements_url(self,
-                                   tokens,
-                                   pdf_statement_id):
+    def get_monthly_statements_url(self, tokens, pdf_statement_id):
         """
         Grabs a url to a pdf of your statement.  
         Where ***pdf_statement_id*** is the id of the month you want to get.  
@@ -1312,16 +1271,18 @@ class Wsimple:
         try:
             logger.debug("get_all_monthly_statements")
             monthly_statements_data = self.get_monthly_statements(tokens)["results"]
-            return_res = []
+            result = []
             for data in monthly_statements_data:
                 inner_dict = {}
                 inner_dict["created_at"] = data["created_at"]
                 inner_dict["updated_at"] = data["updated_at"]
                 inner_dict["period"] = data["period"]
                 inner_dict["id"] = data["id"]
-                inner_dict["url"] = self.get_monthly_statements_url(tokens, data["id"])
-                return_res.append(inner_dict)
-            logger.debug(f"get_all_monthly_statements done!!")            
+                inner_dict["url"] = self.get_monthly_statements_url(tokens, data["id"])["url"]
+                result.append(inner_dict)
+            logger.debug(f"get_all_monthly_statements ^^^")    
+            return result
+                        
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
@@ -1329,6 +1290,8 @@ class Wsimple:
     def get_websocket_ticket(self, tokens):
         """
         Grabs a websocket ticket, need to connect to the wealthsimple websocket 
+        url for accessing websocket is:
+        "wss://trade-service.wealthsimple.com/websocket?ticket={}&version=2".format(ticket) 
         """
         logger.debug("get_websocket_ticket")
         r = requests.post(
@@ -1347,18 +1310,9 @@ class Wsimple:
         function for testing new endpoints
         """
         logger.debug("test endpoint")
-        order_dict =  {
-            "account_id": str(self.get_account(tokens)["results"][0]["id"]),
-            "security_id": "sec-s-76a7155242e8477880cbb43269235cb6",
-            "limit_price": int(),
-            "quantity": 1,
-            "order_type": "buy_quantity",
-            "order_sub_type": "market",
-            "time_in_force": "day"
-        }
-        r = requests.post("{}orders".format(self.base_url),
-                    headers=tokens[0],
-                    json=order_dict)
+        r = requests.post("{}test".format(self.base_url),
+                    headers=tokens[0]
+                    )
         print(f"{r.status_code} {r.url}")
         print(r.headers)
         print(r.content)
@@ -1367,7 +1321,7 @@ class Wsimple:
 
     def settings(self, tokens):
         """
-        Get settings needed for /settings route.
+        Get settings data needed for settings page.
         """
         logger.debug("starting settings")
         try:
@@ -1392,7 +1346,7 @@ class Wsimple:
               sec_id: str,
               time: str = "1d"):
         """
-        Get dashboard needed for /stock/<sec_id> route.
+        Get security data needed for stock search pages.
         """
         logger.debug("starting stock {}".format(sec_id))
         try:
@@ -1412,7 +1366,7 @@ class Wsimple:
         
     def search_page(self, tokens):
         """
-        Get security groups need for /search route
+        Get groups need for search page
         """
         try:
             featured_security_groups = self.get_featured_security_groups(tokens)
@@ -1433,11 +1387,7 @@ class Wsimple:
 
     def dashboard(self, tokens):
         """
-        Get dashboard needed for /home route.  
-        v1: 2+ seconds - 11 calls     
-        v2: 1-2 seconds - 5 calls   
-        v3: 1-2 seconds - 4 calls   
-        v4: 0-1 seconds - 2 calls    
+        Get dashboard page needed for home page.    
         """
         logger.debug("calling dashboard")
         try:
@@ -1493,6 +1443,7 @@ class Wsimple:
         """
         Grabs information about the security resembled by the ticker.  
         Where ***ticker*** is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.
+        !May not work on smaller companies or ETFs. 
         """
         base_url_public = "https://trade-service.wealthsimple.com/public/"
         r = requests.get(
@@ -1516,8 +1467,7 @@ class Wsimple:
         return r.json()
 
     @staticmethod
-    def public_top_traded(offset: int = 0, 
-                          limit: int = 5):
+    def public_top_traded(offset: int = 0, limit: int = 5):
         """
         Get top traded companies on Wealthsimple trade.  
         Where ***offset*** is the displacement between the selected offset and the beginning.   
@@ -1554,8 +1504,7 @@ class Wsimple:
         Order Cancellation, Linking bank accounts,   
         Quotes, Order status, Trading, Market Data,  
         Account Values, Account Opening,   
-        Apps, 
-        iOS app, Android App  
+        Apps, iOS app, Android App  
         the data is in the body(content), data is large.  
         """
         r = requests.get(

@@ -1,3 +1,4 @@
-pdoc --html --config show_source_code=False --output-dir docs api
-
+# build docs
+pdoc --html --force --output-dir docs api
+#locally host docs
 pdoc --http : api
