@@ -336,7 +336,7 @@ class Wsimple:
         )
         logger.debug(f&#34;get_person {r.status_code}&#34;)
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -351,7 +351,7 @@ class Wsimple:
         )
         logger.debug(f&#34;get_bank_accounts {r.status_code}&#34;)
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -366,7 +366,7 @@ class Wsimple:
         )
         logger.debug(f&#34;get_positions {r.status_code}&#34;)
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -428,8 +428,9 @@ class Wsimple:
                         security_id: str,
                         limit_price,
                         quantity: int = 1,
-                        account_id: Optional[str] = None,
-                        time_in_force: str =&#34;day&#34;):
+                        time_in_force: str = &#34;day&#34;,
+                        account_id: Optional[str] = None
+                        ):
         &#34;&#34;&#34;
         Places a limit buy order for a security.    
         &#34;&#34;&#34;
@@ -1877,7 +1878,7 @@ a Wealthsimple Trade account.</p></div>
         )
         logger.debug(f&#34;get_person {r.status_code}&#34;)
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -1892,7 +1893,7 @@ a Wealthsimple Trade account.</p></div>
         )
         logger.debug(f&#34;get_bank_accounts {r.status_code}&#34;)
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -1907,7 +1908,7 @@ a Wealthsimple Trade account.</p></div>
         )
         logger.debug(f&#34;get_positions {r.status_code}&#34;)
         if r.status_code == 401:
-            raise InvalidAccessTokenError()
+            raise InvalidAccessTokenError
         else:
             return r.json()
 
@@ -1969,8 +1970,9 @@ a Wealthsimple Trade account.</p></div>
                         security_id: str,
                         limit_price,
                         quantity: int = 1,
-                        account_id: Optional[str] = None,
-                        time_in_force: str =&#34;day&#34;):
+                        time_in_force: str = &#34;day&#34;,
+                        account_id: Optional[str] = None
+                        ):
         &#34;&#34;&#34;
         Places a limit buy order for a security.    
         &#34;&#34;&#34;
@@ -4040,7 +4042,7 @@ Where <strong><em>sort_order</em></strong> is order of the results and can be ["
     )
     logger.debug(f&#34;get_bank_accounts {r.status_code}&#34;)
     if r.status_code == 401:
-        raise InvalidAccessTokenError()
+        raise InvalidAccessTokenError
     else:
         return r.json()</code></pre>
 </details>
@@ -4454,7 +4456,7 @@ Where <strong><em>limit</em></strong> is the amount of response you want from th
     )
     logger.debug(f&#34;get_person {r.status_code}&#34;)
     if r.status_code == 401:
-        raise InvalidAccessTokenError()
+        raise InvalidAccessTokenError
     else:
         return r.json()</code></pre>
 </details>
@@ -4479,7 +4481,7 @@ Where <strong><em>limit</em></strong> is the amount of response you want from th
     )
     logger.debug(f&#34;get_positions {r.status_code}&#34;)
     if r.status_code == 401:
-        raise InvalidAccessTokenError()
+        raise InvalidAccessTokenError
     else:
         return r.json()</code></pre>
 </details>
@@ -4756,7 +4758,7 @@ Where <strong><em>funds_transfer_id</em></strong> is the id of the withdrawal</p
 </details>
 </dd>
 <dt id="api.api.Wsimple.limit_buy_order"><code class="name flex">
-<span>def <span class="ident">limit_buy_order</span></span>(<span>self, tokens, security_id: str, limit_price, quantity: int = 1, account_id: Optional[str] = None, time_in_force: str = 'day')</span>
+<span>def <span class="ident">limit_buy_order</span></span>(<span>self, tokens, security_id: str, limit_price, quantity: int = 1, time_in_force: str = 'day', account_id: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Places a limit buy order for a security.</p></div>
@@ -4769,8 +4771,9 @@ Where <strong><em>funds_transfer_id</em></strong> is the id of the withdrawal</p
                     security_id: str,
                     limit_price,
                     quantity: int = 1,
-                    account_id: Optional[str] = None,
-                    time_in_force: str =&#34;day&#34;):
+                    time_in_force: str = &#34;day&#34;,
+                    account_id: Optional[str] = None
+                    ):
     &#34;&#34;&#34;
     Places a limit buy order for a security.    
     &#34;&#34;&#34;

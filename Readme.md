@@ -13,11 +13,11 @@
 </p>
 
 ## What is the Wsimple project?
-Welcome! This project is a API(Web interface) for Wealthsimple Trade. The main goal this project is to give developers the ability to create projects while hooking straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
+Welcome! This project is an API(Web interface) for Wealthsimple Trade. The main goal of this project is to give developers the ability to create projects while hooking them straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
 
-Before using this please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available.
+Before using the API, please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available.
 
-**This library was created with non-coders in mind and needs minimal understand of python to get started**
+**This library was created with non-coders in mind and needs a minimal understand of python to get started.**
 
 ## Getting Started
   ### Project Status
@@ -27,11 +27,11 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
   This project is in the pre-alpha stage. if you find any bugs please submit an [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new).
 
   ### Prerequisites
-  * Python and Pip is required to use wsimple
+  * python3+ and pip is required to use wsimple
   * to download pip and python go to ["Download Python"](https://realpython.com/installing-python/)
     * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). 
     * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
-  * to use the Web interface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
+  * to use the web interface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
 
   ### Project Ideas
   * Buy/sell a stock as the end of every month.
@@ -60,15 +60,13 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
 ## API
 ### Usage
   ```python
-  from Wsimple import Wsimple
+  from wsimple.api import Wsimple, WSOTPUser
 
   email = str(input("Enter email: \n>>>"))
   password = str(input("Enter password: \n>>>"))
   try:
-      # login to Wealthsimple
-      ws = Wsimple(email, password) 
-      # token are the keys to your account
-      tokens = ws.tokens 
+      ws = Wsimple(email, password) # login to Wealthsimple
+      tokens = ws.tokens # token are the keys to your account
   except WSOTPUser:
       # Exception occurs on one time password only.
       otpnumber = int(input("Enter otpnumber: \n>>>"))
@@ -95,7 +93,7 @@ Before using this please read the [disclamer](#disclamer), and due to the nature
 
 ## Disclaimer
 
-  This software is provided so you can use Wealthsimple trade on your computer. **This software is not built or maintained by Wealthsimple Trade or the company Wealthsimple.** Remember your responsibility to not engage in illegal or unethical trading behaviours that can disrupt orderly market functions. Flooding the website/api with orders in a short time-frame may result in getting banned or locked out by Wealthsimple Trade.
+  This software is provided so you can use Wealthsimple trade on your computer. This software is not built or maintained by Wealthsimple Trade or the company Wealthsimple. Remember your responsibility to not engage in illegal or unethical trading behaviours that can disrupt orderly market functions. Flooding the API/web-app with orders in a short time-frame may result in getting banned or locked out by Wealthsimple Trade.
 
   Remember when using this website and/or api you are still under Wealthsimple Trade services and they reserve the right to terminate anyone.
 

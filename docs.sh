@@ -1,4 +1,4 @@
 # build docs
-pdoc --html --force --output-dir docs api
+pdoc --html --force --output-dir docs wsimple/api
 #locally host docs
-pdoc --http : api
+pdoc --http : wsimple/api
