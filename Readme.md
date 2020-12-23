@@ -22,7 +22,7 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
 ## Getting Started
   ### Project Status
 
-  _Pre-alpha v1.0_  
+  _v1.0.5_  
 
   This project is in the pre-alpha stage. if you find any bugs please submit an [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new).
 
@@ -40,19 +40,13 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
   * Automatically send tax and monthly trading statements to your email.
   * Create a system to do dollar cost averaging (**DCA**) or dividend reinvestment plan (**DRIP**)
 
-  ### Installation
+  ### Install
   ```bash
-  # Production (not in use yet)
   pip install wsimple 
-  # Testing
-  git clone https://github.com/yusuf8ahmed/Wsimple.git
   ```
   #### start website
   ```bash
-  # Production
   wsimple start
-  # Testing
-  python3.9 app
   ```
 
 <a id="index"></a> 
