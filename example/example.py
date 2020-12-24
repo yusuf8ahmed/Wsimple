@@ -13,7 +13,7 @@ except WSOTPUser:
     tokens = ws.tokens  
 
 # pull account info
-res = ws.get_me(tokens)
+res = ws.get_market_hours(tokens, "NYSE")
 
 # display account info
 print(json.dumps(res, indent=4))
