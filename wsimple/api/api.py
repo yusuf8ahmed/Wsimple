@@ -9,7 +9,7 @@ File Name: api/api.py
 # standard library
 import json
 from loguru import logger
-from typing import Optional
+from typing import Optional, Union
 # custom error
 from .errors import LoginError
 from .errors import InvalidAccessTokenError, InvalidRefreshTokenError
@@ -103,16 +103,16 @@ class Wsimple:
         to True then and users can access the functions prefixed with public without using 
         a Wealthsimple Trade account.
         """
+        #"create_account": not 1
         self.public_mode = public_mode
         self.verbose = verbose_mode
         self.oauth_mode = oauth_mode
+        self.email = email
         if self.public_mode:
             pass
         elif self.oauth_mode:
             self.tokens = tokens
         else:
-            #"create_account": not 1
-            self.email = email
             payload = {"email":email, "password":password, "timeoutMs": 2e4}
             if otp_mode: payload["otp"] = otp_number
             r = requests.post(
@@ -198,7 +198,7 @@ class Wsimple:
         return wsimple
  
     #! account related functions
-    def get_account(self, tokens, id):
+    def get_account(self, tokens, id: str):
         """
         Grab a specific accounts information by id 
         """
@@ -351,7 +351,7 @@ class Wsimple:
         else:
             return r.json()
 
-    def _send_order(self, tokens, payload):
+    def _send_order(self, tokens, payload: dict):
         """ send order to wealthsimple servers """
         logger.debug("create_order")
         r = requests.post("{}orders".format(self.base_url),
@@ -661,37 +661,39 @@ class Wsimple:
     def get_activities(self, 
                        tokens, 
                        limit: int = 20,
-                       type: str = "all",
+                       type: Union[str, list] = "all",
+                       sec_id: Optional[str] = None,
                        account_id: Optional[str] = None,
                        ):
         """
         Grabs the 20 most recent activities on under your Wealthsimple Trade account.    
-        Where ***type*** is the activities type you want can be ["deposit", "withdrawal", "dividend", "buy", "sell"] autoset to all.  
+        Where ***type*** is the activities type you want can be 
+        [ 'buy','sell','deposit','withdrawal',
+          'dividend','institutional_transfer', 'internal_transfer',
+          'refund','referral_bonus', 'affiliate'
+        ] autoset to "all".  
         Where ***limit*** is the limitation of the response has to be less than 100: autoset 20.         
         """
         if account_id is None:
             account_id = self.get_trade_account_id(tokens)
-        if type == "all":
-            logger.debug("get_activities")
-            r = requests.get(
-                url="{}account/activities".format(self.base_url),
-                params={"account-id":account_id, "limit":limit},
-                headers=tokens[0]
-            )
-        else:
-            logger.debug("get_activities")
-            r = requests.get(
-                url="{}account/activities".format(self.base_url),
-                params={"account-id":account_id, "type":type, "limit":limit},
-                headers=tokens[0]
-            )  
+        params = {"account_ids":account_id, "limit":limit}      
+        if not type == "all":
+            params["type"] = type
+        if not sec_id is None:
+            params["security_id"] = sec_id
+        logger.debug("get_activities")
+        r = requests.get(
+            url="{}account/activities".format(self.base_url),
+            params=params,
+            headers=tokens[0]
+        ) 
         logger.debug(f"get_activities {r.status_code}")
         if r.status_code == 401:
             raise InvalidAccessTokenError
         else:
             return r.json()
 
-    def get_activities_bookmark(self, tokens, bookmark = None):
+    def get_activities_bookmark(self, tokens, bookmark: str):
         """
         Provides the last 20 activities on the Wealthsimple Trade based on the bookmark.   
         Where ***bookmark*** is the bookmark id.   
@@ -711,32 +713,27 @@ class Wsimple:
     #! withdrawal functions
     def make_withdrawal(self,
                         tokens, 
-                        amount: int,
-                        currency: str = "CAD",
-                        bank_account_id: str = None,
+                        amount: Union[int, float],
+                        bank_account_id: Optional[str] = None,
                         account_id: Optional[str] = None):
         """
         Make a withdrawal under your Wealthsimple Trade account.  
         Where ***amount*** is the amount to withdraw.  
-        Where ***currency*** is the currency need to be withdrawn: autoset to "CAD"  
         Where ***bank_account_id*** is id of bank account where the money is going to be withdrawn from (get_bank_accounts function)  
         Where ***account_id*** is id of the account that is withdrawing the money.  
         """
         logger.debug("make_withdrawal")
         if bank_account_id == None:
-            bank_account_id = self.get_bank_accounts()["results"][0]["id"]
+            bank_account_id = self.get_bank_accounts(tokens)["results"][0]["id"]
         if account_id == None:
             account_id = self.get_trade_account_id(tokens)
-        person = self.get_person()
+        person = self.get_me(tokens)
         payload = {
             "bank_account_id": str(bank_account_id),
             "account_id": str(account_id),
             "client_id": str(person["id"]),
-            "withdrawal_type": "full",
-            "withdrawal_reason": "other",
-            "withdrawal_reason_details": "other",
             "amount": float(amount),
-            "currency": str(currency)
+            "currency": "CAD"
         }
         r = requests.post(
             url='{}withdrawals'.format(self.base_url),
@@ -798,29 +795,27 @@ class Wsimple:
     #! deposits functions
     def make_deposit(self, 
                      tokens, 
-                     amount: int,
-                     currency: str = "CAD", 
-                     bank_account_id: str = None, 
+                     amount: Union[int, float],
+                     bank_account_id: Optional[str] = None, 
                      account_id: Optional[str] = None):
         """
         Make a deposit under your Wealthsimple Trade account. 
-        Where ***amount*** is the amount to deposit  
-        Where ***currency*** is the currency need to be transferred: autoset to "CAD"  
+        Where ***amount*** is the amount to deposit    
         Where ***bank_account_id*** is id of bank account.  
         Where ***account_id*** is id of the account.  
         """
         logger.debug("make_deposits")
         if bank_account_id == None:
-            bank_account_id = self.get_bank_accounts()["results"][0]["id"]
+            bank_account_id = self.get_bank_accounts(tokens)["results"][0]["id"]
         if account_id == None:
             account_id = self.get_trade_account_id(tokens)
-        person = self.get_person()
+        person = self.get_me(tokens)
         payload = {
             "client_id": str(person["id"]),
             "bank_account_id": str(bank_account_id),
             "account_id": str(account_id),
             "amount": float(amount),
-            "currency": str(currency)
+            "currency": "CAD"
         }
         r = requests.post(
             url='{}deposits'.format(self.base_url),
@@ -1310,10 +1305,13 @@ class Wsimple:
         """
         function for testing new endpoints
         """
+        account_id = self.get_trade_account_id(tokens)
         logger.debug("test endpoint")
-        r = requests.post("{}test".format(self.base_url),
-                    headers=tokens[0]
-                    )
+        r = requests.get(
+            url="{}crypto-waitlist".format(self.base_url),
+            params={"user-id": "user-80b4076b-6a6a-4b3c-84a9-43d44f302da4"},
+            headers=tokens[0]
+            )  
         print(f"{r.status_code} {r.url}")
         print(r.headers)
         print(r.content)
@@ -1345,7 +1343,7 @@ class Wsimple:
     def stock(self,
               tokens,
               sec_id: str,
-              time: str = "1d"):
+              time: str = "1m"):
         """
         Get security data needed for stock search pages.
         """
@@ -1354,7 +1352,7 @@ class Wsimple:
             sparkline = self.find_securities_by_id_historical(tokens, sec_id, time)
             security_info = self.find_securities_by_id(tokens, sec_id)
             news = self.public_find_securities_news(security_info["stock"]["symbol"])
-            position = self.get_account(tokens)
+            position = self.get_positions(tokens)
             return {
                 "sparkline": sparkline,
                 "security_info": security_info,
