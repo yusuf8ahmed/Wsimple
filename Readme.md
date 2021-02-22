@@ -64,7 +64,7 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
   except WSOTPUser:
       # Exception occurs on one time password only.
       otpnumber = int(input("Enter otpnumber: \n>>>"))
-      ws = Wsimple.otp_login(email, passw, otpnumber)
+      ws = Wsimple.otp_login(email, password, otpnumber)
       tokens = ws.tokens  
 
   # check the current operation status of internal Wealthsimple Trade
