@@ -49,4 +49,9 @@ class TSXStopLimitPriceError(Exception):
     """Error thrown when a stop order with a diffrent stop and limit price is made on a TSX/TSX-V securities"""
     def __init__(self):
         super(TSXStopLimitPriceError, self).__init__("TSX/TSX-V securities must have an equivalent stop and limit price")
+        
+class WealthsimpleServerError(Exception):
+    """Error thrown when a endpoint returns a 5XX http code"""
+    def __init__(self):
+        super(WealthsimpleServerError, self).__init__("Wealthsimple endpoint might be down: return a 5XX http code")
 

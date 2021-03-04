@@ -14,12 +14,15 @@ from typing import Optional, Union
 from .errors import LoginError
 from .errors import InvalidAccessTokenError, InvalidRefreshTokenError
 from .errors import WSOTPUser, WSOTPError, WSOTPLoginError, TSXStopLimitPriceError
+from .endpoints import Endpoints
+from .requestor import requestor
 # third party
+from box import Box
 import requests
              
 class Wsimple:
     """Wsimple is the main access class to the wealthsimple trade api."""
-    base_url = "https://trade-service.wealthsimple.com/"
+    BASE_URL = Endpoints.BASE.value
     time_ranges = [
         '1d',
         '1w',
@@ -81,10 +84,10 @@ class Wsimple:
         "AEQUITAS NEO EXCHANGE": "NEOE"
     }
     friendly_account_name = {
-        'ca_tfsa':'TFSA',
-        'ca_non_registered': 'Personal account',
-        'ca_rrsp':'RRSP account',
-        'ca_non_registered_crypto':'Crypto account'
+        'ca_tfsa':'tfsa',
+        'ca_non_registered': 'personal',
+        'ca_rrsp':'rrsp',
+        'ca_non_registered_crypto':'crypto'
     }
     iscanadiansecurity = lambda _, x: x in ["TSX","TSX-V"]
     
@@ -121,9 +124,9 @@ class Wsimple:
             ) 
             del payload
             logger.debug(f"Login status code {r.status_code}")
-            if "x-wealthsimple-otp" in r.headers: 
-                #! one time password code login
-                logger.info("One time password needed")
+            if "x-wealthsimple-otp-required" in r.headers: 
+                #! otp needed code
+                logger.info("OTP code needed")
                 try:
                     otp_headers = r.headers['x-wealthsimple-otp'].replace(" ", "").split(";")
                     method = otp_headers[1][7:] 
@@ -142,13 +145,16 @@ class Wsimple:
                 if r.status_code == 200:
                     self._access_token = r.headers['X-Access-Token']
                     self._refresh_token = r.headers['X-Refresh-Token']
+                    self._access_expires = int(r.headers['X-Access-Token-Expires'])
                     self.tokens = [
                         {'Authorization': self._access_token},
                         {"refresh_token": self._refresh_token}
                         ]
+                    self.data = r.json()
                     del r
                 else:
-                    if otp_mode: raise WSOTPLoginError
+                    if otp_mode:
+                        raise WSOTPLoginError
                     raise LoginError
       
     def refresh_token(self, tokens):
@@ -198,57 +204,48 @@ class Wsimple:
         return wsimple
  
     #! account related functions
-    def get_account(self, tokens, id: str):
-        """
-        Grab a specific accounts information by id 
-        """
-        logger.debug("get_account call")
-        r = requests.get(
-            url="{}account/{}".format(self.base_url, id),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_account {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
-    
     def get_accounts(self, tokens):
         """
         Grabs all accounts information
         """
-        logger.debug("get_accounts call")
-        r = requests.get(
-            url="{}account/list".format(self.base_url),
+        return requestor(
+            Endpoints.GET_ACCOUNT_LIST,
+            args={"base": self.BASE_URL},
+            headers=tokens[0]
+        )    
+        
+    def get_account(self, tokens, account_id: str=None):
+        """
+        Grab a specific accounts information by id: 
+        !Wealthsimple Servers will default to trade account if account_id = None
+        """   
+        params = {}    
+        if account_id != None:
+            params["account_ids"] = account_id   
+        return requestor(
+            Endpoints.GET_ACCOUNT,
+            args={"base": self.BASE_URL},
+            params=params,
             headers=tokens[0]
         )
-        logger.debug(f"get_account {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json() 
-           
-    def get_trade_account_id(self, tokens):
-        """ 
-        If any function 'account_id' param is empty, it will use 
-        this function to get the first trading id  """
-        accounts = self.get_accounts(tokens)["results"]
-        for account in accounts:
-            if account["account_type"] == "ca_non_registered":
-                return account["id"]
-
-    def get_account_ids(self, tokens):
+    
+    def accounts(self, tokens, block_deleted=True):
         """
-        Grabs all account ids under your your Wealthsimple Trade account. 
+        Wrapper: Grabs all account ids under your Wealthsimple account. 
         """
         try:
-            logger.debug("get_account_ids call")
-            accounts = self.get_account(tokens)["results"]
-            account_ids = []
+            logger.debug("accounts call")
+            accounts = self.get_accounts(tokens)["results"]
+            res = {}
             for account in accounts:
-                account_ids.append(account["id"])
-            logger.debug(f"get_account_ids ^^^")
-            return account_ids  
+                k = self.friendly_account_name[account["account_type"]]
+                if block_deleted: 
+                    if account['deleted_at'] == None:
+                        res[k] = account["id"]
+                else:
+                    res[k] = account["id"]
+            logger.debug(f"accounts ^^^")
+            return Box(res)
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
         
@@ -259,109 +256,78 @@ class Wsimple:
                                       ):
         """
         Grabs historical portfolio information for your Wealthsimple Trade account for a specified timeframe.  
-        Where ***time*** is one of [1d, 1w, 1m, 3m, 1y, all]: autoset to 1d.  
+        Where ***time*** is one of [1d, 1w, 1m, 3m, 1y, all]: autoset to 1d. 
+        !account_id is required. 
         """
-        logger.debug("get_historical_portfolio_data call")
         if account_id == None:
-            account_id = self.get_trade_account_id(tokens)
-        r = requests.get(
-            url="{}account/history/{}".format(self.base_url, time),
-            params={"account_id":account_id},
-            headers=tokens[0]
+            account_id = self.accounts(tokens).personal
+        return requestor(
+            Endpoints.GET_ACCOUNT_HISTORY,
+            args={"base": self.BASE_URL, "time": time},
+            headers=tokens[0],
+            params={"account_id": account_id},
         )
-        logger.debug(f"get_historical_portfolio_data {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
 
     def get_me(self, tokens):
         """
         Grabs basic information about your Wealthsimple Trade account.
         """
-        logger.debug("get_me call")
-        r = requests.get(
-            url="{}me".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_me {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_ME,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     def get_person(self, tokens):
         """
         Grabs Advanced/information about your Wealthsimple Trade account. 
         """
-        logger.debug("get_person")
-        r = requests.get(
-            url="{}person".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_person {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_PERSON,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     def get_bank_accounts(self, tokens):
         """
         Grabs all bank accounts under your Wealthsimple Trade account. 
         """
-        logger.debug("get_bank_accounts")
-        r = requests.get(
-            url="{}bank-accounts".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_bank_accounts {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_BANK_ACCOUNTS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
-    def get_positions(self, tokens):
+    def get_positions(self, tokens,
+                      sec_id: Optional[str] = None,
+                      account_id: Optional[str] = None):
         """
         Grabs your current Wealthsimple Trade positions.    
-        """
-        logger.debug("get_positions")
-        r = requests.get(
-            url="{}account/positions".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_positions {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        """      
+        param = {
+            "account_id": account_id,
+            "security_id": sec_id
+        }        
+        return requestor(
+                Endpoints.GET_POSITONS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0],
+                params=param)
 
     #! order functions
     def get_orders(self, tokens):
         """
         Grabs all current and past orders.
-        """
-        logger.debug("get_orders")
-        r = requests.get(
-            url="{}orders".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_orders {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        """    
+        return requestor(
+                Endpoints.GET_ORDERS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     def _send_order(self, tokens, payload: dict):
         """ send order to wealthsimple servers """
-        logger.debug("create_order")
-        r = requests.post("{}orders".format(self.base_url),
-                    headers=tokens[0],
-                    json=payload)
-        logger.debug(f"create_order {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.SEND_ORDER,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0],
+                json=payload)
         
     def market_buy_order(self,
                          tokens,
@@ -536,16 +502,10 @@ class Wsimple:
         Cancels a order by its id.    
         Where ***order*** is order_id.   
         """
-        logger.debug("cancel_order")
-        r = requests.delete(
-            "{}orders/{}".format(self.base_url, order_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"cancel_order {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.CANCEL_ORDER,
+                args = {"base": self.BASE_URL, "order_id": order_id},
+                headers=tokens[0])
 
     def pending_orders(self, tokens):
         """
@@ -622,7 +582,7 @@ class Wsimple:
     def find_securities_by_id(self, tokens, sec_id: str):
         """
         Grabs information about the security resembled by the security id.  
-        Where ***ticker*** is the ticker of the company. 
+        Where ***ticker*** is the ticker of the company. security_id
         """
         logger.debug("find_securities_by_id")
         r = requests.get(
@@ -663,7 +623,7 @@ class Wsimple:
                        limit: int = 20,
                        type: Union[str, list] = "all",
                        sec_id: Optional[str] = None,
-                       account_id: Optional[str] = None,
+                       account_ids: Union[str, list] = None,
                        ):
         """
         Grabs the 20 most recent activities on under your Wealthsimple Trade account.    
@@ -672,43 +632,33 @@ class Wsimple:
           'dividend','institutional_transfer', 'internal_transfer',
           'refund','referral_bonus', 'affiliate'
         ] autoset to "all".  
-        Where ***limit*** is the limitation of the response has to be less than 100: autoset 20.         
+        Where ***limit*** is the limitation of the response has to be less than 100: autoset 20.
+        !Wealthsimple Servers will default to trade account if account_id = None         
         """
-        if account_id is None:
-            account_id = self.get_trade_account_id(tokens)
-        params = {"account_ids":account_id, "limit":limit}      
+        params = {"limit":limit}   
+        if not account_ids is None:
+            params["account_ids"] = account_ids
         if not type == "all":
             params["type"] = type
         if not sec_id is None:
-            params["security_id"] = sec_id
-        logger.debug("get_activities")
-        r = requests.get(
-            url="{}account/activities".format(self.base_url),
-            params=params,
-            headers=tokens[0]
-        ) 
-        logger.debug(f"get_activities {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+            params["security_id"] = sec_id   
+        return requestor(
+                Endpoints.GET_ACTIVITES,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0],
+                params=params)
 
     def get_activities_bookmark(self, tokens, bookmark: str):
         """
         Provides the last 20 activities on the Wealthsimple Trade based on the bookmark.   
         Where ***bookmark*** is the bookmark id.   
         """
-        logger.debug("get_activities_bookmark")
-        r = requests.get(
-            url="{}account/activities".format(self.base_url),
-            params={"bookmark": bookmark},
-            headers=tokens[0]
-        )
-        logger.debug(f"get_activities_bookmark {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        params = {"bookmark": bookmark}
+        return requestor(
+                Endpoints.GET_ACTIVITES,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0],
+                params=params)
 
     #! withdrawal functions
     def make_withdrawal(self,
@@ -1151,32 +1101,40 @@ class Wsimple:
             return r.json()
      
     #! global alerts
-    def get_alerts(self, tokens):
+    def get_global_alerts(self, tokens):
         """
         Grab all global alerts
         """
-        logger.debug("get_alerts")
-        result = {}
-        r_user = requests.get(
-            url='{}global-alerts/user'.format(self.base_url),
-            headers=tokens[0]
-        )
-        r_all = requests.get(
+        logger.debug("get_global_alert")
+        r = requests.get(
             url='{}global-alerts'.format(self.base_url),
             headers=tokens[0]
         ) 
-        result["user"] = r_user.json()["results"]
-        result["all"] = r_all.json()["results"]
-        logger.debug(f"get_alerts user:{r_user.status_code} all:{r_all.status_code}")
-        if (r_user.status_code == 401 or r_all.status_code == 401) :
+        logger.debug(f"get_global_alert {r.status_code}")
+        if r.status_code == 401:
             raise InvalidAccessTokenError
         else:
-            return result
-     
+            return r.json()
+        
+    def get_user_alerts(self, tokens):
+        """
+        Grab all global alerts
+        """
+        logger.debug("get_user_alert")
+        r = requests.get(
+            url='{}global-alerts/user'.format(self.base_url),
+            headers=tokens[0]
+        )
+        logger.debug(f"get_user_alert {r.status_code}")
+        if r.status_code == 401:
+            raise InvalidAccessTokenError
+        else:
+            return r.json()
+        
     #! internal transfers 
     def get_supported_internal_transfers(self, tokens):
         """
-        Grabs a list of all support interal transfers
+        Grabs a list of all support internal transfers
         """
         logger.debug("get_supported_internal_transfers")
         r = requests.get(
@@ -1283,11 +1241,11 @@ class Wsimple:
             raise InvalidAccessTokenError
 
     #! websocket_ticket
-    def get_websocket_ticket(self, tokens):
+    def get_websocket_uri(self, tokens):
         """
         Grabs a websocket ticket, need to connect to the wealthsimple websocket 
         url for accessing websocket is:
-        "wss://trade-service.wealthsimple.com/websocket?ticket={}&version=2".format(ticket) 
+        "wss://trade-service.wealthsimple.com/websocket?ticket=TICKET&version=2"
         """
         logger.debug("get_websocket_ticket")
         r = requests.post(
@@ -1298,25 +1256,54 @@ class Wsimple:
         if r.status_code == 401:
             raise InvalidAccessTokenError
         else:
-            return r.json()  
+            return "wss://trade-service.wealthsimple.com/websocket?ticket={}&version=2".format(r.json()["ticket"])
 
     #! functions after this point are not core to the API
-    def test_endpoint(self, tokens):
+    def test_endpoint(self, tokens, data):
         """
         function for testing new endpoints
         """
         account_id = self.get_trade_account_id(tokens)
+        name = "dsaafefad"
         logger.debug("test endpoint")
-        r = requests.get(
-            url="{}crypto-waitlist".format(self.base_url),
-            params={"user-id": "user-80b4076b-6a6a-4b3c-84a9-43d44f302da4"},
+        k = requests.get(
+            url="{}documents/new".format(self.base_url),
+            params={"filename": name},
             headers=tokens[0]
             )  
+        print(f"{k.status_code} {k.url}")
+        print(k.headers)
+        print(k.json())
+        r = requests.put(
+            url="{}".format(k.json()["upload_url"]),
+            headers={
+            'Content-type': 'application/json'
+            },
+            data=json.dumps(data)
+        )
         print(f"{r.status_code} {r.url}")
         print(r.headers)
-        print(r.content)
         # print(r.json())
-        return r.json()
+        f = requests.post(
+            url="{}documents".format(self.base_url),
+            data={"s3_key": k.json()["s3_key"],
+                    "document_type": "bank_statement",
+                    "resource_type": 'Client'},
+            headers=tokens[0]
+            )  
+        print(f"{f.status_code} {f.url}")
+        print(f.headers)
+        print(f.json())
+        
+        f = requests.get(
+            url="{}document/{}/{}".format(self.base_url, f.json()["id"], name),
+            headers=tokens[0]
+            )  
+        print(f"{f.status_code} {f.url}")
+        print(f.headers)
+        print(f.content)
+        print(f.json())
+        return f.json()
 
     def settings(self, tokens):
         """

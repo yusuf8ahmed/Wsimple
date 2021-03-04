@@ -4,11 +4,6 @@ from setuptools import setup, find_packages
 def read(fname):
     return open(path.join(path.dirname(__file__), fname)).read()
 
-def from_here(relative_path):
-    return path.join(path.dirname(__file__), relative_path)
-
-with open('requirements.txt') as f: 
-    requirements = f.readlines() 
 # source env/bin/activate
 
 #? pypi
@@ -18,10 +13,10 @@ with open('requirements.txt') as f:
 
 setup(
     name="Wsimple",
-    version="1.0.5",
+    version="1.0.6",
     author="Yusuf Ahmed",
     author_email="yusufahmed172@gmail.com",
-    packages=find_packages(include=("images", "wsimple", "wsimple.api" )),
+    packages=find_packages(include=("images", "wsimple", "wsimple.api")),
     description="Wsimple.py: a API(Web interface) for Wealthsimple Trade",
     long_description=read('README.md'),
     long_description_content_type="text/markdown",
