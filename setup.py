@@ -12,8 +12,8 @@ def read(fname):
 # twine upload --skip-existing dist/*
 
 setup(
-    name="Wsimple",
-    version="1.0.6",
+    name="wsimple",
+    version="2.0.0",
     author="Yusuf Ahmed",
     author_email="yusufahmed172@gmail.com",
     packages=find_packages(include=("images", "wsimple", "wsimple.api")),

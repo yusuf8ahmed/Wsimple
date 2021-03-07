@@ -23,6 +23,8 @@ import requests
 class Wsimple:
     """Wsimple is the main access class to the wealthsimple trade api."""
     BASE_URL = Endpoints.BASE.value
+    BASE_PUBLIC_URL = Endpoints.BASE_PUBLIC.value
+    BASE_STATUS_URL = Endpoints.BASE_STATUS.value 
     time_ranges = [
         '1d',
         '1w',
@@ -106,7 +108,6 @@ class Wsimple:
         to True then and users can access the functions prefixed with public without using 
         a Wealthsimple Trade account.
         """
-        #"create_account": not 1
         self.public_mode = public_mode
         self.verbose = verbose_mode
         self.oauth_mode = oauth_mode
@@ -145,7 +146,8 @@ class Wsimple:
                 if r.status_code == 200:
                     self._access_token = r.headers['X-Access-Token']
                     self._refresh_token = r.headers['X-Refresh-Token']
-                    self._access_expires = int(r.headers['X-Access-Token-Expires'])
+                    self.access_expires = int(r.headers['X-Access-Token-Expires'])
+                    print(int(r.headers['X-Access-Token-Expires']))
                     self.tokens = [
                         {'Authorization': self._access_token},
                         {"refresh_token": self._refresh_token}
@@ -214,7 +216,7 @@ class Wsimple:
             headers=tokens[0]
         )    
         
-    def get_account(self, tokens, account_id: str=None):
+    def get_account(self, tokens, account_id: Optional[str]=None):
         """
         Grab a specific accounts information by id: 
         !Wealthsimple Servers will default to trade account if account_id = None
@@ -517,7 +519,7 @@ class Wsimple:
             for order in orders:
                 if order['status'] == 'submitted':
                     result.append(order)
-            return result
+            return {"result": result}
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
     
@@ -567,33 +569,21 @@ class Wsimple:
         Where ***ticker*** is the ticker of the company, API will fuzzy    
         match this argument and therefore multiple results can appear. 
         """
-        logger.debug("find_securities")
-        r = requests.get(
-            url="{}securities".format(self.base_url),
-            params={"query": ticker},
-            headers=tokens[0]
-        )
-        logger.debug(f"find_securities {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.FIND_SECURITIES,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0],
+                params={"query": ticker})
 
     def find_securities_by_id(self, tokens, sec_id: str):
         """
         Grabs information about the security resembled by the security id.  
         Where ***ticker*** is the ticker of the company. security_id
         """
-        logger.debug("find_securities_by_id")
-        r = requests.get(
-            url="{}securities/{}".format(self.base_url, sec_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"find_securities_by_id {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.FIND_SECURITIES_BY_ID,
+                args = {"base": self.BASE_URL, "security_id": sec_id },
+                headers=tokens[0])
 
     def find_securities_by_id_historical(self, 
                                          tokens,
@@ -605,17 +595,11 @@ class Wsimple:
         Where ***time*** is the timeframe one of [1d, 1w, 1m, 3m, 1y, all]: autoset "1d".  
         Where ***mic*** is the Market Identifier Code for the exchange: autoset "XNAS"  
         """
-        logger.debug("find_securities_by_id_historical")
-        r = requests.get(
-            url="{}securities/{}/historical_quotes/{}".format(self.base_url, sec_id, time),
-            params={"mic":mic},
-            headers=tokens[0]
-        )
-        logger.debug(f"find_securities_by_id_historical {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.FIND_SECURITIES_HISTORY,
+                args = {"base": self.BASE_URL, "time": time, "security_id": sec_id },
+                headers=tokens[0],
+                params={"mic":mic})
 
     #! activities functions
     def get_activities(self, 
@@ -676,7 +660,7 @@ class Wsimple:
         if bank_account_id == None:
             bank_account_id = self.get_bank_accounts(tokens)["results"][0]["id"]
         if account_id == None:
-            account_id = self.get_trade_account_id(tokens)
+            account_id = self.accounts(tokens).personal
         person = self.get_me(tokens)
         payload = {
             "bank_account_id": str(bank_account_id),
@@ -685,62 +669,39 @@ class Wsimple:
             "amount": float(amount),
             "currency": "CAD"
         }
-        r = requests.post(
-            url='{}withdrawals'.format(self.base_url),
-            headers=tokens[0],
-            data=payload
-        )
-        logger.debug(f"make_withdrawal {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.MAKE_WITHDRAWALS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0],
+                data=payload)
 
     def get_withdrawal(self, tokens, funds_transfer_id: str):
         """
         Get specific withdrawal under yout Wealthsimple Trade account.
         Where ***funds_transfer_id*** is the id of the withdrawal
         """
-        logger.debug("get_withdrawal")
-        r = requests.get(
-            url="{}withdrawals/{}".format(self.base_url, funds_transfer_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_withdrawal {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_WITHDRAWAL_BY_ID,
+                args={ "base": self.BASE_URL,"funds_transfer_id": funds_transfer_id},
+                headers=tokens[0])
 
     def list_withdrawals(self, tokens):
         """
         Get all withdrawals under your Wealthsimple Trade account.
         """
-        logger.debug("list_withdrawals")
-        r = requests.get(
-            url="{}withdrawals".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"list_withdrawals {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.LIST_WITHDRAWALS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     def delete_withdrawal(self, tokens, funds_transfer_id: str):
         """
         Delete a specific withdrawal your Wealthsimple Trade account.
         """
-        logger.debug("delete_withdrawal")
-        r = requests.delete(
-            url="{}withdrawals/{}".format(self.base_url, funds_transfer_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"delete_withdrawal {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.DELETE_WITHDRAWAL_BY_ID,
+                args = {"base": self.BASE_URL, "funds_transfer_id": funds_transfer_id},
+                headers=tokens[0])
 
     #! deposits functions
     def make_deposit(self, 
@@ -767,78 +728,49 @@ class Wsimple:
             "amount": float(amount),
             "currency": "CAD"
         }
-        r = requests.post(
-            url='{}deposits'.format(self.base_url),
-            headers=tokens[0],
-            data=payload
-        )
-        logger.debug(f"make_deposits {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.MAKE_DEPOSITS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0],
+                data=payload)
 
     def get_deposit(self, tokens, funds_transfer_id: str):
         """
         Get specific deposit under this Wealthsimple Trade account.  
         Where ***funds_transfer_id*** is the id of the deposit  
         """
-        logger.debug("get_deposits")
-        r = requests.get(
-            url="{}deposits/{}".format(self.base_url, funds_transfer_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_deposits {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_DEPOSIT_BY_ID,
+                args = {"base": self.BASE_URL, "funds_transfer_id": funds_transfer_id},
+                headers=tokens[0])
 
     def list_deposits(self, tokens):
         """
         Get all deposits under your Wealthsimple Trade account.
         """
-        logger.debug("list_deposits")
-        r = requests.get(
-            url="{}deposits".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"list_deposits {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.LIST_DEPOSITS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     def delete_deposit(self, tokens, funds_transfer_id: str):
         """
         Delete a specific deposit under your Wealthsimple Trade account.
         """
-        logger.debug("delete_deposits")
-        r = requests.delete(
-            url="{}deposits/{}".format(self.base_url, funds_transfer_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"delete_deposits {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.DELETE_DEPOSIT_BY_ID,
+                args = {"base": self.BASE_URL, "funds_transfer_id": funds_transfer_id},
+                headers=tokens[0])
 
     #! market related functions
     def get_all_markets(self, tokens):
         """
         Grabs all market data including opening and closing hours 
         """
-        logger.debug("get_all_markets")
-        r = requests.get(
-            url='{}markets'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_all_markets {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_ALL_MARKETS,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     def get_market_hours(self, tokens, exchange: str):
         """
@@ -863,80 +795,50 @@ class Wsimple:
         """
         Get all watchlisted securities under your Wealthsimple trade account. 
         """
-        logger.debug("get_watchlist")
-        r = requests.get(
-            url="{}watchlist".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_watchlist {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_WATCHLIST,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     def add_watchlist(self, tokens, sec_id: str):
         """
         Add security under this Wealthsimple Trade account.    
         Where ***sec_id*** is the security id for the security you want to add.            
         """
-        logger.debug("add_watchlist")
-        r = requests.put(
-            url="{}watchlist/{}".format(self.base_url, sec_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"add_watchlist {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.ADD_TO_WATCHLIST,
+                args = {"base": self.BASE_URL, "security_id": sec_id},
+                headers=tokens[0])
 
     def delete_watchlist(self, tokens, sec_id: str):
         """
         Delete a watchlisted securities in your Wealthsimple Trade account.  
         Where ***sec_id*** is the security id for the security you want to delete. 
         """
-        logger.debug("delete_watchlist")
-        r = requests.delete(
-            url="{}watchlist/{}".format(self.base_url, sec_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"delete_watchlist {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.DELETE_FROM_WATCHLIST,
+                args = {"base": self.BASE_URL, "security_id": sec_id},
+                headers=tokens[0])
 
     #! exchange functions
     def get_exchange_rate(self, tokens):
         """
         Current Wealthsimple Trade forex USD/CAD exchange rates. 
         """
-        logger.debug("get_exchange_rate")
-        r = requests.get(
-            url="{}forex".format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_exchange_rate {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_EXCHANGE_RATE,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     #! fact-sheet functions
     def get_fact_sheets(self, tokens):
         """
         Get all fact-sheets that you have access to under your Wealthsimple account
         """
-        logger.debug("get_fact_sheets")
-        r = requests.get(
-            url='{}fact-sheets'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_fact_sheets {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+                Endpoints.GET_FACT_SHEET,
+                args = {"base": self.BASE_URL},
+                headers=tokens[0])
 
     #! securities groups functions
     def get_top_losers_securities(self,
@@ -948,17 +850,11 @@ class Wsimple:
         Where ***offset*** is the displacement between the selected offset and the beginning.   
         Where ***limit*** is the amount of response you want from the request.  
         """
-        logger.debug("get_top_losers_securities")
-        r = requests.get(
-            url='{}securities/top_market_movers'.format(self.base_url),
-            params={"type":"losers","limit":limit,"offset":offset},
-            headers=tokens[0]
-        )
-        logger.debug(f"get_top_losers_securities {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json() 
+        return requestor(
+            Endpoints.GET_TOP_MARKET_MOVERS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0],
+            params={"type":"losers","limit":limit,"offset":offset})  
 
     def get_top_gainers_securities(self,
                                    tokens,
@@ -969,17 +865,11 @@ class Wsimple:
         Where ***offset*** is the displacement between the selected offset and the beginning.   
         Where ***limit*** is the amount of response you want from the request.  
         """
-        logger.debug("get_top_gainers_securities")
-        r = requests.get(
-            url='{}securities/top_market_movers'.format(self.base_url),
-            params={"type":"gainers","limit":limit,"offset":offset},
-            headers=tokens[0]
-        )
-        logger.debug(f"get_top_gainers_securities {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()  
+        return requestor(
+            Endpoints.GET_TOP_MARKET_MOVERS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0],
+            params={"type":"gainers", "limit":limit, "offset":offset})   
     
     def get_most_active_securities(self,
                                    tokens,
@@ -988,17 +878,11 @@ class Wsimple:
         Grab a list of most active securities under Wealthsimple trade today.  
         Where ***limit*** is the amount of response you want from the request.  
         """
-        logger.debug("get_most_active_securities")
-        r = requests.get(
-            url='{}securities/top_market_movers'.format(self.base_url),
-            params={"type":"most_active","limit":limit},
-            headers=tokens[0]
-        )
-        logger.debug(f"get_most_active_securities {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()      
+        return requestor(
+            Endpoints.GET_TOP_MARKET_MOVERS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0],
+            params={"type":"most_active", "limit":limit})      
     
     def get_most_watched_securities(self,
                                     tokens,
@@ -1009,32 +893,20 @@ class Wsimple:
         Where ***offset*** is the displacement between the selected offset and the beginning.   
         Where ***limit*** is the amount of response you want from the request.  
         """
-        logger.debug("get_most_watched_securities")
-        r = requests.get(
-            url='{}securities/most_watched'.format(self.base_url),
-            params={"limit":limit,"offset":offset},
-            headers=tokens[0]
-        )
-        logger.debug(f"get_most_watched_securities {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()    
+        return requestor(
+            Endpoints.GET_MOST_WATCHED,
+            args={"base": self.BASE_URL},
+            headers=tokens[0],
+            params={"limit":limit,"offset":offset})  
     
     def get_featured_security_groups(self, tokens):
         """
         Grabs all featured security groups under Wealthsimple trade today
         """
-        logger.debug("get_featured_security_groups")
-        r = requests.get(
-            url='{}security-groups/featured'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_featured_security_groups {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_FEATURED,
+            args={"base": self.BASE_URL},
+            headers=tokens[0])
     
     def get_securities_in_groups(self, 
                                  tokens,
@@ -1048,17 +920,11 @@ class Wsimple:
         Where ***offset*** is the displacement between the selected offset and the beginning.   
         Where ***limit*** is the amount of response you want from the request.  
         """
-        logger.debug("get_securities_in_groups")
-        r = requests.get(
-            url='{}security-groups/{}/securities'.format(self.base_url, group_id),
-            params={"limit":limit,"offset":offset,"filter_type":filter_type},
-            headers=tokens[0]
-        )        
-        logger.debug(f"get_securities_in_groups {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_SECURITIES_IN_GROUPS,
+            args={"base": self.BASE_URL, "group_id": group_id},
+            headers=tokens[0],
+            params={"limit":limit,"offset":offset,"filter_type":filter_type})
     
     def get_all_securities_groups(self, 
                                   tokens,
@@ -1071,151 +937,96 @@ class Wsimple:
         Where ***limit*** is the limitation of the response, (1 <= limit < 99): autoset to 25  
         Where ***sort_order*** is order of the results and can be ["asc", "desc"]: autoset to "desc"  
         """
-        logger.debug("get_all_securities_groups")
-        r = requests.get(
-            url="{}security-groups".format(self.base_url),
-            params={"offset":offset, "limit":limit, "sort_order":order},
-            headers=tokens[0]
-        )
-        logger.debug(f"get_all_securities_groups {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            print(r.status_code)
-            return r.json()
+        return requestor(
+            Endpoints.GET_ALL_GROUPS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0],
+            params={"offset":offset, "limit":limit, "sort_order":order})
         
     #! mobile dashboard functions
     def get_mobile_dashboard(self, tokens):
         """
         Get all info in the mobile dashboard
         """
-        logger.debug("get_mobile_dashboard")
-        r = requests.get(
-            url='{}mobile-dashboard'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_mobile_dashboard {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_MOBILE_DASHBOARD,
+            args={"base": self.BASE_URL},
+            headers=tokens[0])
      
     #! global alerts
     def get_global_alerts(self, tokens):
         """
         Grab all global alerts
         """
-        logger.debug("get_global_alert")
-        r = requests.get(
-            url='{}global-alerts'.format(self.base_url),
-            headers=tokens[0]
-        ) 
-        logger.debug(f"get_global_alert {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_GLOBAL_ALERTS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0]) 
         
     def get_user_alerts(self, tokens):
         """
         Grab all global alerts
         """
-        logger.debug("get_user_alert")
-        r = requests.get(
-            url='{}global-alerts/user'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_user_alert {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_USER_ALERTS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0]) 
         
     #! internal transfers 
     def get_supported_internal_transfers(self, tokens):
         """
         Grabs a list of all support internal transfers
+        ! NOT WORKING
         """
-        logger.debug("get_supported_internal_transfers")
-        r = requests.get(
-            url='{}supported-internal-transfers'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_supported_internal_transfers {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_SUPPORTED_INTERNAL_TRANSFERS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0],
+            response_list=True)
      
     def create_internal_transfers(self, tokens, payload):
         """
         create a internal transfer request  
         currently no wrapper functions.
         """
-        logger.debug("create_internal_transfers")
-        r = requests.post(
-            url='{}internal_transfers'.format(self.base_url),
+        return requestor(
+            Endpoints.CREATE_INTERNAL_TRANSFER,
+            args={"base": self.BASE_URL},
             headers=tokens[0],
-            data=payload
-        )
-        logger.debug(f"create_internal_transfers {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()    
+            data=payload)   
     
     #! tax-documents
     def get_tax_documents(self, 
-                          tokens, 
-                          account_id: Optional[str] = None):
+                          tokens):
         """
         Grab tax documents of your Wealthsimple account
-        """
-        logger.debug("get_tax_documents")
-        if account_id is None:
-            account_id = self.get_trade_account_id(tokens)
-        r = requests.get(
-            url='{}tax-documents'.format(self.base_url),
-            param={"account_id", account_id},
-            headers=tokens[0]
-        )
-        logger.debug(f"get_tax_documents {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        """  
+        return requestor(
+            Endpoints.GET_TAX_DOCUMENTS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0],
+            response_list=True
+            )
      
     #! monthly-statements
     def get_monthly_statements(self, tokens):
         """
         Grabs all monthly statements under your Wealthsimple account
         """
-        logger.debug("get_monthly_statements")
-        r = requests.get(
-            url='{}monthly-statements'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_monthly_statements {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_MONTHLY_STATEMENTS,
+            args={"base": self.BASE_URL},
+            headers=tokens[0])
     
     def get_monthly_statements_url(self, tokens, pdf_statement_id):
         """
         Grabs a url to a pdf of your statement.  
         Where ***pdf_statement_id*** is the id of the month you want to get.  
         """
-        logger.debug("get_monthly_statements")
-        r = requests.get(
-            url='{}monthly-statements/{}'.format(self.base_url, pdf_statement_id),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_monthly_statements {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return r.json()
+        return requestor(
+            Endpoints.GET_URL_MONTHLY_STATEMENTS,
+            args={"base": self.BASE_URL, "pdf_statement_id": pdf_statement_id},
+            headers=tokens[0])
 
     def get_monthly_statements_cleaned(self, tokens):
         """
@@ -1235,75 +1046,58 @@ class Wsimple:
                 inner_dict["url"] = self.get_monthly_statements_url(tokens, data["id"])["url"]
                 result.append(inner_dict)
             logger.debug(f"get_all_monthly_statements ^^^")    
-            return result
-                        
+            return result           
         except InvalidAccessTokenError:
             raise InvalidAccessTokenError
 
     #! websocket_ticket
     def get_websocket_uri(self, tokens):
         """
-        Grabs a websocket ticket, need to connect to the wealthsimple websocket 
-        url for accessing websocket is:
-        "wss://trade-service.wealthsimple.com/websocket?ticket=TICKET&version=2"
+        returns websocket url to a wealthsimple websockets 
+        "wss://trade-service.wealthsimple.com/websocket?ticket={{TICKET}}&version=2"
         """
-        logger.debug("get_websocket_ticket")
-        r = requests.post(
-            url='{}websocket-ticket'.format(self.base_url),
-            headers=tokens[0]
-        )
-        logger.debug(f"get_websocket_ticket {r.status_code}")
-        if r.status_code == 401:
-            raise InvalidAccessTokenError
-        else:
-            return "wss://trade-service.wealthsimple.com/websocket?ticket={}&version=2".format(r.json()["ticket"])
+        res = requestor(
+            Endpoints.GET_WEBSOCKET_URI,
+            args={"base": self.BASE_URL},
+            headers=tokens[0])
+        return "wss://trade-service.wealthsimple.com/websocket?ticket={}&version=2".format(res.ticket)   
 
     #! functions after this point are not core to the API
     def test_endpoint(self, tokens, data):
         """
         function for testing new endpoints
         """
-        account_id = self.get_trade_account_id(tokens)
-        name = "dsaafefad"
-        logger.debug("test endpoint")
-        k = requests.get(
-            url="{}documents/new".format(self.base_url),
-            params={"filename": name},
-            headers=tokens[0]
-            )  
-        print(f"{k.status_code} {k.url}")
-        print(k.headers)
-        print(k.json())
-        r = requests.put(
-            url="{}".format(k.json()["upload_url"]),
-            headers={
-            'Content-type': 'application/json'
-            },
-            data=json.dumps(data)
-        )
-        print(f"{r.status_code} {r.url}")
-        print(r.headers)
-        # print(r.json())
-        f = requests.post(
-            url="{}documents".format(self.base_url),
-            data={"s3_key": k.json()["s3_key"],
-                    "document_type": "bank_statement",
-                    "resource_type": 'Client'},
-            headers=tokens[0]
-            )  
-        print(f"{f.status_code} {f.url}")
-        print(f.headers)
-        print(f.json())
-        
-        f = requests.get(
-            url="{}document/{}/{}".format(self.base_url, f.json()["id"], name),
-            headers=tokens[0]
-            )  
-        print(f"{f.status_code} {f.url}")
-        print(f.headers)
-        print(f.content)
-        print(f.json())
-        return f.json()
+        # account_id = self.accounts(tokens).personal
+        # base_url = self.BASE_URL
+        # name = "kepa"
+        # k = requests.get(
+        #     url="{}documents/new".format(base_url),
+        #     params={"filename": name},
+        #     headers=tokens[0]
+        #     )  
+        # print(f"{k.status_code} {k.url}")
+        # print(k.headers)
+        # print(k.json())
+        # r = requests.put(
+        #     url="{}".format(k.json()["upload_url"]),
+        #     headers={
+        #     'Content-type': 'application/json'
+        #     },
+        #     data=data
+        # )
+        # print(f"{r.status_code} {r.url}")
+        # print(r.headers)
+        # print(r.content)
+        # f = requests.post(
+        #     url="{}documents".format(base_url),
+        #     data={"s3_key": k.json()["s3_key"],
+        #             "document_type": "notes",
+        #             "resource_type": 'Client'},
+        #     headers=tokens[0]
+        #     )  
+        # print(f"{f.status_code} {f.url}")
+        # print(f.headers)
+        # print(f.json())
 
     def settings(self, tokens):
         """
@@ -1424,64 +1218,50 @@ class Wsimple:
             raise InvalidAccessTokenError
 
     #! public prefix functions
-    @staticmethod
-    def public_find_securities_by_ticker(ticker):
+    def public_find_securities_by_ticker(self, ticker):
         """
         Grabs information about the security resembled by the ticker.  
         Where ***ticker*** is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.
         !May not work on smaller companies or ETFs. 
         """
-        base_url_public = "https://trade-service.wealthsimple.com/public/"
-        r = requests.get(
-            url="{}securities/{}".format(base_url_public, ticker)
-        )
-        return r.json()
+        return requestor(
+            Endpoints.PUBLIC_GET_SECURITIES_BY_TICKER,
+            args={"base": self.BASE_PUBLIC_URL, "ticker": ticker})   
 
-    @staticmethod
-    def public_find_securities_by_ticker_historical(ticker, time):
+    def public_find_securities_by_ticker_historical(self, ticker, time):
         """
         Get a company historical data based on a time.    
         Where ***ticker*** is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.  
         Where ***time*** is ("1d", "1w", "1m", "3m", "1y"): DOES NOT INCLUDE ("all").   
         !May not work on smaller companies or ETFs.  
         """
-        base_url_public = "https://trade-service.wealthsimple.com/public/"
-        r = requests.get(
-            url="{}securities/{}/historical_quotes/{}".format(
-                base_url_public, ticker, time)
-        )
-        return r.json()
+        return requestor(
+            Endpoints.PUBLIC_GET_SECURITIES_HISTORICAL,
+            args={"base": self.BASE_PUBLIC_URL, "ticker": ticker, "time": time})   
 
-    @staticmethod
-    def public_top_traded(offset: int = 0, limit: int = 5):
+    def public_top_traded(self, offset: int = 0, limit: int = 5):
         """
         Get top traded companies on Wealthsimple trade.  
         Where ***offset*** is the displacement between the selected offset and the beginning.   
         Where ***limit*** is the amount of response you want from the request.  
         """
-        base_url_public = "https://trade-service.wealthsimple.com/public/"
-        r = requests.get(
-            url="{}securities/top_traded".format(base_url_public),
-            params={"offset": offset,"limit":limit}
-        )
-        return r.json()
+        return requestor(
+            Endpoints.PUBLIC_GET_TOP_TRADED,
+            args={"base": self.BASE_PUBLIC_URL},
+            params={"offset":offset, "limit":limit})   
 
-    @staticmethod
-    def public_find_securities_news(ticker):
+    def public_find_securities_news(self, ticker):
         """
         Get public news based on the ticker.    
         Where ***ticker*** is the ticker of the company or ETF. Ex. AMZN, APPL, GOOGL, SPY.   
         !May not work on smaller companies or ETF. 
         """
-        base_url_public = "https://trade-service.wealthsimple.com/public/"
-        r = requests.get(
-            url="{}securities/{}/news".format(base_url_public, ticker)
-        )
-        return r.json()
+        return requestor(
+            Endpoints.PUBLIC_GET_SECURITIES_NEWS,
+            args={"base": self.BASE_PUBLIC_URL, "ticker": ticker})   
 
     #! public prefix functions: wealthsimple operational status
-    @staticmethod
-    def summary_status():
+    def summary_status(self):
         """
         Get current summary status/incidents of Wealthsimple trade.     
         This function returns data on these systems:  
@@ -1493,29 +1273,30 @@ class Wsimple:
         Apps, iOS app, Android App  
         the data is in the body(content), data is large.  
         """
-        r = requests.get(
-            url="https://status.wealthsimple.com/api/v2/summary.json"
-        )
-        return json.loads(r.content)
+        return requestor(
+            Endpoints.GET_SUMMARY_STATUS,
+            args={"base": self.BASE_STATUS_URL},
+            request_status=True
+            )   
 
-    @staticmethod
-    def current_status():
+    def current_status(self):
         """
         Get current status/incidents of wealthsimple trade.    
         the data is in body(content), data could be large. 
         """
-        r = requests.get(
-            url="https://status.wealthsimple.com/api/v2/status.json"
-        )
-        return json.loads(r.content)
+        return requestor(
+            Endpoints.GET_CURRENT_STATUS,
+            args={"base": self.BASE_STATUS_URL},
+            request_status=True
+            )   
 
-    @staticmethod
-    def historical_status():
+    def historical_status(self):
         """
         Get all previous history status/incidents of wealthsimple trade.   
         the data is in body(content), data could be large. 
         """
-        r = requests.get(
-            url="https://status.wealthsimple.com/api/v2/incidents.json"
-        )
-        return json.loads(r.content)
+        return requestor(
+            Endpoints.GET_HISTORICAL_STATUS,
+            args={"base": self.BASE_STATUS_URL},
+            request_status=True
+            )    

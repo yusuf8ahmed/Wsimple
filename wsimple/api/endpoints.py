@@ -28,14 +28,19 @@ class Endpoints(Enum):
     
     FIND_SECURITIES = Route("{base}securities", "GET")
     FIND_SECURITIES_BY_ID = Route("{base}securities/{security_id}", "GET")
-    FIND_SECURITIES_HISTORY = Route("{base}securities/{time}/historical_quotes/{security_id}", "GET")
+    FIND_SECURITIES_HISTORY = Route("{base}securities/{security_id}/historical_quotes/{time}", "GET")
     
     GET_ACTIVITES = Route("{base}account/activities", "GET")
     
     MAKE_WITHDRAWALS = Route('{base}withdrawals', "POST")
-    GET_WITHDRAWALS_BY_ID = Route("{base}withdrawals/{funds_transfer_id}", "GET")
+    GET_WITHDRAWAL_BY_ID = Route("{base}withdrawals/{funds_transfer_id}", "GET")
     LIST_WITHDRAWALS = Route('{base}withdrawals', "GET")
     DELETE_WITHDRAWAL_BY_ID = Route("{base}withdrawals/{funds_transfer_id}", "DELETE")
+    
+    MAKE_DEPOSITS = Route('{base}deposits', "POST")
+    GET_DEPOSIT_BY_ID = Route("{base}deposits/{funds_transfer_id}", "GET")
+    LIST_DEPOSITS = Route('{base}deposits', "GET")
+    DELETE_DEPOSIT_BY_ID = Route("{base}deposits/{funds_transfer_id}", "DELETE")
     
     GET_ALL_MARKETS = Route('{base}markets', "GET")
     
@@ -68,11 +73,11 @@ class Endpoints(Enum):
     
     GET_WEBSOCKET_URI = Route('{base}websocket-ticket', "GET")
     
-    PUBLIC_GET_SECURITIES_BY_TICKER = Route('{base_public}securities/{ticker}', "GET")
-    PUBLIC_GET_SECURITIES_HISTORICAL = Route('{base_public}securities/{ticker}/historical_quotes/{time}', "GET")
-    PUBLIC_GET_TOP_TRADED = Route("{base_public}securities/top_traded", "GET")
-    PUBLIC_GET_SECURITIES_NEWS = Route('{base_public}securities/{ticker}/news', "GET")
+    PUBLIC_GET_SECURITIES_BY_TICKER = Route('{base}securities/{ticker}', "GET")
+    PUBLIC_GET_SECURITIES_HISTORICAL = Route('{base}securities/{ticker}/historical_quotes/{time}', "GET")
+    PUBLIC_GET_TOP_TRADED = Route("{base}securities/top_traded", "GET")
+    PUBLIC_GET_SECURITIES_NEWS = Route('{base}securities/{ticker}/news', "GET")
     
-    GET_SUMMARY_STATUS = Route('{base_status}api/v2/summary.json', "GET")
-    GET_CURRENT_STATUS = Route('{base_status}api/v2/status.json', "GET")
-    GET_HISTORICAL_STATUS = Route('{base_status}api/v2/incidents.json', "GET")
+    GET_SUMMARY_STATUS = Route('{base}api/v2/summary.json', "GET")
+    GET_CURRENT_STATUS = Route('{base}api/v2/status.json', "GET")
+    GET_HISTORICAL_STATUS = Route('{base}api/v2/incidents.json', "GET")

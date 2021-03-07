@@ -54,4 +54,9 @@ class WealthsimpleServerError(Exception):
     """Error thrown when a endpoint returns a 5XX http code"""
     def __init__(self):
         super(WealthsimpleServerError, self).__init__("Wealthsimple endpoint might be down: return a 5XX http code")
+        
+class RouteNotFoundException(Exception):
+    """Error thrown when a endpoint returns a 5XX http code"""
+    def __init__(self):
+        super(RouteNotFoundException, self).__init__("Wealthsimple endpoint not found: return a 404 http code")
 
