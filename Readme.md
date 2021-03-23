@@ -15,7 +15,7 @@
 </p>
 
 ## What is the Wsimple project?
-Welcome! This project is an API(Web interface) for Wealthsimple Trade. The main goal of this project is to give developers the ability to create projects while hooking them straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
+Welcome! This project is an API and Web interface(In-development) for Wealthsimple Trade. The main goal of this project is to give developers the ability to create projects while hooking them straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
 
 Before using the API, please read the [disclamer](#disclamer), and due to the nature of this project and goodwill, specific endpoints aren't available.
 
@@ -24,16 +24,16 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
 ## Getting Started
   ### Project Status
 
-  _v1.0.5_  
+  _v2.0.0_  
 
   This project is in the pre-alpha stage. if you find any bugs please submit an [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new).
 
   ### Prerequisites
-  * python3+ and pip is required to use wsimple
+  * **python3+**, **pip** and **node** are required to use wsimple
   * to download pip and python go to ["Download Python"](https://realpython.com/installing-python/)
     * for windows click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-windows). 
     * for macos click ["Here"](https://realpython.com/installing-python/#how-to-install-python-on-macos)
-  * to use the web interface on Windows you will need [Windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (wsl).
+  * to download node go to ["Download Node"](https://www.edureka.co/blog/node-js-installation/)
 
   ### Project Ideas
   * Buy/sell a stock as the end of every month.
@@ -46,7 +46,7 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
   ```bash
   pip install wsimple 
   ```
-  #### start website
+  #### start website (Not finished)
   ```bash
   wsimple start
   ```
@@ -56,18 +56,17 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
 ## API
 ### Usage
   ```python
-  from wsimple.api import Wsimple, WSOTPUser
+  from wsimple.api import Wsimple
+
+  def get_otp():
+      return int(input("Enter otpnumber: \n>>>"))
 
   email = str(input("Enter email: \n>>>"))
   password = str(input("Enter password: \n>>>"))
-  try:
-      ws = Wsimple(email, password) # login to Wealthsimple
-      tokens = ws.tokens # token are the keys to your account
-  except WSOTPUser:
-      # Exception occurs on one time password only.
-      otpnumber = int(input("Enter otpnumber: \n>>>"))
-      ws = Wsimple.otp_login(email, passw, otpnumber)
-      tokens = ws.tokens  
+
+  ws = Wsimple(email, password, otp_callback=get_otp) 
+
+  print(ws.get_market_hours(exchange="NYSE")) 
 
   # check the current operation status of internal Wealthsimple Trade
   print(ws.current_status())
