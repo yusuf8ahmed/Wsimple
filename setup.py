@@ -23,7 +23,9 @@ setup(
     url="https://github.com/yusuf8ahmed/Wsimple",
     install_requires=[
         "loguru==0.5.3",
-        "requests==2.24.0"],
+        "cloudscraper==1.2.56",
+        "requests==2.24.0",
+        "python-box==5.3.0"],
     classifiers=[
         'Development Status :: 3 - Alpha',
         "Programming Language :: Python :: 3",

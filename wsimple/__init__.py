@@ -1,7 +1,11 @@
-from .api import Wsimple
-from .api import LoginError
-from .api import InvalidAccessTokenError
-from .api import InvalidRefreshTokenError
-from .api import WSOTPUser 
-from .api import WSOTPError
-from .api import WSOTPLoginError
+from .api.api import Wsimple
+
+from .api.tokens import TokensBox
+
+from .api.errors import LoginError
+from .api.errors import InvalidAccessTokenError
+from .api.errors import InvalidRefreshTokenError
+from .api.errors import WSOTPUser 
+from .api.errors import WSOTPError
+from .api.errors import WSOTPLoginError
+

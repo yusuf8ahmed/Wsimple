@@ -33,7 +33,7 @@ class InvalidRefreshTokenError(Exception):
 class WSOTPUser(Exception):
     """Error thrown when an user is an otp user"""
     def __init__(self):
-        super(WSOTPUser, self).__init__("An wealthsimple otp user account was triggered, please try again and use a try block")
+        super(WSOTPUser, self).__init__("An wealthsimple otp user account was triggered, please use a callback function that return the otp code")
 
 class WSOTPError(Exception):
     """Error thrown when an otp error occurs"""

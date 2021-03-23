@@ -2,24 +2,32 @@ import json
 # errors
 from .errors import InvalidAccessTokenError, WealthsimpleServerError, RouteNotFoundException
 # 3 party
-from requests import request
+import cloudscraper as req
 from loguru import logger
 from box import Box
 
-def requestor(endpoint, args, request_status=False, response_list=False, **kwargs):
+def requestor(endpoint, 
+              args, 
+              request_status=False, 
+              response_list=False, 
+              login_refresh=False, 
+              **kwargs) -> Box:
     name = endpoint.name
     url = endpoint.value.route.format(**args)
+    rcloud = req.create_scraper()
     logger.debug("{} called".format(name))
-    r = request(
-            endpoint.value[1], 
-            url,
+    r = rcloud.request(
+            method=endpoint.value[1], 
+            url=url,
             **kwargs
     )
     logger.debug("{}: {}".format(name, r.status_code))
+    if login_refresh:
+        return r
     if r.status_code == 401:
         raise InvalidAccessTokenError
     if r.status_code == 404:
-        print(r.url)
+        logger.error(f"404 on {r.url}")
         raise RouteNotFoundException
     elif r.status_code >= 500:
         raise WealthsimpleServerError

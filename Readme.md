@@ -73,16 +73,16 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
   print(ws.current_status())
   
   # return a list of securities that include GOOG and GOOGL
-  print(ws.find_securities(tokens, "GOOG")) 
+  print(ws.find_securities("GOOG")) 
   
   # create deposit order for 2000 CAD into your account
-  ws.make_deposit(tokens, 2000)
+  ws.make_deposit(2000)
   
   # create withdrawal order for 6000 CAD into your account
-  ws.make_withdrawal(tokens, 6000)
+  ws.make_withdrawal(6000)
   
   # return opening and closing of the exchange NYSE
-  print(ws.get_market_hours(tokens, exchange="NYSE"))
+  print(ws.get_market_hours(exchange="NYSE"))
   ```
 
 <a id="disclamer"></a> 

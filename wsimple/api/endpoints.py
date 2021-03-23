@@ -11,8 +11,8 @@ class Endpoints(Enum):
     BASE_PUBLIC = "https://trade-service.wealthsimple.com/public/"
     BASE_STATUS = "https://status.wealthsimple.com/"
     
-    LOGIN = Route("{base}auth/login", "GET")
-    REFRESH = Route("{base}auth/refresh", "GET")
+    LOGIN = Route("{base}auth/login", "POST")
+    REFRESH = Route("{base}auth/refresh", "POST")
     
     GET_ME = Route("{base}me", "GET")
     GET_ACCOUNT = Route("{base}account", "GET")
