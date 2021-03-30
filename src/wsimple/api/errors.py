@@ -30,10 +30,10 @@ class InvalidRefreshTokenError(Exception):
     def __init__(self):
         super(InvalidRefreshTokenError, self).__init__("An Invalid refresh token error was given, please try again")
 
-class WSOTPUser(Exception):
-    """Error thrown when an user is an otp user"""
+class OTPCallbackNone(Exception):
+    """Error thrown when otp_callback == None"""
     def __init__(self):
-        super(WSOTPUser, self).__init__("An wealthsimple otp user account was triggered, please try again and use a try block")
+        super(OTPCallbackNone, self).__init__("An wealthsimple otp user account was triggered, please use a callback function")
 
 class WSOTPError(Exception):
     """Error thrown when an otp error occurs"""
@@ -49,4 +49,14 @@ class TSXStopLimitPriceError(Exception):
     """Error thrown when a stop order with a diffrent stop and limit price is made on a TSX/TSX-V securities"""
     def __init__(self):
         super(TSXStopLimitPriceError, self).__init__("TSX/TSX-V securities must have an equivalent stop and limit price")
+        
+class WealthsimpleServerError(Exception):
+    """Error thrown when a endpoint returns a 5XX http code"""
+    def __init__(self):
+        super(WealthsimpleServerError, self).__init__("Wealthsimple endpoint might be down: return a 5XX http code")
+        
+class RouteNotFoundException(Exception):
+    """Error thrown when a endpoint returns a 5XX http code"""
+    def __init__(self):
+        super(RouteNotFoundException, self).__init__("Wealthsimple endpoint not found: return a 404 http code")
 
