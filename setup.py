@@ -1,6 +1,9 @@
 from os import path
 from setuptools import setup, find_packages
 
+# git checkout master
+# git merge api_v2
+
 setup(
     name="wsimple",
     version="2.1.0",

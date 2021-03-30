@@ -1,5 +1,3 @@
-# Working Branch of API_V2
-
 <p align="center">
   <a>
     <img src="images/logo64.svg">
