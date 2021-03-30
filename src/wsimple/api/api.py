@@ -303,7 +303,7 @@ class Wsimple:
         !account_id is required. 
         """
         if account_id == None:
-            account_id = self.accounts(tokens).personal
+            account_id = self.accounts(tokens=tokens).personal
         return requestor(
             Endpoints.GET_ACCOUNT_HISTORY,
             args={"base": self.BASE_URL, "time": time},
@@ -818,10 +818,10 @@ class Wsimple:
         """
         logger.debug("make_deposits")
         if bank_account_id == None:
-            bank_account_id = self.get_bank_accounts(tokens)["results"][0]["id"]
+            bank_account_id = self.get_bank_accounts(tokens=tokens)["results"][0]["id"]
         if account_id == None:
             account_id = account_id = self.accounts(tokens=tokens).personal
-        person = self.get_me(tokens)
+        person = self.get_me(tokens=tokens)
         payload = {
             "client_id": str(person["id"]),
             "bank_account_id": str(bank_account_id),
@@ -1170,8 +1170,7 @@ class Wsimple:
     
     #! tax-documents
     @_manage_tokens
-    def get_tax_documents(self, 
-                          tokens=None):
+    def get_tax_documents(self, tokens=None):
         """
         Grab tax documents of your Wealthsimple account
         """  
@@ -1249,45 +1248,6 @@ class Wsimple:
         """
         function for testing new endpoints ;
         # """
-        # account_id = self.accounts(tokens=tokens).personal
-        base_url = self.BASE_URL
-        # name = "peepeepoopoo"
-        # k = requests.get(
-        #     url="{}documents/new".format(base_url),
-        #     params={"filename": name},
-        #     headers=tokens[0]
-        #     )  
-        # print(f"{k.status_code} {k.url}")
-        # print(k.headers)
-        # print(k.json())
-        # r = requests.put(
-        #     url="{}".format(k.json()["upload_url"]),
-        #     headers={'Content-type': 'application/json'},
-        #     data=data
-        # )
-        # print(f"{r.status_code} {r.url}")
-        # print(r.headers)
-        # print(r.content)
-        # f = requests.post(
-        #     url="{}documents".format(base_url),
-        #     json={"s3_key": k.json()["s3_key"],
-        #             "resource_type": 'Client',
-        #             "document_type": "bank_statement"},
-        #     headers=tokens[0]
-        #     )  
-        # print(f"{f.status_code} {f.url}")
-        # print(f.headers)
-        # print(f.json())
-        # (?<![\w\d])CA(?![\w\d])
-        f = requests.get(
-            url="{}subscription/tiers".format(base_url),
-            params={"region":"CA"},
-            headers=tokens[0]
-            )  
-        print(f"{f.status_code} {f.url}")
-        print(f.headers)
-        print(f.content)
-        print(f.json())
 
     @_manage_tokens
     def settings(self, tokens=None):

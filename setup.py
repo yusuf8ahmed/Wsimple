@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="wsimple",
-    version="2.0.4",
+    version="2.1.0",
     author="Yusuf Ahmed",
     author_email="yusufahmed172@gmail.com",
     long_description=open("README.md").read(),
@@ -16,7 +16,8 @@ setup(
         "loguru",
         "cloudscraper",
         "requests",
-        "python-box"],
+        "python-box",
+        "websockets"],
     classifiers=[
         'Development Status :: 3 - Alpha',
         "Programming Language :: Python :: 3",
