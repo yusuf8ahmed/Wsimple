@@ -11,7 +11,7 @@ blinker==1.4
 cachetools==4.2.1
 certifi==2020.12.5
 cffi==1.14.5
-chardet==3.0.4
+chardet==4.0.0
 click==7.1.2
 cloudscraper==1.2.56
 colorama==0.4.4
