@@ -1,12 +1,9 @@
 from os import path
 from setuptools import setup, find_packages
 
-# git checkout master
-# git merge api_v2
-
 setup(
     name="wsimple",
-    version="2.1.0",
+    version="3.0.0",
     author="Yusuf Ahmed",
     author_email="yusufahmed172@gmail.com",
     long_description=open("README.md").read(),

@@ -8,7 +8,7 @@ import websockets
 
 # login to Wealthsimple
 def get_otp():
-    return int(input("Enter otpnumber: \n>>>"))
+    return input("Enter otpnumber: \n>>>")
 
 email = str(input("Enter email: \n>>>"))
 password = str(input("Enter password: \n>>>"))
@@ -23,6 +23,9 @@ def event_account(data):
     
 def event_price_quote(data):
     print(data)  
+    
+def event_order_filled(data):
+    print(data) 
 
 async def ws_realtimedata():
     uri = ws.get_websocket_uri() 
@@ -36,6 +39,8 @@ async def ws_realtimedata():
                 await event_account(data)
             elif data["type"] == "PRICE_QUOTE":
                 await event_price_quote(data)
+            elif data["type"] == "ORDER_FILLED": 
+                await event_order_filled(data)  
             else:
                 print("unsupported event: {}", data["type"]) 
                                          

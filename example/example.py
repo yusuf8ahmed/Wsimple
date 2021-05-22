@@ -2,7 +2,7 @@ from wsimple.api import Wsimple
 
 # login to Wealthsimple
 def get_otp():
-    return int(input("Enter otpnumber: \n>>>"))
+    return input("Enter otpnumber: \n>>>")
 
 email = str(input("Enter email: \n>>>"))
 password = str(input("Enter password: \n>>>"))

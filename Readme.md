@@ -57,7 +57,7 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
   from wsimple.api import Wsimple
 
   def get_otp():
-      return int(input("Enter otpnumber: \n>>>"))
+      return input("Enter otpnumber: \n>>>")
 
   email = str(input("Enter email: \n>>>"))
   password = str(input("Enter password: \n>>>"))
