@@ -794,10 +794,10 @@ class Wsimple:
         """
         self.logger.debug("make_withdrawal")
         if bank_account_id == None:
-            bank_account_id = self.get_bank_accounts(tokens)["results"][0]["id"]
+            bank_account_id = self.get_bank_accounts(tokens=tokens)["results"][0]["id"]
         if account_id == None:
-            account_id = self.accounts(tokens).personal
-        person = self.get_me(tokens)
+            account_id = self.accounts(tokens=tokens).personal
+        person = self.get_me(tokens=tokens)
         payload = {
             "bank_account_id": str(bank_account_id),
             "account_id": str(account_id),

@@ -22,7 +22,7 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
 ## Getting Started
   ### Project Status
 
-  _v2.0.0_  
+  _v3.0.0_ - Indefinite pause on further development 
 
   This project is in the pre-alpha stage. if you find any bugs please submit an [issue](https://github.com/yusuf8ahmed/Wsimple/issues/new).
 
@@ -64,22 +64,22 @@ Before using the API, please read the [disclamer](#disclamer), and due to the na
 
   ws = Wsimple(email, password, otp_callback=get_otp) 
 
-  print(ws.get_market_hours(exchange="NYSE")) 
-
-  # check the current operation status of internal Wealthsimple Trade
-  print(ws.current_status())
-  
-  # return a list of securities that include GOOG and GOOGL
-  print(ws.find_securities("GOOG")) 
-  
-  # create deposit order for 2000 CAD into your account
-  ws.make_deposit(2000)
-  
-  # create withdrawal order for 6000 CAD into your account
-  ws.make_withdrawal(6000)
-  
-  # return opening and closing of the exchange NYSE
-  print(ws.get_market_hours(exchange="NYSE"))
+  # always check if wealthsimple is working (return True if working or an error)
+  if ws.is_operational(): 
+    # check the current operation status of internal Wealthsimple Trade
+    print(ws.current_status())
+    
+    # return a list of securities that include GOOG and GOOGL
+    print(ws.find_securities("GOOG")) 
+    
+    # create deposit order for 2000 CAD into your account
+    ws.make_deposit(2000)
+    
+    # create withdrawal order for 6000 CAD into your account
+    ws.make_withdrawal(6000)
+    
+    # return opening and closing of the exchange NYSE
+    print(ws.get_market_hours(exchange="NYSE"))
   ```
 
 <a id="disclamer"></a> 
