@@ -65,7 +65,7 @@ ptyprocess==0.7.0
 pyarrow==3.0.0
 pycparser==2.20
 pydeck==0.6.1
-Pygments==2.8.1
+Pygments==2.9.0
 pyparsing==2.4.7
 pyrsistent==0.17.3
 python-box==5.3.0
