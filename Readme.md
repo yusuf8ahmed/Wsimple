@@ -12,6 +12,12 @@
   </a>
 </p>
 
+## Project Status
+
+Hi there, this project is currently completed and has reached all of its goals. Thank you to everybody who downloaded it for making this such a good learning opportunity for me. 
+Okay back to business now since the project is completed this repo will be archived and sadly I will not be accepting any PRs to focus on my other projects.
+Thank you and peace outtt :rocket:
+
 ## What is the Wsimple project?
 Welcome! This project is an API and Web interface(In-development) for Wealthsimple Trade. The main goal of this project is to give developers the ability to create projects while hooking them straight into their Wealthsimple Trade account. Click [Here](https://yusuf8ahmed.github.io/Wsimple/api/api.html#app.api.api.Wsimple) for API wrapper documentation. When looking for a specific function use the left navbar to find it.
 
